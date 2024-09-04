@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+{% endblock %}
+
+{% block content %}
+<h1>Computadores</h1>
+
+<div class="head">
+    <div class="filtros">
+        <form method="get" action="{{ url_for('computadores') }}">
+            <div class="filtroSistema">
+                <input class="form-control me-2" type="search" name="search" placeholder="Buscar por nombre del PC" aria-label="Search" value="{{ request.args.get('search', '') }}">
+                <button class="btn btn-outline-success mt-2" type="submit">Buscar</button>
+            </div>
+        </form>
+    </div>
+    <div class="Botones_Sistema">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ModalAgregarComputador">Agregar Nuevo Computador</button>
+    
+        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#ModelEliminarComputador">Eliminar Computador</button>
+    </div>
+</div>
+
+{% if pcs %}
+<table class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>Nombre del PC</th>
+            <th>Placa</th>
+            <th>Disco</th>
+            <th>Ram</th>
+            <th>Fuente</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in pcs %}
+        <tr>
+            <td>{{ row['Nombre_pc'] }}</td>
+            <td>{{ row['Placa'] }}</td>
+            <td>{{ row['Disco'] }}</td>
+            <td>{{ row['Ram'] }}</td>
+            <td>{{ row['Fuente'] }}</td>
+            <td>
+                <button>
+                    Editar
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<tr>
+    <div class="alert alert-danger" role="alert">
+        No existen registros.
+    </div>
+</tr>
+{% endif %}
+
+{% endblock %}

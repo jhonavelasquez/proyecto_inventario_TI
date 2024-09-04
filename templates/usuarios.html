@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style_usuarios.css') }}">
+
+{% endblock %}
+
+{% block content %}
+<h1>Usuarios</h1>
+
+<div class="head">
+    <div class="filtros">
+        <form method="get" action="{{ url_for('usuarios') }}">
+            <div class="filtroSistema">
+                <input class="form-control me-2" type="search" name="search" placeholder="Buscar por nombre de usuario" aria-label="Search" value="{{ request.args.get('search', '') }}">
+                <button class="btn btn-outline-success mt-2" type="submit">Buscar</button>
+            </div>
+        </form>
+    </div>
+    <div class="Botones_Usuario">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ModalAgregarUsuario">Agregar Nuevo Usuario</button>
+    
+        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#ModelEliminarUsuario">Eliminar Usuario</button>
+    </div>
+</div>
+
+<!-- AGREGAR USUARIO -->
+<div class="modal fade" id="ModalAgregarUsuario" tabindex="-1" aria-labelledby="ModalAgregarUsuario" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ModalAgregarUsuario">Agregar Nuevo Usuario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{{ url_for('crear_usuario') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="userName" class="form-label">Nombre del Usuario</label>
+                        <input type="text" class="form-control" id="userName" name="nombre_user" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email_user" class="form-label">Email</label>
+                        <input type="text" class="form-control" id="email_user" name="email_user" required>
+                    </div>
+                    
+                        <div class="mb-3">
+                            <select class="form-select form-select-sm" name="usuario" aria-label="Selecciona un Usuario" required>
+                                <option value="">Asignar Computador</option>
+                                {% for pc in pcs %}
+                                    <option value="{{ pc['Id_pc'] }}">
+                                        {{ pc['Nombre_pc'] }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+            
+        </div>
+    </div>
+</div>
+
+{% if users %}
+<table class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>Id Usuario</th>
+            <th>Nombre del Usuario</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in users %}
+        <tr>
+            <td>{{ row['Id_usuario'] }}</td>
+            <td>{{ row['Nombre_user'] }}</td>
+            <td>{{ row['email'] }}</td>
+            <td>
+                <button>
+                    Editar
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<tr>
+    <div class="alert alert-danger" role="alert">
+        No existen registros.
+    </div>
+</tr>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,38 @@
+h1 {
+    text-align: center;
+    padding: 10px;
+}
+
+.filtros{
+    background-color: rgb(255, 255, 255);
+    width: 50%;
+}
+
+.filtroSistema{
+    margin-top: 1%;
+    display: flex;
+    flex-direction: row;
+    background-color: rgb(255, 255, 255);
+    width: 100%;
+}
+
+.filtroSistema > button{
+    
+    margin: 1% 5% 1% 1%;
+}
+
+.head{
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.Botones_Usuario{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.alert{
+    margin-top: 1%;
+}
