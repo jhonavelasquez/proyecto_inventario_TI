@@ -8,11 +8,11 @@ with open('schema.sql') as f:
 
 cur = connection.cursor()
 
-cur.execute("INSERT INTO Usuario (Nombre_user, Email) VALUES ('JUPEREZ', 'juan.perez@sanantonio.cl');")
-cur.execute("INSERT INTO Usuario (Nombre_user, Email) VALUES ('JOVELASQUEZ', 'jvelasquez@sanantonio.cl');")
-cur.execute("INSERT INTO Usuario (Nombre_user, Email) VALUES ('pepe', 'jvelasquez@sanantonio.cl');")
-cur.execute("INSERT INTO Usuario (Nombre_user, Email) VALUES ('felipe', 'jvelasquez@sanantonio.cl');")
-cur.execute("INSERT INTO Usuario (Nombre_user, Email) VALUES ('alex', 'jvelasquez@sanantonio.cl');")
+# cur.execute("INSERT INTO Usuario (Nombre_user, Email) VALUES ('JUPEREZ', 'juan.perez@sanantonio.cl');")
+# cur.execute("INSERT INTO Usuario (Nombre_user, Email) VALUES ('JOVELASQUEZ', 'jvelasquez@sanantonio.cl');")
+# cur.execute("INSERT INTO Usuario (Nombre_user, Email) VALUES ('pepe', 'jvelasquez@sanantonio.cl');")
+# cur.execute("INSERT INTO Usuario (Nombre_user, Email) VALUES ('felipe', 'jvelasquez@sanantonio.cl');")
+# cur.execute("INSERT INTO Usuario (Nombre_user, Email) VALUES ('alex', 'jvelasquez@sanantonio.cl');")
 
 cur.execute("INSERT INTO Pc (Nombre_pc, Placa, Disco, Ram, Fuente) VALUES ('SA2101051', 'ASUS ROG STRIX', 512, 16, 'Corsair 650W');")
 cur.execute("INSERT INTO Pc (Nombre_pc, Placa, Disco, Ram, Fuente) VALUES ('SA2000000', 'HP Network', 512, 8, 'Corsair 550W');")
@@ -69,17 +69,17 @@ cur.execute("INSERT INTO Sistema (Nombre_sistema) VALUES ('SISTEMA DE BODEGAS (A
 # cur.execute("INSERT INTO Sistema (Nombre_sistema) VALUES ('SISTEMA DE INFORMACIÓN TERRITORIAL DE SAN ANTONIO SITSA');")
 
 
-cur.execute("INSERT INTO Usuario_PC (Id_usuario, Id_pc) VALUES (1, 1);")
-cur.execute("INSERT INTO Usuario_PC (Id_usuario, Id_pc) VALUES (2, 2);")
-cur.execute("INSERT INTO Usuario_PC (Id_usuario, Id_pc) VALUES (3, 2);")
-cur.execute("INSERT INTO Usuario_PC (Id_usuario, Id_pc) VALUES (4, 3);")
-cur.execute("INSERT INTO Usuario_PC (Id_usuario, Id_pc) VALUES (5, 2);")
+# cur.execute("INSERT INTO Usuario_PC (Id_usuario, Id_pc) VALUES (1, 1);")
+# cur.execute("INSERT INTO Usuario_PC (Id_usuario, Id_pc) VALUES (2, 2);")
+# cur.execute("INSERT INTO Usuario_PC (Id_usuario, Id_pc) VALUES (3, 2);")
+# cur.execute("INSERT INTO Usuario_PC (Id_usuario, Id_pc) VALUES (4, 3);")
+# cur.execute("INSERT INTO Usuario_PC (Id_usuario, Id_pc) VALUES (5, 2);")
 
-cur.execute("INSERT INTO Usuario_Sistema (Id_usuario, Id_sistema, Activo) VALUES (1, 1, TRUE);")
-cur.execute("INSERT INTO Usuario_Sistema (Id_usuario, Id_sistema, Activo) VALUES (2, 2, FALSE);")
-cur.execute("INSERT INTO Usuario_Sistema (Id_usuario, Id_sistema, Activo) VALUES (4, 2, TRUE);")
-cur.execute("INSERT INTO Usuario_Sistema (Id_usuario, Id_sistema, Activo) VALUES (3, 2, TRUE);")
-cur.execute("INSERT INTO Usuario_Sistema (Id_usuario, Id_sistema, Activo) VALUES (4, 1, FALSE);")
+# cur.execute("INSERT INTO Usuario_Sistema (Id_usuario, Id_sistema, Activo) VALUES (1, 1, TRUE);")
+# cur.execute("INSERT INTO Usuario_Sistema (Id_usuario, Id_sistema, Activo) VALUES (2, 2, FALSE);")
+# cur.execute("INSERT INTO Usuario_Sistema (Id_usuario, Id_sistema, Activo) VALUES (4, 2, TRUE);")
+# cur.execute("INSERT INTO Usuario_Sistema (Id_usuario, Id_sistema, Activo) VALUES (3, 2, TRUE);")
+# cur.execute("INSERT INTO Usuario_Sistema (Id_usuario, Id_sistema, Activo) VALUES (4, 1, FALSE);")
 
 connection.commit()
 connection.close()

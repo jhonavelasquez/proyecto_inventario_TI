@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style_editar_usuario.css')}}">
+{% endblock %}
+
+{% block content %}
+
+<div class="card text-start mb-3">
+    <form id="editForm" method="post" action="{{ url_for('editar_usuario_form') }}">
+        <div class="modal-body">
+            <input type="hidden" name="id_usuario" id="id_usuario" value="{{ use['Id_usuario'] }}">
+            <input type="hidden" name="action" id="action" value="">
+            <h2>Editar Usuario</h2>
+            <p>Actualiza la informacion del usuario <b>{{ use['Nombre_user'] }} (#{{ use['Id_usuario'] }}) </b></p>
+            
+            <div class="form-floating mb-3">
+                <input type="text" id="nombre_usuario" name="nombre_usuario" class="form-control" placeholder="" value="{{ use['Nombre_user'] }}">
+                <label for="nombre_usuario">Nombre</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input type="email" id="email" name="email" class="form-control" placeholder="" value="{{ use['Email'] }}">
+                <label for="email">Email</label>
+            </div>
+            
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-danger" onclick="document.getElementById('action').value='delete';">Eliminar</button>
+            <a href="{{url_for('usuarios')}}"><button type="button" class="btn btn-secondary">Cerrar</button></a>
+            <button type="submit" class="btn btn-primary" onclick="document.getElementById('action').value='save';">Guardar cambios</button>
+        </div>
+    </form>    
+</div>
+
+
+
+{% endblock %}

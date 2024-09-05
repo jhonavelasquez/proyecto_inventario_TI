@@ -19,12 +19,43 @@
     </div>
     <div class="Botones_Sistema">
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ModalAgregarComputador">Agregar Nuevo Computador</button>
-    
-        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#ModelEliminarComputador">Eliminar Computador</button>
     </div>
 </div>
 
-{% if pcs %}
+<!-- AGREGAR SISTEMA -->
+<div class="modal fade" id="ModalAgregarComputador" tabindex="-1" aria-labelledby="ModalAgregarComputador" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ModalAgregarComputador">Agregar Nuevo Sistema</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{{ url_for('crear_computador') }}">
+                <div class="modal-body">
+                    <div class="form-floating mb-3">
+                        <input type="text" id="nombre_computador" name="nombre_computador" class="form-control" placeholder="" value="">
+                        <label for="nombre_computador">Nombre del Computador</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" id="nombre_placa" name="nombre_placa" class="form-control" placeholder="" value="">
+                        <label for="nombre_placa">Nombre de Placa</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" id="nombre_computador" name="nombre_computador" class="form-control" placeholder="" value="">
+                        <label for="nombre_computador">Nombre del Computador</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% if filtro_pcs %}
 <table class="table table-striped mt-3">
     <thead>
         <tr>
@@ -36,7 +67,7 @@
         </tr>
     </thead>
     <tbody>
-        {% for row in pcs %}
+        {% for row in filtro_pcs %}
         <tr>
             <td>{{ row['Nombre_pc'] }}</td>
             <td>{{ row['Placa'] }}</td>
@@ -44,9 +75,7 @@
             <td>{{ row['Ram'] }}</td>
             <td>{{ row['Fuente'] }}</td>
             <td>
-                <button>
-                    Editar
-                </button>
+                <a href="#" class="btn btn-warning">Editar</a>
             </td>
         </tr>
         {% endfor %}
