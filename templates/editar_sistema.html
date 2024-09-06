@@ -7,24 +7,30 @@
 {% block content %}
 
 <div class="card text-start mb-3">
-    <form id="editForm" method="post" action="{{ url_for('editar_sistema', id_sistema=user_pc['Id_sistema'], id_usuario=user_pc['Id_usuario'], id_pc=user_pc['Id_pc']) }}">
+    <div class="bodyBack">
+        <a id="botonBack" href="{{url_for('index')}}" aria-valuetext="a"><img id="imgBack"
+                src="{{ url_for('static', filename='img/icon-back.png')}}" alt="icon-back" width="30px"></a>
+    </div>
+    <form id="editForm" method="post"
+        action="{{ url_for('editar_sistema', id_sistema=user_pc['Id_sistema'], id_usuario=user_pc['Id_usuario'], id_pc=user_pc['Id_pc']) }}">
 
         <h2>Editar Sistema</h2>
-        <p>Asigna un nuevo computador a <b>{{ user_pc['Nombre_user'] }}</b> o activale el sistema <b>{{ user_pc['Nombre_sistema'] }}</b></p>
+        <p>Asigna un nuevo computador a <b>{{ user_pc['Nombre_user'] }}</b> o activale el sistema <b>{{
+                user_pc['Nombre_sistema'] }}</b></p>
         <input type="hidden" name="Id_usuario" value="{{ user_pc['Id_usuario'] }}">
         <input type="hidden" name="editar_Sistema" value="{{ user_pc['Id_sistema'] }}">
-    
+
         <div class="form-floating mb-3">
             <select id="selectPc" class="form-select" name="nuevo_Id_pc" required>
                 {% for pc in pcs %}
-                    <option value="{{ pc['Id_pc'] }}" {% if pc['Id_pc'] == user_pc['Id_pc'] %}selected{% endif %}>
-                        {{ pc['Nombre_pc'] }}
-                    </option>
+                <option value="{{ pc['Id_pc'] }}" {% if pc['Id_pc']==user_pc['Id_pc'] %}selected{% endif %}>
+                    {{ pc['Nombre_pc'] }}
+                </option>
                 {% endfor %}
             </select>
             <label for="selectPc" class="form-label">Seleccionar Computador</label>
         </div>
-        
+
         <div class="form-floating mb-3">
             <select class="form-select" id="editActivo" name="Activo">
                 <option value="1" {% if user_pc['Activo'] %}selected{% endif %}>Sí</option>
@@ -32,9 +38,9 @@
             </select>
             <label for="editActivo" class="form-label">{{ user_pc['Nombre_sistema'] }}</label>
         </div>
-    
+
         <button type="submit" class="btn btn-primary">Guardar cambios</button>
-    </form> 
+    </form>
 </div>
 
 

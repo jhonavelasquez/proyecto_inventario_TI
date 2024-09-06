@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style_sistemas.css') }}">
 <!-- Incluir jQuery primero -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -12,41 +12,52 @@
 {% endblock %}
 
 {% block content %}
-<h1>Sistemas</h1>
+<div class="titulo">
+    <h1><b>Sistemas</b></h1>
+</div>
+
 
 <div class="head">
     <div class="filtros">
-        <form method="get" action="{{ url_for('index') }}">
-            <div class="filtroSistema">
-                <select class="form-select form-select-sm" name="sistema" aria-label="Selecciona un Sistema">
-                    <option value="">Selecciona un Sistema</option>
-                    {% for sistema in sistemas %}
-                    <option value="{{ sistema['Id_sistema'] }}" {% if request.args.get('sistema')==sistema['Id_sistema']
-                        %} selected {% endif %}>
-                        {{ sistema['Nombre_sistema'] }}
-                    </option>
-                    {% endfor %}
-                </select>
-                <button class="btn btn-outline-success mt-2" type="submit">Filtrar</button>
+        <form method="get" action="{{ url_for('index') }}" id="filtro-form">
+            <div class="doble-filtro-sistema">
+                <div >
+                    <div class="filtro">
+                        <select class="form-select form-select-sm" name="sistema" aria-label="Selecciona un Sistema">
+                            <option value="">Selecciona un Sistema</option>
+                            {% for sistema in sistemas %}
+                            <option value="{{ sistema['Id_sistema'] }}" {% if request.args.get('sistema')==sistema['Id_sistema'] %} selected {% endif %}>
+                                {{ sistema['Nombre_sistema'] }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+        
+                    <div class="filtro">
+                        <input class="form-control me-2" type="search" name="search"
+                            placeholder="Buscar por nombre de usuario o nombre del PC" aria-label="Search"
+                            value="{{ request.args.get('search', '') }}">
+                    </div>
+                </div>
+                <button class="btn btn-success" type="button" id="filtro-boton">Buscar</button>
             </div>
-
-
-            <div class="filtroSistema">
-                <input class="form-control me-2" type="search" name="search"
-                    placeholder="Buscar por nombre de usuario o nombre del PC" aria-label="Search"
-                    value="{{ request.args.get('search', '') }}">
-                <button class="btn btn-outline-success mt-2" type="submit">Buscar</button>
-            </div>
+            
         </form>
     </div>
-    <div class="Botones_Sistema">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ModalAgregarSistema">Agregar Nuevo
-            Sistema</button>
 
-        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#ModelEliminarSistema">Eliminar
-            Sistema</button>
+    <div class="Botones_Sistema">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ModalAgregarSistema">Agregar Nuevo Sistema</button>
+
+        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#ModelEliminarSistema">Eliminar Sistema</button>
     </div>
 </div>
+
+<script>
+    document.getElementById('filtro-boton').addEventListener('click', function() {
+        document.getElementById('filtro-form').submit();
+    });
+</script>
+
 
 <!-- AGREGAR SISTEMA -->
 <div class="modal fade" id="ModalAgregarSistema" tabindex="-1" aria-labelledby="ModalAgregarSistema" aria-hidden="true">
@@ -123,26 +134,25 @@
 {% if request.args.get('sistema') or request.args.get('search') %}
 <div id="tabla_contenido">
     {% if user_pc_data %}
-    <table class="table table-responsive-md">
+    <table class="table table-responsive-md table-striped mt-3">
         <thead>
             <tr>
-                <th>Nombre de Usuario</th>
-                <th>Nombre del PC</th>
+                <th>Usuario</th>
+                <th>Computador</th>
                 <th>Sistema</th>
                 <th>Activo</th>
-                <th>Acciones</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
             {% for row in user_pc_data %}
-            <tr>
+            <tr class="clickable-row" data-href="{{ url_for('editar_sistema', id_sistema=row['Id_sistema'], id_usuario=row['Id_usuario'], id_pc=row['Id_pc']) }}">
                 <td>{{ row['Nombre_user'] }}</td>
                 <td>{{ row['Nombre_pc'] }}</td>
                 <td>{{ row['Nombre_sistema'] }}</td>
                 <td>{{ 'Sí' if row['Activo'] else 'No' }}</td>
-                <td>
-                    <a href="{{ url_for('editar_sistema', id_sistema=row['Id_sistema'], id_usuario=row['Id_usuario'], id_pc=row['Id_pc']) }}"
-                        class="btn btn-warning">Editar</a>
+                <td class="editar-responsivo">
+                    <a href="{{ url_for('editar_sistema', id_sistema=row['Id_sistema'], id_usuario=row['Id_usuario'], id_pc=row['Id_pc']) }}" class="btn btn-warning">Editar</a>
                 </td>
             </tr>
             {% endfor %}
@@ -154,32 +164,28 @@
     </div>
     {% endif %}
 </div>
-
-<script>
-    $(document).ready(function () {
-        $('#filtrar_btn').click(function () {
-            cargarTabla();
-        });
-
-        function cargarTabla() {
-            var formData = $('#filtros_form').serialize();
-
-            $.ajax({
-                url: "{{ url_for('cargar_tabla') }}",
-                type: "GET",
-                data: formData,
-                success: function (response) {
-                    $('#tabla_contenido').html(response);
-                },
-                error: function (xhr) {
-                    console.error("Error al cargar la tabla: ", xhr.statusText);
-                }
-            });
-        }
-    });
-</script>
 {% else %}
 <p>Por favor, selecciona un sistema o realiza una búsqueda para ver los datos.</p>
 {% endif %}
+
+<script>
+    $(document).ready(function() {
+        function handleRowClick() {
+            if ($(window).width() <= 700) {
+                $(".clickable-row").click(function() {
+                    window.location = $(this).data("href");
+                });
+            } else {
+                $(".clickable-row").off("click");
+            }
+        }
+
+        handleRowClick(); // Ejecutar la función al cargar la página
+
+        $(window).resize(function() {
+            handleRowClick(); // Ejecutar la función cada vez que cambie el tamaño de la pantalla
+        });
+    });
+</script>
 
 {% endblock %}

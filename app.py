@@ -40,31 +40,6 @@ def index():
 
     return render_template('index.html', user_pc_data=user_pc_data, sistemas=sistemas, pcs=pcs)
 
-@app.route('/cargar_tabla', methods=['GET'])
-def cargar_tabla():
-    conn = get_db_connection()
-    sistema_id = request.args.get('sistema')
-    search_query = request.args.get('search', '')
-
-    query = '''
-    SELECT Usuario.Id_usuario, Usuario.Nombre_user, Usuario.Email, Pc.Id_pc, 
-        Pc.Nombre_pc, Sistema.Id_sistema, Sistema.Nombre_sistema, Usuario_Sistema_PC.Activo
-    FROM Usuario
-    INNER JOIN Usuario_Sistema_PC ON Usuario_Sistema_PC.Id_usuario = Usuario.Id_usuario
-    INNER JOIN Pc ON Pc.Id_pc = Usuario_Sistema_PC.Id_pc
-    INNER JOIN Sistema ON Sistema.Id_sistema = Usuario_Sistema_PC.Id_sistema
-    WHERE 1=1
-    '''
-    params = []
-    if sistema_id:
-        query += ' AND Sistema.Id_sistema = ?'
-        params.append(sistema_id)
-    if search_query:
-        query += ' AND (Usuario.Nombre_user LIKE ? OR Pc.Nombre_pc LIKE ?)'
-        params.extend(['%' + search_query + '%', '%' + search_query + '%'])
-
-    user_pc_data = conn.execute(query, params).fetchall()
-    conn.close()
 
     return render_template('_tabla.html', user_pc_data=user_pc_data)
 
@@ -74,28 +49,21 @@ def crear_sistema():
     conn = get_db_connection()
     nombre_sistema = request.form['nombre_sistema']
 
-    # Verificar si el sistema ya existe
     sistemas = conn.execute("SELECT Nombre_sistema FROM Sistema").fetchall()
-
     for sistema in sistemas:
         if nombre_sistema == sistema['Nombre_sistema']:
             flash("El sistema ya existe y no será añadido de nuevo.", "warning")
             conn.close()
             return redirect(url_for('index'))
 
-    # Insertar el nuevo sistema
     conn.execute('INSERT INTO Sistema (Nombre_sistema) VALUES (?)', (nombre_sistema,))
     conn.commit()
 
-    # Obtener el Id del nuevo sistema
     id_sistema = conn.execute(
         'SELECT Id_sistema FROM Sistema WHERE Nombre_sistema = ?', (nombre_sistema,)).fetchone()['Id_sistema']
 
-    # Obtener todos los usuarios
     usuarios = conn.execute("SELECT Id_usuario FROM Usuario").fetchall()
-
     for usuario in usuarios:
-        # Obtener el PC más utilizado por el usuario actual
         id_pc_mas_utilizado = conn.execute('''
             SELECT Id_pc
             FROM Usuario_Sistema_PC
@@ -106,7 +74,6 @@ def crear_sistema():
         ''', (usuario['Id_usuario'],)).fetchone()
 
         if id_pc_mas_utilizado:
-            # Asignar el sistema al PC más utilizado por el usuario
             conn.execute(
                 "INSERT INTO Usuario_Sistema_PC (Id_usuario, Id_sistema, Id_pc, Activo) VALUES (?, ?, ?, FALSE)",
                 (usuario['Id_usuario'], id_sistema, id_pc_mas_utilizado['Id_pc'])
@@ -117,7 +84,7 @@ def crear_sistema():
     conn.commit()
     conn.close()
 
-    flash("Sistema creado exitosamente y asignado a los PCs más utilizados por cada usuario.", "success")
+    flash("Sistema creado exitosamente.", "success")
     return redirect(url_for('index'))
 
 
@@ -146,7 +113,6 @@ def editar_sistema(id_sistema, id_usuario, id_pc):
         nuevo_id_pc = request.form.get('nuevo_Id_pc')
         activo = request.form.get('Activo')
 
-        # Actualiza el registro en Usuario_Sistema_PC
         conn.execute('''
             UPDATE Usuario_Sistema_PC 
             SET Activo = ?, Id_pc = ?
@@ -156,7 +122,7 @@ def editar_sistema(id_sistema, id_usuario, id_pc):
         conn.commit()
         conn.close()
 
-        flash("¡El PC y el estado del sistema han sido actualizados!", "success")
+        flash("¡El PC o el estado del sistema han sido actualizados!", "success")
         return redirect(url_for('index'))
 
     user_pc = conn.execute('''
@@ -191,12 +157,25 @@ def computadores():
 
     return render_template('computadores.html', filtro_pcs=filtro_pcs)
 
-@app.route('/crear_computador', methods=['GET','POST'])
+@app.route('/crear_computador', methods=['POST'])
 def crear_computador():
     if request.method == 'POST':
+        nombre_pc = request.form['nombre_computador']
+        placa_pc = request.form['nombre_placa']
+        almacenamiento = request.form.get('disco')
+        ram = request.form.get('ram')
+        nombre_fuente = request.form['fuente']
 
+        conn = get_db_connection()
+        conn.execute('INSERT INTO Pc ( Nombre_pc, Placa, Almacenamiento, Ram, Fuente) VALUES (?,?,?,?,?)', (nombre_pc, placa_pc, almacenamiento, ram, nombre_fuente))
+
+        conn.commit()
+        conn.close()
+        
+        flash("Computador creado exitosamente.", "success")
         return redirect('computadores')
     return render_template('computadores.html')
+
 
 @app.route('/usuarios', methods=['GET'])
 def usuarios():
@@ -209,8 +188,8 @@ def usuarios():
 
     params = []
     if search_query:
-        query += ' AND Usuario.Nombre_user LIKE ?'
-        params.extend(['%' + search_query + '%'])
+        query += ' AND (Usuario.Nombre_user LIKE ?  OR Usuario.Id_usuario LIKE ?)'
+        params.extend(['%' + search_query + '%', '%' + search_query + '%'])
 
     users = conn.execute(query, params).fetchall()
     conn.close()

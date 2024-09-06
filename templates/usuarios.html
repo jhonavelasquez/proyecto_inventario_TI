@@ -6,19 +6,22 @@
 {% endblock %}
 
 {% block content %}
-<h1>Usuarios</h1>
+<div class="titulo">
+    <h1><b>Usuarios</b></h1>
+</div>
+
 
 <div class="head">
     <div class="filtros">
-        <form method="get" action="{{ url_for('usuarios') }}">
-            <div class="filtroSistema">
-                <input class="form-control me-2" type="search" name="search" placeholder="Buscar por nombre de usuario" aria-label="Search" value="{{ request.args.get('search', '') }}">
-                <button class="btn btn-outline-success mt-2" type="submit">Buscar</button>
+        <form method="get" action="{{ url_for('usuarios') }}" id="filtro-form">
+            <div class="filtro">
+                <input class="form-control me-2" type="search" name="search" placeholder="Buscar por nombre o ID de usuario" aria-label="Search" value="{{ request.args.get('search', '') }}">
+                <button class="btn btn-success" type="submit">Buscar</button>
             </div>
         </form>
     </div>
     <div class="Botones_Usuario">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ModalAgregarUsuario">Agregar Nuevo Usuario</button>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ModalAgregarUsuario"><img id="agregar" src="{{ url_for('static', filename='img/icon-agregar-usuario.png') }}" alt="icon-agregar" width="30px"><b>Agregar Nuevo Usuario</b></button>
     </div>
 </div>
 
@@ -43,7 +46,7 @@
                     </div>
                     
                         <div class="mb-3">
-                            <select class="form-select form-select-sm" name="computador" aria-label="Selecciona un Usuario" required>
+                            <select class="form-select form-select-sm" name="computador" required>
                                 <option value="">Asignar Computador</option>
                                 {% for pc in pcs %}
                                     <option value="{{ pc['Id_pc'] }}">
@@ -82,9 +85,10 @@
 <table class="table table-responsive-md table-striped mt-3" >
     <thead>
         <tr>
-            <th>Id Usuario</th>
+            <th>ID</th>
             <th>Nombre del Usuario</th>
-            <th>Email</th>
+            <th class="responsive">Email</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -92,7 +96,7 @@
         <tr>
             <td>{{ row['Id_usuario'] }}</td>
             <td>{{ row['Nombre_user'] }}</td>
-            <td>{{ row['email'] }}</td>
+            <td class="responsive">{{ row['email'] }}</td>
             <td>
                 <a href="{{ url_for('editar_usuario', id=row['Id_usuario']) }}" class="btn btn-warning">Editar</a>
             </td>

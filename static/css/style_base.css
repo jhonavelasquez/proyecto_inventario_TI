@@ -1,0 +1,199 @@
+body {
+    margin: 0;
+    font-family: "Lato", sans-serif;
+}
+
+.content{
+    background-color: #f7f7f7;
+}
+
+
+.titulo{
+    padding-top: 42px;
+    padding-bottom: 42px;
+    background-color: #ffffff;
+}
+
+h1 {
+    text-align: center;
+}
+
+.tituloMenu{
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+    height: 11%;
+}
+  
+.sidebar {
+    margin: 0;
+    padding: 0;
+    width: 200px;
+    background-color: #f1f1f1;
+    position: fixed;
+    height: 100%;
+    overflow: auto;
+    box-shadow:
+    inset 0 -1em 1em rgba(0, 0, 0, 0.1),
+    0.1em 0.1em 1em rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Sidebar links */
+  .sidebar a {
+    display: block;
+    color: black;
+    padding: 16px;
+    text-decoration: none;
+  }
+   
+.sidebar a.active {
+    background-color: #045aaa;
+    color: white;
+}
+  
+.sidebar a:hover:not(.active) {
+    background-color: #555;
+    color: white;
+}
+  
+div.content {
+    margin-left: 200px;
+    padding: 1px 16px;
+    height: 1000px;
+}
+
+#icon-menu{
+    width: 50px;
+}
+
+.head{
+    height: 100px;
+}
+
+.filtros{
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.filtro{
+    margin-top: 1%;
+    padding-right: 1%;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+#filtro-form{
+    width: 100%;
+}
+
+.filtro > button{
+    
+    margin: 1% 5% 1% 1%;
+}
+
+.doble-filtro-sistema{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.table{
+    box-shadow:
+    inset 0 -3em 3em rgba(0, 0, 0, 0.1),
+    0 0 0 2px rgb(255, 255, 255),
+    0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
+    margin-top: 2%;
+}
+  
+@media screen and (max-width: 900px) {
+    .tituloMenu{
+        display: none;
+    }
+    hr{
+        display: none;
+    }
+
+    .sidebar {
+      width: 100%;
+      height: auto;
+      position: relative;
+    }
+    .sidebar a {float: left;}
+    div.content {margin-left: 0;}
+
+    .head{
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        margin-bottom: 5%;
+    }
+
+    .head div {
+        width: 100%;
+    }
+
+    .head div button{
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .doble-filtro-sistema{
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+    }
+    #filtro-boton{
+        width: 20%;
+    }
+}
+
+@media screen and (max-width: 700px) {  
+
+    .clickable-row{
+        margin: 5% !important;
+    }
+
+    .editar-responsivo{
+        display: none;
+    }
+}
+  
+@media screen and (max-width: 550px) {
+    #icon-menu{
+        width: 30px;
+    }
+
+    .sidebar a {
+      text-align: center;
+      float: none;
+      padding: 10px;
+    }
+
+    .responsive{
+        display: none;
+    }
+
+    .btn-editar {
+        display: none;
+    }
+
+    tr[data-href] {
+        cursor: pointer;
+    }
+
+    .clickable-row {
+        cursor: pointer;
+    }
+
+    .filtro{
+        margin-top: 1%;
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+    }
+}

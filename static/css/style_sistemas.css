@@ -1,0 +1,24 @@
+
+.head{
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+
+
+.Botones_Sistema{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.alert{
+    margin-top: 1%;
+}
+
+@media screen and (max-width: 900px) {
+    .head{
+        margin-bottom: 100px !important;
+    }
+}

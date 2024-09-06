@@ -1,29 +1,35 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style_computadores.css') }}">
 
 {% endblock %}
 
 {% block content %}
-<h1>Computadores</h1>
+<div class="titulo">
+    <h1><b>Computadores</b></h1>
+</div>
+
 
 <div class="head">
     <div class="filtros">
-        <form method="get" action="{{ url_for('computadores') }}">
-            <div class="filtroSistema">
-                <input class="form-control me-2" type="search" name="search" placeholder="Buscar por nombre del PC" aria-label="Search" value="{{ request.args.get('search', '') }}">
-                <button class="btn btn-outline-success mt-2" type="submit">Buscar</button>
+        <form method="get" action="{{ url_for('computadores') }}" id="filtro-form">
+            <div class="filtro">
+                <input class="form-control me-2" type="search" name="search" placeholder="Buscar por nombre del PC"
+                    aria-label="Search" value="{{ request.args.get('search', '') }}">
+                <button class="btn btn-success" type="submit">Buscar</button>
             </div>
         </form>
     </div>
-    <div class="Botones_Sistema">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ModalAgregarComputador">Agregar Nuevo Computador</button>
+    <div class="Botones_Computador">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ModalAgregarComputador"><img id="agregar" src="{{ url_for('static', filename='img/icon-agregar.png') }}" alt="icon-agregar" width="30px"><b>Agregar Nuevo
+            Computador</b></button>
     </div>
 </div>
 
-<!-- AGREGAR SISTEMA -->
-<div class="modal fade" id="ModalAgregarComputador" tabindex="-1" aria-labelledby="ModalAgregarComputador" aria-hidden="true">
+<!-- AGREGAR COMPUTADOR -->
+<div class="modal fade" id="ModalAgregarComputador" tabindex="-1" aria-labelledby="ModalAgregarComputador"
+    aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -33,24 +39,50 @@
             <form method="post" action="{{ url_for('crear_computador') }}">
                 <div class="modal-body">
                     <div class="form-floating mb-3">
-                        <input type="text" id="nombre_computador" name="nombre_computador" class="form-control" placeholder="" value="">
+                        <input type="text" id="nombre_computador" name="nombre_computador" class="form-control"
+                            placeholder="" value="">
                         <label for="nombre_computador">Nombre del Computador</label>
                     </div>
                     <div class="form-floating mb-3">
-                        <input type="text" id="nombre_placa" name="nombre_placa" class="form-control" placeholder="" value="">
+                        <input type="text" id="nombre_placa" name="nombre_placa" class="form-control" placeholder=""
+                            value="">
                         <label for="nombre_placa">Nombre de Placa</label>
                     </div>
-                    <div class="form-floating mb-3">
-                        <input type="text" id="nombre_computador" name="nombre_computador" class="form-control" placeholder="" value="">
-                        <label for="nombre_computador">Nombre del Computador</label>
+                    <div class="row g-2">
+                        <div class="col-md">
+                            <div class="form-floating">
+                                <select class="form-select" id="disco" name="disco">
+                                    <option selected>Seleciona Cantidad</option>
+                                    <option value="512">512 GB</option>
+                                    <option value="1024">1.024 GB</option>
+                                    <option value="2048">2.048 GB</option>
+                                </select>
+                                <label for="disco">Almacenamiento Total (GB) (GB)</label>
+                            </div>
+                        </div>
+                        <div class="col-md">
+                            <div class="form-floating">
+                                <select class="form-select" id="ram" name="ram">
+                                    <option selected>Seleciona Cantidad</option>
+                                    <option value="8">8 GB</option>
+                                    <option value="16">16 GB</option>
+                                    <option value="32">32 GB</option>
+                                </select>
+                                <label for="ram">Ram (GB)</label>
+                            </div>
+                        </div>
                     </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" id="fuente" name="fuente" class="form-control" placeholder="" value="">
+                        <label for="fuente">Fuente de Poder</label>
+                    </div>
+                    
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                     <button type="submit" class="btn btn-primary">Guardar</button>
                 </div>
             </form>
-
         </div>
     </div>
 </div>
@@ -60,21 +92,22 @@
     <thead>
         <tr>
             <th>Nombre del PC</th>
-            <th>Placa</th>
-            <th>Disco</th>
-            <th>Ram</th>
-            <th>Fuente</th>
+            <th class="responsive" >Placa</th>
+            <th class="responsive">Almacenamiento</th>
+            <th class="responsive">Ram</th>
+            <th class="responsive">Fuente</th>
+            <th class="responsive"></th>
         </tr>
     </thead>
     <tbody>
         {% for row in filtro_pcs %}
         <tr>
             <td>{{ row['Nombre_pc'] }}</td>
-            <td>{{ row['Placa'] }}</td>
-            <td>{{ row['Disco'] }}</td>
-            <td>{{ row['Ram'] }}</td>
-            <td>{{ row['Fuente'] }}</td>
-            <td>
+            <td class="responsive">{{ row['Placa'] }}</td>
+            <td class="responsive">{{ row['Almacenamiento'] }}</td>
+            <td class="responsive">{{ row['Ram'] }}</td>
+            <td class="responsive">{{ row['Fuente'] }}</td>
+            <td >
                 <a href="#" class="btn btn-warning">Editar</a>
             </td>
         </tr>

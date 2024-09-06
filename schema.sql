@@ -15,7 +15,7 @@ CREATE TABLE Pc (
     Id_pc INTEGER PRIMARY KEY AUTOINCREMENT,
     Nombre_pc VARCHAR(100),
     Placa VARCHAR(50),
-    Disco INTEGER,  -- en GB
+    Almacenamiento INTEGER,  -- en GB
     Ram INTEGER,    -- en GB
     Fuente VARCHAR(100)
 );
@@ -23,6 +23,13 @@ CREATE TABLE Pc (
 CREATE TABLE Sistema (
     Id_sistema INTEGER PRIMARY KEY AUTOINCREMENT,
     Nombre_sistema VARCHAR(100)
+);
+
+CREATE TABLE Reporte (
+    Id_reporte INTEGER PRIMARY KEY AUTOINCREMENT,
+    Encabezado VARCHAR(100),
+    Cuerpo VARCHAR(100),
+    Adjunto
 );
 
 CREATE TABLE Usuario_Sistema_PC (

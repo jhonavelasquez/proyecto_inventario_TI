@@ -1,4 +1,6 @@
 
+
+
 .head{
     display: flex;
     width: 100%;
@@ -9,7 +11,7 @@
     margin-right: 10px;
 }
 
-.Botones_Usuario{
+.Botones_Computador{
     display: flex;
     align-items: center;
 }
@@ -17,3 +19,4 @@
 .alert{
     margin-top: 1%;
 }
+
