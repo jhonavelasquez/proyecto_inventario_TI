@@ -6,9 +6,9 @@
 {% endblock %}
 
 {% block content %}
-<div class="titulo">
-    <h1><b>Computadores</b></h1>
-</div>
+<h1 class="block-effect" style="--td:0.3s">
+    <div class="block-reveal" style="--bc: #2b3034; --d: 0.5s">Computadores</div>
+</h1>
 
 
 <div class="head">
@@ -22,7 +22,7 @@
         </form>
     </div>
     <div class="Botones_Computador">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ModalAgregarComputador"><img id="agregar" src="{{ url_for('static', filename='img/icon-agregar.png') }}" alt="icon-agregar" width="30px"><b>Agregar Nuevo
+        <button class="button_slide slide_left" data-bs-toggle="modal" data-bs-target="#ModalAgregarComputador"><img id="agregar" src="{{ url_for('static', filename='img/icon-agregar.png') }}" alt="icon-agregar" width="30px"><b>Agregar Nuevo
             Computador</b></button>
     </div>
 </div>

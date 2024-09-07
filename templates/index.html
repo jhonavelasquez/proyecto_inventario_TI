@@ -8,14 +8,27 @@
 <!-- Incluir Select2 después -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+<script>document.addEventListener("DOMContentLoaded", function () {
+    const loadingScreen = document.getElementById('loading-screen');
 
+    // Mostrar la pantalla de carga antes de enviar el formulario
+    document.getElementById('filtro-form').addEventListener('submit', function () {
+        loadingScreen.classList.add('show');  // Mostrar la pantalla de carga
+    });
+
+    // Ocultar la pantalla de carga después de 3 segundos
+    setTimeout(function () {
+        loadingScreen.classList.remove('show');  // Ocultar la pantalla de carga
+    }, 3000); // 3000ms = 3 segundos de retardo
+});
+</script>
 {% endblock %}
 
 {% block content %}
-<div class="titulo">
-    <h1><b>Sistemas</b></h1>
-</div>
 
+<h1 class="block-effect" style="--td:0.3s">
+    <div class="block-reveal" style="--bc: #2b3034; --d: 0.5s">Sistemas</div>
+</h1>
 
 <div class="head">
     <div class="filtros">
@@ -46,9 +59,9 @@
     </div>
 
     <div class="Botones_Sistema">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ModalAgregarSistema">Agregar Nuevo Sistema</button>
+        <button class="button_slide slide_right" data-bs-toggle="modal" data-bs-target="#ModalAgregarSistema"><b>Agregar Nuevo Sistema</b></button>
 
-        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#ModelEliminarSistema">Eliminar Sistema</button>
+        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#ModelEliminarSistema"><b>Eliminar Sistema</b></button>
     </div>
 </div>
 
@@ -64,7 +77,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="ModalAgregarSistema">Agregar Nuevo Sistema</h5>
+                <h5 class="modal-title" id="ModalAgregarSistema" >Agregar Nuevo Sistema</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="post" action="{{ url_for('crear_sistema') }}">
@@ -118,6 +131,16 @@
     </div>
 </div>
 
+
+<div class="loading-screen" id="loading-screen">
+  <div class="loading">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+  </div>
+</div>
+
 {% with messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}
 <div class="mt-3">
@@ -132,7 +155,7 @@
 
 
 {% if request.args.get('sistema') or request.args.get('search') %}
-<div id="tabla_contenido">
+<div id="tabla_contenido" class="table-responsive">
     {% if user_pc_data %}
     <table class="table table-responsive-md table-striped mt-3">
         <thead>
