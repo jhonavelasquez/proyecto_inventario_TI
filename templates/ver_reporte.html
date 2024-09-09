@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style_verReporte.css')}}">
+{% endblock %}
+
+{% block content %}
+<div class="card text-start mb-3">
+    <div class="bodyBack">
+        <a id="botonBack" href="{{url_for('reportes')}}" aria-valuetext="a"><img id="imgBack"
+                src="{{ url_for('static', filename='img/icon-back.png')}}" alt="icon-back" width="30px"></a>
+    </div>
+    <div class="report-details" id="ReportDetails">
+        <div class="report-details-header">
+            <h3>Detalles del Reporte</h3>
+        </div>
+        <div class="report-details-body">
+            <div class="headReporte">
+                <h5>Asunto: {{reporte['asunto']}}</h5>
+                <p class="fecha">Fecha: {{reporte['fecha']}} <br>De: {{reporte['usuario_id']}}</p>
+            </div>
+            <hr>
+            {% if reporte['archivo'] %}
+            <div class="archivoReporte">
+                <p><strong>Archivo:</strong> <a href="{{ url_for('uploaded_file', filename=reporte['archivo']) }}"
+                        target="_blank">Ver Archivo</a></p>
+                <hr>
+            </div>
+            {% endif %}
+            <div class="descripcionReporte">
+                <p><strong>Descripción:</strong></p>
+                <div class="descripcion-text">{{ reporte['descripcion'] }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

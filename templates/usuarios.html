@@ -39,39 +39,81 @@
             </div>
             <form method="post" action="{{ url_for('crear_usuario') }}">
                 <div class="modal-body">
-
-                    <div class="mb-3">
+                    <div class="form-floating mb-5 position-relative">
+                        <input type="text" class="form-control" id="userName" name="nombre_user" placeholder="" onkeyup="javascript:this.value=this.value.toUpperCase();" required>
                         <label for="userName" class="form-label">Nombre del Usuario</label>
-                        <input type="text" class="form-control" id="userName" name="nombre_user" required>
                     </div>
-                    <div class="mb-3">
+                    <div class="form-floating mb-5 position-relative">
+                        <input type="text" class="form-control" id="email_user" name="email_user" placeholder="" onkeyup="javascript:this.value=this.value.toUpperCase();" required>
                         <label for="email_user" class="form-label">Email</label>
-                        <input type="text" class="form-control" id="email_user" name="email_user" required>
                     </div>
-
-                    <div class="mb-3">
-                        <select class="form-select form-select-sm" name="computador" required>
-                            <option value="">Asignar Computador</option>
+                    <div class="form-floating mb-5 position-relative">
+                        <input type="password" class="form-control" id="psw" name="psw" placeholder="" required>
+                        <label for="psw" class="form-label">Contraseña</label>
+                        <button type="button" class="btn btn-light position-absolute top-50 end-0 translate-middle-y" id="togglePassword">
+                            <img src="{{ url_for('static', filename='img/icon-psw.png') }}"  alt="icon-psw" id="icon-psw">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <div class="form-floating mb-5 position-relative">
+                        <input type="password" class="form-control" id="psw_confirm" name="psw_confirm" required>
+                        <label for="psw_confirm" class="form-label">Confirmar Contraseña</label>
+                        <button type="button" class="btn btn-outline-secondary position-absolute top-50 end-0 translate-middle-y" id="togglePassword2">
+                            <img src="{{ url_for('static', filename='img/icon-psw.png') }}"  alt="icon-psw" id="icon-psw">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <div class="form-floating mb-5">
+                        <select class="form-select" id="computador" name="computador">
+                            <option selected>Asignar Computador</option>
                             {% for pc in pcs %}
                             <option value="{{ pc['Id_pc'] }}">
                                 {{ pc['Nombre_pc'] }}
                             </option>
                             {% endfor %}
                         </select>
+                        <label for="computador">Computador</label>
                     </div>
-
-
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                     <button type="submit" class="btn btn-primary">Guardar</button>
                 </div>
             </form>
-
         </div>
     </div>
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const togglePassword = document.getElementById('togglePassword');
+        const togglePassword2 = document.getElementById('togglePassword2');
+        const passwordField = document.getElementById('psw');
+        const confirmPasswordField = document.getElementById('psw_confirm');
+
+        togglePassword.addEventListener('click', function() {
+            const type = passwordField.type === 'password' ? 'text' : 'password';
+            passwordField.type = type;
+            this.querySelector('i').className = type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+        });
+
+        togglePassword2.addEventListener('click', function() {
+            const type = confirmPasswordField.type === 'password' ? 'text' : 'password';
+            confirmPasswordField.type = type;
+            this.querySelector('i').className = type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+        });
+
+        document.addEventListener("submit", (e) => { 
+        if (passwordField.value !== confirmPasswordField.value) {
+            e.preventDefault(); // Prevenir que la página se recargue
+            err.innerHTML = "Las contraseñas no coinciden"; // Notificar al usuario
+            setTimeout(() => {
+            err.innerHTML = " ";
+            }, 1200); // Esperar 1.2 segundos y quitar el mensaje
+        }
+});
+    });
+</script>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}

@@ -7,3 +7,14 @@
     margin-top: 10%;
     padding: 3% 10% 3% 10%;
 }
+
+@media screen and (max-width: 700px) {  
+    .bodyBack{
+        padding-top: 5%;
+        padding-bottom: 8%;
+    }
+
+    .botones{
+        width: 100%;
+    }
+}

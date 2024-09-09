@@ -1,0 +1,55 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+
+
+.head{
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.Botones_Reportes{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.alert{
+    width: 100%;
+    height: 100%;
+}
+
+.listReport{
+    width: 90%;
+}
+
+#verReporte {
+    color: inherit; /* Mantiene el color heredado del padre */
+    text-decoration: none; /* Quita el subrayado */
+}
+
+#verReporte:hover {
+    text-decoration: underline; /* Agrega un subrayado al pasar el mouse, si lo deseas */
+}
+
+.rich-text {
+    white-space: pre-wrap !important; /* Mantiene los saltos de línea */
+    background-color: #f9f9f9;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    color: #333;
+    min-height: 150px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.rich-text:focus {
+    outline: none;
+    border-color: #66afe9;
+    box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);
+}

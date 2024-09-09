@@ -1,0 +1,27 @@
+.descripcion-text {
+    word-wrap: break-word; /* Corta las palabras largas al final de la línea */
+    word-break: break-all; /* Rompe palabras largas */
+    white-space: pre-wrap; /* Mantiene los saltos de línea y espacios */
+    overflow-wrap: break-word; /* Evita el desbordamiento de palabras largas */
+}
+
+.card{
+    padding: 5%;
+}
+
+.report-details{
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.report-details-body{
+    width: 70%;
+}
+
+.fecha{
+    color: gray;
+    
+}

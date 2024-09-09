@@ -1,16 +1,16 @@
 DROP TABLE IF EXISTS Usuario;
 DROP TABLE IF EXISTS Pc;
 DROP TABLE IF EXISTS Sistema;
--- DROP TABLE IF EXISTS Usuario_PC;
---DROP TABLE IF EXISTS Usuario_Sistema;
 DROP TABLE IF EXISTS Usuario_Sistema_PC;
-DROP TABLE IF EXISTS Reporte;
+DROP TABLE IF EXISTS Reportes;
+DROP TABLE IF EXISTS Historial;
 
 
 CREATE TABLE Usuario (
     Id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
     Nombre_user VARCHAR(100),
-    Email VARCHAR(100)
+    Email VARCHAR(100),
+    Psw VARCHAR(100)
 );
 
 CREATE TABLE Pc (
@@ -27,11 +27,14 @@ CREATE TABLE Sistema (
     Nombre_sistema VARCHAR(100)
 );
 
-CREATE TABLE Reporte (
-    Id_reporte INTEGER PRIMARY KEY AUTOINCREMENT,
-    Encabezado VARCHAR(100),
-    Cuerpo VARCHAR(100),
-    Adjunto
+CREATE TABLE Reportes (
+    id_reporte INTEGER PRIMARY KEY AUTOINCREMENT,
+    usuario_id INTEGER,
+    asunto VARCHAR(100) NOT NULL,
+    descripcion VARCHAR(300) NOT NULL,
+    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    archivo VARCHAR,
+    FOREIGN KEY (usuario_id) REFERENCES Usuario(Id_usuario)
 );
 
 CREATE TABLE Usuario_Sistema_PC (
@@ -45,3 +48,9 @@ CREATE TABLE Usuario_Sistema_PC (
     FOREIGN KEY (Id_pc) REFERENCES Pc(Id_pc)
 );
 
+CREATE TABLE Historial (
+    Id_historial INTEGER PRIMARY KEY AUTOINCREMENT,
+    usuario_historial VARCHAR(100),
+    descripcion VARCHAR(100),
+    fecha VARCHAR(100)
+);

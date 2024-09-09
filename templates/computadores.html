@@ -40,40 +40,25 @@
                 <div class="modal-body">
                     <div class="form-floating mb-3">
                         <input type="text" id="nombre_computador" name="nombre_computador" class="form-control"
-                            placeholder="" value="">
+                            placeholder="" onkeyup="javascript:this.value=this.value.toUpperCase();">
                         <label for="nombre_computador">Nombre del Computador</label>
                     </div>
                     <div class="form-floating mb-3">
                         <input type="text" id="nombre_placa" name="nombre_placa" class="form-control" placeholder=""
-                            value="">
+                        onkeyup="javascript:this.value=this.value.toUpperCase();">
                         <label for="nombre_placa">Nombre de Placa</label>
                     </div>
-                    <div class="row g-2">
-                        <div class="col-md">
-                            <div class="form-floating">
-                                <select class="form-select" id="disco" name="disco">
-                                    <option selected>Seleciona Cantidad</option>
-                                    <option value="512">512 GB</option>
-                                    <option value="1024">1.024 GB</option>
-                                    <option value="2048">2.048 GB</option>
-                                </select>
-                                <label for="disco">Almacenamiento Total (GB) (GB)</label>
-                            </div>
-                        </div>
-                        <div class="col-md">
-                            <div class="form-floating">
-                                <select class="form-select" id="ram" name="ram">
-                                    <option selected>Seleciona Cantidad</option>
-                                    <option value="8">8 GB</option>
-                                    <option value="16">16 GB</option>
-                                    <option value="32">32 GB</option>
-                                </select>
-                                <label for="ram">Ram (GB)</label>
-                            </div>
-                        </div>
+                    <div class="form-floating mb-3">
+                        <input type="number" id="disco" name="disco" class="form-control" placeholder=""
+                            value="">
+                        <label for="disco">Total Almacenamiento</label>
                     </div>
                     <div class="form-floating mb-3">
-                        <input type="text" id="fuente" name="fuente" class="form-control" placeholder="" value="">
+                        <input type="number" id="ram" name="ram" class="form-control" placeholder="" value="">
+                        <label for="ram">Total de Ram</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" id="fuente" name="fuente" class="form-control" placeholder="" onkeyup="javascript:this.value=this.value.toUpperCase();">
                         <label for="fuente">Fuente de Poder</label>
                     </div>
                     
@@ -104,11 +89,11 @@
         <tr>
             <td>{{ row['Nombre_pc'] }}</td>
             <td class="responsive">{{ row['Placa'] }}</td>
-            <td class="responsive">{{ row['Almacenamiento'] }}</td>
-            <td class="responsive">{{ row['Ram'] }}</td>
+            <td class="responsive">{{ row['Almacenamiento'] }} GB</td>
+            <td class="responsive">{{ row['Ram'] }} GB</td>
             <td class="responsive">{{ row['Fuente'] }}</td>
             <td >
-                <a href="#" class="btn btn-warning">Editar</a>
+                <a href="{{ url_for('editar_computador', id_pc=row['Id_pc']) }}" class="btn btn-warning">Editar</a>
             </td>
         </tr>
         {% endfor %}

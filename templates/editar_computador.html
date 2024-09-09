@@ -13,28 +13,41 @@
     </div>
     <form id="editForm" method="post" action="{{ url_for('editar_computador_form') }}">
         <div class="modal-body">
-            <input type="hidden" name="id_usuario" id="id_usuario" value="{{ use['Id_usuario'] }}">
+            <input type="hidden" name="id_pc" id="id_pc" value="{{ pc['Id_pc'] }}">
             <input type="hidden" name="action" id="action" value="">
-            <h2>Editar Usuario</h2>
-            <p>Actualiza la informacion del usuario <b>{{ use['Nombre_user'] }} (#{{ use['Id_usuario'] }}) </b></p>
+            <h2>Editar Computador</h2>
+            <p>Actualiza la informacion del computador <b>{{ pc['Nombre_pc'] }} (#{{ pc['Id_pc'] }}) </b></p>
 
             <div class="form-floating mb-3">
-                <input type="text" id="nombre_usuario" name="nombre_usuario" class="form-control" placeholder=""
-                    value="{{ use['Nombre_user'] }}">
-                <label for="nombre_usuario">Nombre</label>
+                <input type="text" id="nombre_computador" name="nombre_computador" class="form-control" placeholder=""
+                    value="{{ pc['Nombre_pc'] }}">
+                <label for="nombre_computador">Nombre</label>
             </div>
-
             <div class="form-floating mb-3">
-                <input type="email" id="email" name="email" class="form-control" placeholder=""
-                    value="{{ use['Email'] }}">
-                <label for="email">Email</label>
+                <input type="text" id="nombre_placa" name="nombre_placa" class="form-control" placeholder=""
+                    value="{{ pc['Placa'] }}">
+                <label for="nombre_placa">Nombre</label>
             </div>
-
+            <div class="form-floating mb-3">
+                <input type="text" id="almacenamiento" name="almacenamiento" class="form-control" placeholder=""
+                    value="{{ pc['Almacenamiento'] }}">
+                <label for="almacenamiento">Nombre</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input type="text" id="ram" name="ram" class="form-control" placeholder=""
+                    value="{{ pc['Ram'] }}">
+                <label for="ram">Nombre</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input type="text" id="fuente" name="fuente" class="form-control" placeholder=""
+                    value="{{ pc['Fuente'] }}">
+                <label for="fuente">Nombre</label>
+            </div>
         </div>
         <div class="modal-footer">
             <button type="submit" class="btn btn-danger"
                 onclick="document.getElementById('action').value='delete';">Eliminar</button>
-            <a href="{{url_for('usuarios')}}"><button type="button" class="btn btn-secondary">Cerrar</button></a>
+            <a href="{{url_for('computadores')}}"><button type="button" class="btn btn-secondary">Cerrar</button></a>
             <button type="submit" class="btn btn-primary"
                 onclick="document.getElementById('action').value='save';">Guardar
                 cambios</button>

@@ -22,3 +22,17 @@
 .alert{
     margin-top: 1%;
 }
+
+#togglePassword{
+    border-color: transparent !important;
+    margin-right: 5px;
+}
+
+#togglePassword2{
+    border-color: transparent !important;
+    margin-right: 5px;
+}
+
+#icon-psw{
+    width: 20px;
+}

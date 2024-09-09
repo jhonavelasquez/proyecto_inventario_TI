@@ -1,4 +1,6 @@
 import sqlite3
+from werkzeug.security import generate_password_hash, check_password_hash
+import datetime
 
 connection = sqlite3.connect('database.db')
 
@@ -8,11 +10,15 @@ with open('schema.sql') as f:
 
 cur = connection.cursor()
 
-# cur.execute("INSERT INTO Usuario (Nombre_user, Email) VALUES ('JUPEREZ', 'juan.perez@sanantonio.cl');")
-# cur.execute("INSERT INTO Usuario (Nombre_user, Email) VALUES ('JOVELASQUEZ', 'jvelasquez@sanantonio.cl');")
-# cur.execute("INSERT INTO Usuario (Nombre_user, Email) VALUES ('pepe', 'jvelasquez@sanantonio.cl');")
-# cur.execute("INSERT INTO Usuario (Nombre_user, Email) VALUES ('felipe', 'jvelasquez@sanantonio.cl');")
-# cur.execute("INSERT INTO Usuario (Nombre_user, Email) VALUES ('alex', 'jvelasquez@sanantonio.cl');")
+hashed_password = generate_password_hash('admin')
+cur.execute("INSERT INTO Usuario (Nombre_user, Email, Psw) VALUES (?, ?, ?);", ('admin', 'admin@sanantonio.cl', hashed_password))
+# cur.execute("INSERT INTO Usuario (Nombre_user, Email, Psw) VALUES ('JOVELASQUEZ', 'jvelasquez@sanantonio.cl');")
+# cur.execute("INSERT INTO Usuario (Nombre_user, Email, Psw) VALUES ('pepe', 'jvelasquez@sanantonio.cl');")
+# cur.execute("INSERT INTO Usuario (Nombre_user, Email, Psw) VALUES ('felipe', 'jvelasquez@sanantonio.cl');")
+# cur.execute("INSERT INTO Usuario (Nombre_user, Email, Psw) VALUES ('alex', 'jvelasquez@sanantonio.cl');")
+
+cur.execute("INSERT INTO Reportes (usuario_id, asunto, descripcion, fecha) VALUES (?, ?, ?, ?)",
+            (1, 'problema sistema de adquisicion', 'descripcion aksdjaksa asd asdasd asd asd asd as dasaaaaaaaaaadasdad asd ass sssssd', datetime.datetime.now().strftime('%Y-%m-%d %H:%M')))
 
 cur.execute("INSERT INTO Pc (Nombre_pc, Placa, Almacenamiento, Ram, Fuente) VALUES ('SA2101051', 'ASUS ROG STRIX', 512, 16, 'Corsair 650W');")
 cur.execute("INSERT INTO Pc (Nombre_pc, Placa, Almacenamiento, Ram, Fuente) VALUES ('SA2000000', 'HP Network', 512, 8, 'Corsair 550W');")

@@ -1,15 +1,67 @@
 import sqlite3
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
+from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from model import *
+import datetime
+import os
+
 
 app = Flask(__name__)
 app.secret_key = 's3cr3t_k3y_12345'
+app.config['UPLOAD_FOLDER'] = 'uploads'  # Carpeta para almacenar archivos subidos
+app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'png', 'jpg', 'jpeg', 'gif'}  # Tipos de archivos permitidos
+
+hashed_password = generate_password_hash("@j0n_v3l4squ3z#")
+check_password = check_password_hash(hashed_password, "contraseña_ingresada")
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return Usuario.get_by_id(user_id)
 
 def get_db_connection():
     conn = sqlite3.connect('database.db')
     conn.row_factory = sqlite3.Row
     return conn
 
-@app.route('/', methods=['GET'])
+
+@app.route('/', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        nombre_usuario = request.form['nombre_usuario']
+        password = request.form['contrasena']
+        user = Usuario.get_by_nombre_usuario(nombre_usuario)
+
+        if user:
+            print(f"user: {user.nombre_usuario}, psw: {user.password}")  # Esto es solo para depuración
+
+        if user and check_password_hash(user.password, password):
+            print("Contraseña correcta") 
+            login_user(user)
+            flash('Inicio de sesión exitoso.', 'success')
+            return redirect(url_for('index'))
+        else:
+            print("Credenciales inválidas")
+            flash('Credenciales inválidas. Por favor, inténtalo de nuevo.', 'danger')
+
+    return render_template('login.html')
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('Sesion cerrada correctamente', 'warning')
+    return redirect(url_for('login'))
+
+# BACKEND SISTEMA
+@app.route('/index', methods=['GET'])
+@login_required
 def index():
     conn = get_db_connection()
     sistema_id = request.args.get('sistema')
@@ -38,13 +90,10 @@ def index():
     user_pc_data = conn.execute(query, params).fetchall()
     conn.close()
 
-    return render_template('index.html', user_pc_data=user_pc_data, sistemas=sistemas, pcs=pcs)
-
-
-    return render_template('_tabla.html', user_pc_data=user_pc_data)
-
+    return render_template('index.html', user_pc_data=user_pc_data, sistemas=sistemas, pcs=pcs,  user=current_user)
 
 @app.route('/crear_sistema', methods=['POST'])
+@login_required
 def crear_sistema():
     conn = get_db_connection()
     nombre_sistema = request.form['nombre_sistema']
@@ -89,6 +138,7 @@ def crear_sistema():
 
 
 @app.route('/eliminar_sistema', methods=['POST'])
+@login_required
 def eliminar_sistema():
     conn = get_db_connection()
     sistema_id = request.form.get('sistema')
@@ -106,6 +156,7 @@ def eliminar_sistema():
     return redirect(url_for('index'))
 
 @app.route('/editar_sistema/<int:id_sistema>/<int:id_usuario>/<int:id_pc>', methods=['GET', 'POST'])
+@login_required
 def editar_sistema(id_sistema, id_usuario, id_pc):
     conn = get_db_connection()
 
@@ -140,7 +191,9 @@ def editar_sistema(id_sistema, id_usuario, id_pc):
     
     return render_template('editar_sistema.html', user_pc=user_pc, pcs=pcs)
 
+# BACKEND COMPUTADOR
 @app.route('/computadores', methods=['GET'])
+@login_required
 def computadores():
     conn = get_db_connection()
 
@@ -158,6 +211,7 @@ def computadores():
     return render_template('computadores.html', filtro_pcs=filtro_pcs)
 
 @app.route('/crear_computador', methods=['POST'])
+@login_required
 def crear_computador():
     if request.method == 'POST':
         nombre_pc = request.form['nombre_computador']
@@ -176,8 +230,54 @@ def crear_computador():
         return redirect('computadores')
     return render_template('computadores.html')
 
+@app.route('/editar_computador/<int:id_pc>', methods=['GET'])
+@login_required
+def editar_computador(id_pc):
+    conn = get_db_connection()
+    
+    pc = conn.execute('''
+        SELECT *
+        FROM Pc
+        WHERE Pc.Id_pc = ?
+    ''', (id_pc,)).fetchone()
+    conn.close()
+    
+    return render_template('editar_computador.html', pc=pc)
 
+@app.route('/editar_computador_form', methods=['POST'])
+@login_required
+def editar_computador_form():
+    id_pc = request.form['id_pc']
+    nombre_pc = request.form['nombre_computador']
+    placa_pc = request.form['nombre_placa']
+    almacenamiento = request.form.get('almacenamiento')
+    ram = request.form.get('ram')
+    nombre_fuente = request.form['fuente']
+    action = request.form['action']
+
+    conn = get_db_connection()
+
+    if action == 'save':
+        conn.execute(
+            'UPDATE Pc SET Nombre_pc = ?, PLaca = ?, Almacenamiento = ?, Ram = ?, Fuente = ? WHERE Id_pc = ?',
+            (nombre_pc, placa_pc, almacenamiento, ram, nombre_fuente, id_pc)
+        )
+        flash("Información del computador actualizada con éxito.", "success")
+    elif action == 'delete':
+        conn.execute(
+            'DELETE FROM Pc WHERE Id_pc = ?',
+            (id_pc,)
+        )
+        flash("Computador eliminado con éxito.", "danger")
+
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for('computadores'))
+
+# BACKEND USUARIO
 @app.route('/usuarios', methods=['GET'])
+@login_required
 def usuarios():
     conn = get_db_connection()
 
@@ -197,30 +297,43 @@ def usuarios():
     return render_template('usuarios.html', users=users, pcs=pcs)
 
 @app.route('/crear_usuario', methods=['GET', 'POST'])
+@login_required
 def crear_usuario():
     if request.method == 'POST':
         nombre_user = request.form['nombre_user']
         email_user = request.form['email_user']
-        id_pc = request.form.get('computador')
+        psw = request.form['psw']
+        id_pc = request.form.get('computador') 
 
+        hashed_password = generate_password_hash(psw)
         conn = get_db_connection()
-        conn.execute('INSERT INTO Usuario (Nombre_user, Email) VALUES (?, ?)', (nombre_user, email_user))
 
-        id_usuario = conn.execute(
-            'SELECT Id_usuario FROM Usuario WHERE Nombre_user = ? AND Email = ?', (nombre_user, email_user)).fetchone()['Id_usuario']
+        try:
+            conn.execute('INSERT INTO Usuario (Nombre_user, Email, Psw) VALUES (?, ?, ?)', (nombre_user, email_user, hashed_password))
 
+            id_usuario = conn.execute(
+                'SELECT Id_usuario FROM Usuario WHERE Nombre_user = ? AND Email = ?', (nombre_user, email_user)).fetchone()['Id_usuario']
 
+            sistemas = conn.execute("SELECT Id_sistema FROM Sistema").fetchall()
 
-        sistemas = conn.execute("SELECT Id_sistema FROM Sistema").fetchall()
+            for sistema in sistemas:
+                print(f"Inserción: Usuario ID: {id_usuario}, Sistema ID: {sistema['Id_sistema']}, PC ID: {id_pc}")
+                conn.execute(
+                    "INSERT INTO Usuario_Sistema_PC (Id_usuario, Id_sistema, Id_pc, Activo) VALUES (?, ?, ?, FALSE)",
+                    (id_usuario, sistema['Id_sistema'], id_pc)
+                )
+                print("se agrego a sistema")
 
-        for sistema in sistemas:
-            conn.execute(
-                "INSERT INTO Usuario_Sistema_PC (Id_usuario, Id_sistema, Id_pc, Activo) VALUES (?, ?, ?,FALSE)",
-                (id_usuario, sistema['Id_sistema'],id_pc)
-            )
+            user = current_user
+            fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+            descripcion_hist = (f" agregó a un nuevo usuario {nombre_user}.  {fecha_actual}")
+            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha) VALUES (?,?,?)', (user.nombre_usuario, descripcion_hist, fecha_actual))
 
-        conn.commit()
-        conn.close()
+            conn.commit()
+        except Exception as e:
+            print(f"Error: {e}")
+        finally:
+            conn.close()
         
         flash("Usuario creado exitosamente.", "success")
         return redirect(url_for('usuarios'))
@@ -228,10 +341,10 @@ def crear_usuario():
     return render_template('usuarios.html')
 
 @app.route('/editar_usuario/<int:id>', methods=['GET'])
+@login_required
 def editar_usuario(id):
     conn = get_db_connection()
     
-    # Obtener los detalles del usuario para el ID proporcionado
     use = conn.execute('''
         SELECT *
         FROM Usuario
@@ -242,6 +355,7 @@ def editar_usuario(id):
     return render_template('editar_usuario.html', use=use)
 
 @app.route('/editar_usuario_form', methods=['POST'])
+@login_required
 def editar_usuario_form():
     id_usuario = request.form['id_usuario']
     nombre_usuario = request.form['nombre_usuario']
@@ -261,9 +375,89 @@ def editar_usuario_form():
             'DELETE FROM Usuario WHERE Id_usuario = ?',
             (id_usuario,)
         )
+        user = current_user
+        fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+        descripcion_hist= (f" eliminó a un usuario {nombre_usuario}.  {fecha_actual}")
+        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha) VALUES (?,?,?)', (user.nombre_usuario,descripcion_hist,fecha_actual))
         flash("Usuario eliminado con éxito.", "danger")
+
+    
 
     conn.commit()
     conn.close()
 
     return redirect(url_for('usuarios'))
+
+@app.route('/historial', methods=['GET'])
+@login_required
+def historial():
+    conn = get_db_connection()
+
+    registros = conn.execute("SELECT * FROM Historial ORDER BY fecha DESC").fetchall()
+    conn.close()
+
+    return render_template('historial.html', registros=registros)
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+@app.route('/reportes', methods=['GET', 'POST'])
+@login_required
+def reportes():
+    # Conexión a la base de datos
+    conn = get_db_connection()
+    
+    # Obtener filtros de búsqueda (si existen)
+    search = request.args.get('search')
+    
+    if search:
+        # Buscar reportes por asunto o ID de usuario
+        query = f"SELECT * FROM Reportes WHERE asunto LIKE ? OR usuario_id LIKE ? ORDER BY fecha DESC"
+        reportes = conn.execute(query, ('%' + search + '%', '%' + search + '%')).fetchall()
+    else:
+        # Obtener todos los reportes
+        reportes = conn.execute("SELECT * FROM Reportes ORDER BY fecha DESC").fetchall()
+    
+    conn.close()
+    return render_template('reportes.html', reportes=reportes)
+
+@app.route('/crear_reporte', methods=['POST'])
+@login_required
+def crear_reporte():
+    # Recopilar datos del formulario
+    asunto = request.form['asunto']
+    descripcion = request.form['descripcion']
+    user = current_user
+    
+    file = request.files.get('file')
+    file_path = None
+    
+    if file and file.filename:
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(filename)
+        file.save(file_path)
+    
+    conn = get_db_connection()
+    conn.execute(
+        'INSERT INTO Reportes (usuario_id, asunto, descripcion, fecha, archivo) VALUES (?, ?, ?, ?, ?)',
+        (user.nombre_usuario, asunto, descripcion, datetime.datetime.now().strftime('%Y-%m-%d %H:%M'), file_path)
+    )
+    conn.commit()
+    conn.close()
+    
+    flash("Reporte creado exitosamente.", "success")
+    return redirect(url_for('reportes'))
+
+@app.route('/ver_reporte/<int:id_reporte>', methods=['GET'])
+@login_required
+def ver_reporte(id_reporte):
+    conn = get_db_connection()
+    reporte = conn.execute("SELECT * FROM Reportes WHERE id_reporte = ?", (id_reporte,)).fetchone()
+    conn.close()
+    return render_template('ver_reporte.html', reporte=reporte)
+
+@app.route('/ver_reporte/<filename>')
+@login_required
+def uploaded_file(filename):
+    return send_from_directory('uploads', filename)

@@ -13,23 +13,23 @@
   <title>{% block title %} {% endblock %}</title>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const loadingScreen = document.getElementById('loading-screen');
+      const loadingScreen = document.getElementById('loading-screen');
 
-        // Mostrar la pantalla de carga antes de enviar el formulario
-        document.getElementById('filtro-form').addEventListener('submit', function () {
-            loadingScreen.classList.add('show');
-        });
+      // Mostrar la pantalla de carga antes de enviar el formulario
+      document.getElementById('filtro-form').addEventListener('submit', function () {
+        loadingScreen.classList.add('show');
+      });
 
-        // Ocultar la pantalla de carga 4 segundos después de que la página ha cargado completamente
-        window.addEventListener('load', function () {
-            setTimeout(function () {
-                loadingScreen.classList.remove('show');
-            }, 3000); // 4000ms = 4 segundos de retardo
-        });
+      // Ocultar la pantalla de carga 4 segundos después de que la página ha cargado completamente
+      window.addEventListener('load', function () {
+        setTimeout(function () {
+          loadingScreen.classList.remove('show');
+        }, 3000); // 4000ms = 4 segundos de retardo
+      });
     });
-    
-</script>
-  
+
+  </script>
+
 </head>
 
 <body>
@@ -65,11 +65,25 @@
               {% endif %} <b>Computadores</b></a>
           </li>
           <li class="nav-item">
-            <a href="#" class="nav-link {% if request.endpoint == '#' %}active{% endif %}">
+            <a href="{{ url_for('reportes') }}" class="nav-link {% if request.endpoint == '#' %}active{% endif %}">
               {% if request.endpoint == '#' %}
               <img id="icon-menu" src="{{ url_for('static', filename='img/icon-documento.png') }}"
                 alt="icon-documentos">
               {% endif %} <b>Reportes</b></a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('historial') }}" class="nav-link {% if request.endpoint == '#' %}active{% endif %}">
+              {% if request.endpoint == '#' %}
+              <img id="icon-menu" src="{{ url_for('static', filename='img/icon-historial.png') }}"
+                alt="icon-documentos">
+              {% endif %} <b>Historial</b></a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('logout') }}" class="nav-link {% if request.endpoint == '#' %}active{% endif %}">
+              {% if request.endpoint == '#' %}
+              <img id="icon-menu" src="{{ url_for('static', filename='img/icon-logout.png') }}"
+                alt="icon-documentos">
+              {% endif %} <b>Cerrar Sesión</b></a>
           </li>
         </ul>
       </div>
@@ -78,39 +92,54 @@
 
   <div class="sidebar" style="display: flex; flex-direction: column;">
     <div class="tituloMenu">
-        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo-IMSA" width="100px">
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo-IMSA" width="100px">
     </div>
     <hr>
     <a href="{{ url_for('index') }}" class="slide_right {% if request.endpoint == 'index' %}active{% endif %}">
-        <img id="icon-index" class="menu-icon {% if request.endpoint == 'index' %}show{% endif %}" src="{{ url_for('static', filename='img/icon-sistemas.png') }}" alt="icon-Sistema">
-        <b>Sistema</b>
+      <img id="icon-index" class="menu-icon {% if request.endpoint == 'index' %}show{% endif %}"
+        src="{{ url_for('static', filename='img/icon-sistemas.png') }}" alt="icon-Sistema">
+      <b>Sistema</b>
     </a>
     <a href="{{ url_for('usuarios') }}" class="slide_right {% if request.endpoint == 'usuarios' %}active{% endif %}">
-        <img id="icon-usuarios" class="menu-icon {% if request.endpoint == 'usuarios' %}show{% endif %}" src="{{ url_for('static', filename='img/icon-usuarios.png') }}" alt="icon-Usuarios">
-        <b>Usuarios</b>
+      <img id="icon-usuarios" class="menu-icon {% if request.endpoint == 'usuarios' %}show{% endif %}"
+        src="{{ url_for('static', filename='img/icon-usuarios.png') }}" alt="icon-Usuarios">
+      <b>Usuarios</b>
     </a>
-    <a href="{{ url_for('computadores') }}" class="slide_right {% if request.endpoint == 'computadores' %}active{% endif %}">
-        <img id="icon-computadores" class="menu-icon {% if request.endpoint == 'computadores' %}show{% endif %}" src="{{ url_for('static', filename='img/icon-computador.png') }}" alt="icon-Pc">
-        <b>Computadores</b>
+    <a href="{{ url_for('computadores') }}"
+      class="slide_right {% if request.endpoint == 'computadores' %}active{% endif %}">
+      <img id="icon-computadores" class="menu-icon {% if request.endpoint == 'computadores' %}show{% endif %}"
+        src="{{ url_for('static', filename='img/icon-computador.png') }}" alt="icon-Pc">
+      <b>Computadores</b>
     </a>
-    <a href="#" class="slide_right {% if request.endpoint == '#' %}active{% endif %}">
-        <img id="icon-reportes" class="menu-icon {% if request.endpoint == '#' %}show{% endif %}" src="{{ url_for('static', filename='img/icon-documento.png') }}" alt="icon-documentos">
-        <b>Reportes</b>
+    <a href="{{ url_for('reportes') }}" class="slide_right {% if request.endpoint == '#' %}active{% endif %}">
+      <img id="icon-reportes" class="menu-icon {% if request.endpoint == '#' %}show{% endif %}"
+        src="{{ url_for('static', filename='img/icon-documento.png') }}" alt="icon-documentos">
+      <b>Reportes</b>
     </a>
-</div>
-
-<div class="loading-screen" id="loading-screen">
-  <div class="loading">
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
+    <a href="{{ url_for('historial') }}" class="slide_right {% if request.endpoint == '#' %}active{% endif %}">
+      <img id="icon-historial" class="menu-icon {% if request.endpoint == '#' %}show{% endif %}"
+        src="{{ url_for('static', filename='img/icon-historial.png') }}" alt="icon-documentos">
+      <b>Historial</b>
+    </a>
+    <a href="{{ url_for('logout') }}" class="slide_right {% if request.endpoint == '#' %}active{% endif %}">
+      <img id="icon-historial" class="menu-icon {% if request.endpoint == '#' %}show{% endif %}"
+        src="{{ url_for('static', filename='img/icon-logout.png') }}" alt="icon-documentos">
+      <b>Cerrar Sesion</b>
+    </a>
   </div>
-</div>
+
+  <div class="loading-screen" id="loading-screen">
+    <div class="loading">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
 
   <div class="content">
-    {% block content %} 
-    
+    {% block content %}
+
     {% endblock %}
   </div>
 
