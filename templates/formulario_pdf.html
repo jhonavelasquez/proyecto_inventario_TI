@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style_crear_reporte.css') }}">
+{% endblock %}
+
+{% block content %}
+<h1 class="block-effect" style="--td:0.3s">
+    <div class="block-reveal" style="--bc: #2b3034; --d: 0.5s">Generar Reporte</div>
+</h1>
+<div class="contenedor">
+    <form method="POST" action="{{ url_for('generar_pdf') }}" enctype="multipart/form-data">
+
+        <div class="columna-left">
+            <div class="row g-2">
+                <div class="col-sm">
+                    <label for="num_implementacion" class="form-label">N° Implementación:</label>
+                    <input type="text" class="form-control" id="num_implementacion" name="num_implementacion">
+                </div>
+                <div class="col-sm">
+                    <label for="version" class="form-label">Versión</label>
+                    <input type="text" class="form-control" id="version" name="version">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="nombre_sistema" class="form-label">Nombre del Sistema</label>
+                <input type="text" class="form-control" id="nombre_sistema" name="nombre_sistema" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="responsable_sistema" class="form-label">Responsable del sistema:</label>
+                <input type="text" class="form-control" id="responsable_sistema" name="responsable_sistema" required>
+            </div>
+            <div class="mb-3">
+                <label for="direccion_unidad" class="form-label">Dirección/Unidad:</label>
+                <input type="text" class="form-control" id="direccion_unidad" name="direccion_unidad" required>
+            </div>
+            <div class="mb-3">
+                <label for="nombre_solicitante" class="form-label">Nombre Solicitante:</label>
+                <input type="text" class="form-control" id="nombre_solicitante" name="nombre_solicitante" required>
+            </div>
+            <div class="mb-3">
+                <label for="responsable_ddi" class="form-label">Responsable DDI:</label>
+                <input type="text" class="form-control" id="responsable_ddi" name="responsable_ddi" required>
+            </div>
+            <div class="mb-3">
+                <label for="responsable_solicitud" class="form-label">Responsable Solicitud:</label>
+                <input type="text" class="form-control" id="responsable_solicitud" name="responsable_solicitud"
+                    required>
+            </div>
+        </div>
+        <div class="columna-rigth">
+
+            <!-- LIMITAR A 3000 CARACTERES EL TEXAREA DE DESCRIPCION -->
+
+            <label for="descripcion" class="form-label">Descripción:</label>
+            <textarea class="form-control" id="descripcion" name="descripcion" rows="10"
+                placeholder="Escribe aqui tu reporte..."></textarea>
+            <!-- <label for="imagen">Cargar Imagen:</label>
+                <input type="file" id="imagen" name="imagen" accept="image/*"><br><br> -->
+            <br>
+            <button type="submit" class="btn btn-primary">Generar PDF</button>
+
+        </div>
+    </form>
+
+</div>
+
+
+
+{% endblock %}

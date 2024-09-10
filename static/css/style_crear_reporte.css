@@ -1,0 +1,34 @@
+.contenedor{
+    width: 100%;
+}
+
+form{
+    display: flex;
+    width: 100%;
+}
+
+
+.columna-left{
+    width: 40%;
+    margin: 3%;
+}
+
+.columna-rigth{
+    width: 50%;
+    margin: 3%;
+}
+
+@media screen and (max-width: 1400px) {
+    form{
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+    .columna-left{
+        width: 95%;
+    }
+
+    .columna-rigth{
+        width: 95%;
+    }
+}

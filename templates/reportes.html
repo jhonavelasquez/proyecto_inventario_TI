@@ -21,44 +21,11 @@
         </form>
     </div>
     <div class="Botones_Reportes">
-        <button class="button_slide slide_left" data-bs-toggle="modal" data-bs-target="#ModalNuevoReporte">
+        <a href="{{ url_for('generar_pdf') }}" class="button_slide slide_left">
             <img id="agregar" src="{{ url_for('static', filename='img/icon-agregar-usuario.png') }}" alt="icon-agregar"
                 width="30px">
             <b>Crear Nuevo Reporte</b>
-        </button>
-    </div>
-</div>
-
-<!-- Modal para crear un nuevo reporte -->
-<div class="modal fade" id="ModalNuevoReporte" tabindex="-1" aria-labelledby="ModalNuevoReporte" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="ModalNuevoReporte">Crear Nuevo Reporte</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="post" action="{{ url_for('crear_reporte') }}" enctype="multipart/form-data">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="asunto" class="form-label">Asunto</label>
-                        <input type="text" class="form-control" id="asunto" name="asunto"
-                            placeholder="Asunto del reporte" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="descripcion" class="form-label">Descripción</label>
-                        <textarea class="form-control rich-text" id="descripcion" name="descripcion" rows="6" placeholder="Escribe tu mensaje aquí..."></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="file" class="form-label">Archivo Adicional</label>
-                        <input type="file" class="form-control" id="file" name="file">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="submit" class="btn btn-primary">Guardar</button>
-                </div>
-            </form>
-        </div>
+        </a>
     </div>
 </div>
 

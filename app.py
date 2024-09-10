@@ -1,11 +1,14 @@
 import sqlite3
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, send_file
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from model import *
 import datetime
 import os
+
+from PyPDF2 import PdfReader, PdfWriter,PdfFileMerger
+from io import BytesIO
 
 
 app = Flask(__name__)
@@ -461,3 +464,55 @@ def ver_reporte(id_reporte):
 @login_required
 def uploaded_file(filename):
     return send_from_directory('uploads', filename)
+
+
+@app.route('/generar_pdf', methods=['GET', 'POST'])
+@login_required
+def generar_pdf():
+    if request.method == 'POST':
+        nombre_sistema = request.form['nombre_sistema']
+        responsable_sistema = request.form['responsable_sistema']
+        direccion_unidad = request.form['direccion_unidad']
+        nombre_solicitante = request.form['nombre_solicitante']
+        version = request.form['version']
+        descripcion = request.form['descripcion']
+        responsable_ddi = request.form['responsable_ddi']
+        responsable_solicitud = request.form['responsable_solicitud']
+        num_implementacion = request.form['num_implementacion']
+        fecha = datetime.datetime.now().strftime('%d-%m-%Y')
+
+        pdf_template_path = 'static/pdf/FORMULARIO DE SOLICITUD.pdf'
+
+        pdf_reader = PdfReader(pdf_template_path)
+        pdf_writer = PdfWriter()
+
+        for page_num in range(len(pdf_reader.pages)):
+            page = pdf_reader.pages[page_num]
+            pdf_writer.add_page(page)
+
+        pdf_fields = pdf_reader.get_fields()
+
+        if pdf_fields:
+            pdf_writer.update_page_form_field_values(
+                pdf_writer.pages[0],
+                {
+                    'Text2': nombre_sistema,
+                    'Text3': responsable_sistema,
+                    'Text4': direccion_unidad,
+                    'Text5': nombre_solicitante,
+                    'Text6': num_implementacion,
+                    'Text7': fecha,
+                    'Text8': version,
+                    'Text9': descripcion,
+                    'Text10': responsable_ddi,
+                    'Text11': responsable_solicitud,
+                }
+            )
+
+        output_pdf = BytesIO()
+        pdf_writer.write(output_pdf)
+        output_pdf.seek(0)
+
+        return send_file(output_pdf, as_attachment=True, download_name=num_implementacion + '.pdf', mimetype='application/pdf')
+
+    return render_template('formulario_pdf.html')
