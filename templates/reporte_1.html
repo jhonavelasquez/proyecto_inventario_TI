@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style_crear_reporte.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style_crear_reporte_1.css') }}">
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet" />
 {% endblock %}
 
 {% block content %}
@@ -9,8 +10,12 @@
     <div class="block-reveal" style="--bc: #2b3034; --d: 0.5s">Generar Reporte</div>
 </h1>
 <div class="contenedor">
-    <form method="POST" action="{{ url_for('generar_pdf') }}" enctype="multipart/form-data">
-
+    <div>
+        <h2>
+            Reporte 1
+        </h2>
+    </div>
+    <form method="POST" action="{{ url_for('reporte_1') }}" enctype="multipart/form-data">
         <div class="columna-left">
             <div class="row g-2">
                 <div class="col-sm">
@@ -18,12 +23,12 @@
                     <input type="text" class="form-control" id="num_implementacion" name="num_implementacion">
                 </div>
                 <div class="col-sm">
-                    <label for="version" class="form-label">Versión</label>
+                    <label for="version" class="form-label">Versión:</label>
                     <input type="text" class="form-control" id="version" name="version">
                 </div>
             </div>
             <div class="mb-3">
-                <label for="nombre_sistema" class="form-label">Nombre del Sistema</label>
+                <label for="nombre_sistema" class="form-label">Nombre del Sistema:</label>
                 <input type="text" class="form-control" id="nombre_sistema" name="nombre_sistema" required>
             </div>
 
@@ -50,20 +55,35 @@
             </div>
         </div>
         <div class="columna-rigth">
-
-            <!-- LIMITAR A 3000 CARACTERES EL TEXAREA DE DESCRIPCION -->
-
-            <label for="descripcion" class="form-label">Descripción:</label>
-            <textarea class="form-control" id="descripcion" name="descripcion" rows="10"
-                placeholder="Escribe aqui tu reporte..."></textarea>
-            <!-- <label for="imagen">Cargar Imagen:</label>
-                <input type="file" id="imagen" name="imagen" accept="image/*"><br><br> -->
+            <div class="main-editor">
+                <div id="editor"></div>
+            </div>
+            <input type="hidden" name="descripcion" id="descripcion-hidden">
             <br>
             <button type="submit" class="btn btn-primary">Generar PDF</button>
-
         </div>
     </form>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+    <script>
+        const quill = new Quill('#editor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline'],
+                    [{'list': 'ordered'}, {'list': 'bullet'}]
+                ]
+            }
+        });
 
+
+        const form = document.querySelector('form');
+        const hiddenDescription = document.querySelector('#descripcion-hidden');
+
+        form.addEventListener('submit', function () {
+            const plainText = quill.getText();
+            hiddenDescription.value = plainText;
+        });
+    </script>
 </div>
 
 

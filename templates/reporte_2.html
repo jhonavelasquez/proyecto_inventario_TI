@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style_crear_reporte_2.css') }}">
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+<h1 class="block-effect" style="--td:0.3s">
+    <div class="block-reveal" style="--bc: #2b3034; --d: 0.5s">Generar Reporte</div>
+</h1>
+<div class="contenedor">
+    <div>
+        <h2>Reporte 2</h2>
+    </div>
+    <form method="POST" action="{{ url_for('reporte_2') }}" enctype="multipart/form-data">
+        <div class="columna-left">
+            <div class="row g-2">
+                <div class="col-sm">
+                    <label for="num_solicitud" class="form-label">N° Solicitud:</label>
+                    <input type="text" class="form-control" id="num_solicitud" name="num_solicitud">
+                </div>
+                <div class="col-sm">
+                    <label for="version" class="form-label">Versión:</label>
+                    <input type="text" class="form-control" id="version" name="version">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="nombre_sistema" class="form-label">Nombre del Sistema:</label>
+                <input type="text" class="form-control" id="nombre_sistema" name="nombre_sistema" required>
+            </div>
+            <div class="mb-3">
+                <label for="responsable_sistema" class="form-label">Responsable del sistema:</label>
+                <input type="text" class="form-control" id="responsable_sistema" name="responsable_sistema" required>
+            </div>
+            <div class="mb-3">
+                <label for="direccion_unidad" class="form-label">Dirección/Unidad:</label>
+                <input type="text" class="form-control" id="direccion_unidad" name="direccion_unidad" required>
+            </div>
+            <div class="mb-3">
+                <label for="nombre_solicitante" class="form-label">Nombre Solicitante:</label>
+                <input type="text" class="form-control" id="nombre_solicitante" name="nombre_solicitante" required>
+            </div>
+            <div class="mb-3">
+                <label for="fecha_solucion" class="form-label">Fecha de Solución:</label>
+                <input type="date" class="form-control" id="fecha_solucion" name="fecha_solucion" required>
+            </div>
+            <div class="mb-3">
+                <label for="responsable_ddi" class="form-label">Responsable DDI:</label>
+                <input type="text" class="form-control" id="responsable_ddi" name="responsable_ddi" required>
+            </div>
+            <div class="mb-3">
+                <label for="responsable_solicitud" class="form-label">Responsable Solicitud:</label>
+                <input type="text" class="form-control" id="responsable_solicitud" name="responsable_solicitud"
+                    required>
+            </div>
+        </div>
+        <div class="columna-right">
+            <div class="main-editor">
+                <div id="editor"></div>
+            </div>
+            <input type="hidden" name="descripcion" id="descripcion-hidden">
+            <br>
+            <button type="submit" class="btn btn-primary">Generar PDF</button>
+        </div>
+
+    </form>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+    <script>
+        const quill = new Quill('#editor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline'],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                    ['clean'] 
+                ]
+            },
+            formats: ['bold', 'italic', 'underline', 'list', 'bullet']
+        });
+
+        const form = document.querySelector('form');
+        const hiddenDescription = document.querySelector('#descripcion-hidden');
+
+        form.addEventListener('submit', function () {
+            // Extraer el texto plano del editor Quill
+            const plainText = quill.getText();
+            hiddenDescription.value = plainText;
+        });
+    </script>
+</div>
+{% endblock %}

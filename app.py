@@ -6,6 +6,8 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from model import *
 import datetime
 import os
+from bs4 import BeautifulSoup
+
 
 from PyPDF2 import PdfReader, PdfWriter,PdfFileMerger
 from io import BytesIO
@@ -466,9 +468,9 @@ def uploaded_file(filename):
     return send_from_directory('uploads', filename)
 
 
-@app.route('/generar_pdf', methods=['GET', 'POST'])
+@app.route('/reporte_1', methods=['GET', 'POST'])
 @login_required
-def generar_pdf():
+def reporte_1():
     if request.method == 'POST':
         nombre_sistema = request.form['nombre_sistema']
         responsable_sistema = request.form['responsable_sistema']
@@ -481,8 +483,8 @@ def generar_pdf():
         num_implementacion = request.form['num_implementacion']
         fecha = datetime.datetime.now().strftime('%d-%m-%Y')
 
-        pdf_template_path = 'static/pdf/FORMULARIO DE SOLICITUD.pdf'
-
+        pdf_template_path = 'static/pdf/reporte_1.2.pdf'
+        
         pdf_reader = PdfReader(pdf_template_path)
         pdf_writer = PdfWriter()
 
@@ -490,24 +492,21 @@ def generar_pdf():
             page = pdf_reader.pages[page_num]
             pdf_writer.add_page(page)
 
-        pdf_fields = pdf_reader.get_fields()
-
-        if pdf_fields:
-            pdf_writer.update_page_form_field_values(
-                pdf_writer.pages[0],
-                {
-                    'Text2': nombre_sistema,
-                    'Text3': responsable_sistema,
-                    'Text4': direccion_unidad,
-                    'Text5': nombre_solicitante,
-                    'Text6': num_implementacion,
-                    'Text7': fecha,
-                    'Text8': version,
-                    'Text9': descripcion,
-                    'Text10': responsable_ddi,
-                    'Text11': responsable_solicitud,
-                }
-            )
+        pdf_writer.update_page_form_field_values(
+            pdf_writer.pages[0],
+            {
+                'Text2': nombre_sistema,
+                'Text3': responsable_sistema,
+                'Text4': direccion_unidad,
+                'Text5': nombre_solicitante,
+                'Text6': num_implementacion,
+                'Text7': fecha,
+                'Text8': version,
+                'Text9': descripcion,
+                'Text10': responsable_ddi,
+                'Text11': responsable_solicitud
+            }
+        )
 
         output_pdf = BytesIO()
         pdf_writer.write(output_pdf)
@@ -515,4 +514,62 @@ def generar_pdf():
 
         return send_file(output_pdf, as_attachment=True, download_name=num_implementacion + '.pdf', mimetype='application/pdf')
 
-    return render_template('formulario_pdf.html')
+    return render_template('reporte_1.html')
+
+
+@app.route('/reporte_2', methods=['GET', 'POST'])
+@login_required
+def reporte_2():
+    if request.method == 'POST':
+        nombre_sistema = request.form['nombre_sistema']
+        responsable_sistema = request.form['responsable_sistema']
+        direccion_unidad = request.form['direccion_unidad']
+        nombre_solicitante = request.form['nombre_solicitante']
+        version = request.form['version']
+        descripcion = request.form['descripcion']
+        responsable_ddi = request.form['responsable_ddi']
+        responsable_solicitud = request.form['responsable_solicitud']
+        fecha_solucion = request.form['fecha_solucion']
+        num_solicitud = request.form['num_solicitud']
+        fecha = datetime.datetime.now().strftime('%d-%m-%Y')
+
+        pdf_template_path = 'static/pdf/reporte_2.pdf'
+        
+        # Leer el PDF base
+        pdf_reader = PdfReader(pdf_template_path)
+        pdf_writer = PdfWriter()
+
+        for page_num in range(len(pdf_reader.pages)):
+            page = pdf_reader.pages[page_num]
+            pdf_writer.add_page(page)
+
+        pdf_writer.update_page_form_field_values(
+            pdf_writer.pages[0],
+            {
+                'Text1': nombre_sistema,
+                'Text2': responsable_sistema,
+                'Text3': direccion_unidad,
+                'Text4': nombre_solicitante,
+                'Text5': num_solicitud,
+                'Text6': fecha,
+                'Text7': version,
+                'Text8': fecha_solucion,
+                'Text9': descripcion
+            },
+        )
+        
+        pdf_writer.update_page_form_field_values(
+            pdf_writer.pages[1],
+            {
+                'Text10': responsable_ddi,
+                'Text11': responsable_solicitud
+            }
+        )
+
+        output_pdf = BytesIO()
+        pdf_writer.write(output_pdf)
+        output_pdf.seek(0)
+
+        return send_file(output_pdf, as_attachment=True, download_name=num_solicitud + '.pdf', mimetype='application/pdf')
+
+    return render_template('reporte_2.html')

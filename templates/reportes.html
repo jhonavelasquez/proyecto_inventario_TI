@@ -21,11 +21,20 @@
         </form>
     </div>
     <div class="Botones_Reportes">
-        <a href="{{ url_for('generar_pdf') }}" class="button_slide slide_left">
-            <img id="agregar" src="{{ url_for('static', filename='img/icon-agregar-usuario.png') }}" alt="icon-agregar"
-                width="30px">
-            <b>Crear Nuevo Reporte</b>
-        </a>
+        <div>
+            <a href="{{ url_for('reporte_1') }}" class="button_slide slide_left">
+                <img id="agregar" src="{{ url_for('static', filename='img/icon-agregar-usuario.png') }}" alt="icon-agregar"
+                    width="30px">
+                <b>Crear Nuevo Reporte 1</b>
+            </a>
+        </div>
+        <div>
+            <a href="{{ url_for('reporte_2') }}" class="button_slide slide_left">
+                <img id="agregar" src="{{ url_for('static', filename='img/icon-agregar-usuario.png') }}" alt="icon-agregar"
+                    width="30px">
+                <b>Crear Nuevo Reporte 2</b>
+            </a>
+        </div>
     </div>
 </div>
 

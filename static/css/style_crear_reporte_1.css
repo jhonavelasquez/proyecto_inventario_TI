@@ -13,9 +13,22 @@ form{
     margin: 3%;
 }
 
-.columna-rigth{
-    width: 50%;
-    margin: 3%;
+
+.columna-right{
+    width: 50%; 
+    margin-top: 67px;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+}
+
+
+.main-editor{
+    height: 30%;
+}
+
+.btn{
+    margin-top: 5%;
 }
 
 @media screen and (max-width: 1400px) {
