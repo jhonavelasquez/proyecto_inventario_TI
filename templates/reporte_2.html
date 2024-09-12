@@ -10,19 +10,19 @@
     <div class="block-reveal" style="--bc: #2b3034; --d: 0.5s">Generar Reporte</div>
 </h1>
 <div class="contenedor">
-    <div>
+    <!-- <div>
         <h2>Reporte 2</h2>
-    </div>
+    </div> -->
     <form method="POST" action="{{ url_for('reporte_2') }}" enctype="multipart/form-data">
         <div class="columna-left">
             <div class="row g-2">
                 <div class="col-sm">
                     <label for="num_solicitud" class="form-label">N° Solicitud:</label>
-                    <input type="text" class="form-control" id="num_solicitud" name="num_solicitud">
+                    <input type="text" class="form-control" id="num_solicitud" name="num_solicitud" required>
                 </div>
                 <div class="col-sm">
                     <label for="version" class="form-label">Versión:</label>
-                    <input type="text" class="form-control" id="version" name="version">
+                    <input type="text" class="form-control" id="version" name="version" required>
                 </div>
             </div>
             <div class="mb-3">
@@ -67,17 +67,17 @@
     </form>
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
     <script>
-        const quill = new Quill('#editor', {
-            theme: 'snow',
-            modules: {
+        var options = {
+        placeholder: 'Escribe tu reporte aquí...',
+        theme: 'snow',
+         modules: {
                 toolbar: [
-                    ['bold', 'italic', 'underline'],
-                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                    ['clean'] 
                 ]
-            },
-            formats: ['bold', 'italic', 'underline', 'list', 'bullet']
-        });
+            }
+        };
+        
+        
+        var quill = new Quill('#editor', options);
 
         const form = document.querySelector('form');
         const hiddenDescription = document.querySelector('#descripcion-hidden');

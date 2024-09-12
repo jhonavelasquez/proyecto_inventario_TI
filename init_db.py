@@ -17,13 +17,17 @@ cur.execute("INSERT INTO Usuario (Nombre_user, Email, Psw) VALUES (?, ?, ?);", (
 # cur.execute("INSERT INTO Usuario (Nombre_user, Email, Psw) VALUES ('felipe', 'jvelasquez@sanantonio.cl');")
 # cur.execute("INSERT INTO Usuario (Nombre_user, Email, Psw) VALUES ('alex', 'jvelasquez@sanantonio.cl');")
 
-cur.execute("INSERT INTO Reportes (usuario_id, asunto, descripcion, fecha) VALUES (?, ?, ?, ?)",
-            (1, 'problema sistema de adquisicion', 'descripcion aksdjaksa asd asdasd asd asd asd as dasaaaaaaaaaadasdad asd ass sssssd', datetime.datetime.now().strftime('%Y-%m-%d %H:%M')))
+# cur.execute("INSERT INTO Reportes (usuario_id, asunto, descripcion, fecha) VALUES (?, ?, ?, ?)",
+#             (1, 'problema sistema de adquisicion', 'descripcion aksdjaksa asd asdasd asd asd asd as dasaaaaaaaaaadasdad asd ass sssssd', datetime.datetime.now().strftime('%Y-%m-%d %H:%M')))
 
 cur.execute("INSERT INTO Pc (Nombre_pc, Placa, Almacenamiento, Ram, Fuente) VALUES ('SA2101051', 'ASUS ROG STRIX', 512, 16, 'Corsair 650W');")
 cur.execute("INSERT INTO Pc (Nombre_pc, Placa, Almacenamiento, Ram, Fuente) VALUES ('SA2000000', 'HP Network', 512, 8, 'Corsair 550W');")
 cur.execute("INSERT INTO Pc (Nombre_pc, Placa, Almacenamiento, Ram, Fuente) VALUES ('SA0999999', 'HP', 512, 8, 'Corsair 550W');")
 
+cur.execute("INSERT INTO Categoria_historial (nombre_categoria) VALUES ('Usuarios');")
+cur.execute("INSERT INTO Categoria_historial (nombre_categoria) VALUES ('Sistemas');")
+cur.execute("INSERT INTO Categoria_historial (nombre_categoria) VALUES ('Computadores');")
+cur.execute("INSERT INTO Categoria_historial (nombre_categoria) VALUES ('Reportes');")
 
 cur.execute("INSERT INTO Sistema (Nombre_sistema) VALUES ('SISTEMA DE GESTIÓN DOCUMENTAL (SGD)');")
 cur.execute("INSERT INTO Sistema (Nombre_sistema) VALUES ('SISTEMA DE ADQUISICIONES MUNICIPALES (AB)');")

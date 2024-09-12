@@ -5,17 +5,49 @@
 {% endblock %}
 {% block content %}
 
-
-
 <h1 class="block-effect" style="--td:0.3s">
     <div class="block-reveal" style="--bc: #2b3034; --d: 0.5s">Historial</div>
 </h1>
 
-{% if registros %}
+<div class="head">
+    <form method="get" action="{{ url_for('historial') }}" id="filtro-form">
+        <div class="doble-filtro-sistema">
+            <div>
+                <div class="filtro">
+                    <!-- Cambiado de 'sistema' a 'categoria' -->
+                    <select class="form-select form-select-sm" name="categoria" aria-label="Selecciona una Categoría">
+                        <option value="">Selecciona una Categoría</option>
+                        {% for categoria in categorias %}
+                        <option value="{{ categoria['id_categoria'] }}" {% if
+                            request.args.get('categoria')==categoria['id_categoria'] %} selected {% endif %}>
+                            {{ categoria['nombre_categoria'] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <button class="btn btn-success" type="button" id="filtro-boton">Buscar</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('filtro-boton').addEventListener('click', function () {
+        document.getElementById('filtro-form').submit();
+    });
+</script>
+
+<h3>
+    {% if categoria_nombre %}
+    Categoria {{ categoria_nombre['nombre_categoria'] }}
+    {% endif %}
+</h3>
+
+{% if registros or historial_data %}
 <div class="mt-3">
-    {% for registro in registros %}
+    {% for registro in (registros or historial_data) %}
     <div class="alert alert-light" role="alert">
-        <strong> {{ registro['usuario_historial'] }}</strong> {{ registro['descripcion'] }}
+        <strong>{{ registro['usuario_historial'] }}</strong> {{ registro['descripcion'] }}
     </div>
     {% endfor %}
 </div>

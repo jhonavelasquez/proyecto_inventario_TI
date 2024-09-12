@@ -1,47 +1,66 @@
-.contenedor{
+.contenedor {
     width: 100%;
 }
 
-form{
+form {
     display: flex;
     width: 100%;
 }
 
 
-.columna-left{
+.columna-left {
     width: 40%;
-    margin: 3%;
+    padding: 3%;
 }
 
 .columna-right{
-    width: 50%; 
+    width: 50%;
     margin-top: 67px;
     display: flex;
     flex-direction: column;
     justify-content: start;
 }
 
-
-.main-editor{
-    height: 30%;
+.main-editor {
+    background-color: #ffffff;
 }
 
-.btn{
+
+#editor {
+    background-color: #ffffff;
+}
+
+.btn {
     margin-top: 5%;
 }
 
 
 @media screen and (max-width: 1400px) {
-    form{
+    form {
         display: flex;
         flex-direction: column;
         width: 100%;
     }
-    .columna-left{
-        width: 95%;
+
+    .columna-left {
+        width: 100%;
     }
 
-    .columna-rigth{
-        width: 95%;
+    .columna-right{
+        display: flex;
+        justify-content: center;
+        margin-top: 0px;
+        padding: 0% 3% 0% 3%;
+        width: 100%;
     }
+
+    .main-editor {
+        width: 100%;
+        height: 250px;
+    }
+    
+    .btn {
+        margin-top: 25px;
+    }
+
 }

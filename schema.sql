@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS Sistema;
 DROP TABLE IF EXISTS Usuario_Sistema_PC;
 DROP TABLE IF EXISTS Reportes;
 DROP TABLE IF EXISTS Historial;
+DROP TABLE IF EXISTS Categoria_historial;
 
 
 CREATE TABLE Usuario (
@@ -52,5 +53,13 @@ CREATE TABLE Historial (
     Id_historial INTEGER PRIMARY KEY AUTOINCREMENT,
     usuario_historial VARCHAR(100),
     descripcion VARCHAR(100),
-    fecha VARCHAR(100)
+    fecha VARCHAR(100),
+    categoria VARCHAR(100),
+    id_categoria INTEGER,
+    FOREIGN KEY (id_categoria) REFERENCES Categoria_Historial(id_categoria)
 );
+
+CREATE TABLE Categoria_historial (
+    id_categoria INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre_categoria VARCHAR(100)
+)

@@ -6,9 +6,6 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from model import *
 import datetime
 import os
-from bs4 import BeautifulSoup
-
-
 from PyPDF2 import PdfReader, PdfWriter,PdfFileMerger
 from io import BytesIO
 
@@ -135,6 +132,11 @@ def crear_sistema():
         else:
             flash(f"No se pudo encontrar un PC asignado para el usuario con ID {usuario['Id_usuario']}.", "warning")
 
+    user = current_user
+    fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    descripcion_hist= (f" agregó un nuevo sistema.  {nombre_sistema}.  {fecha_actual}")
+    conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 2)', (user.nombre_usuario,descripcion_hist,fecha_actual))
+
     conn.commit()
     conn.close()
 
@@ -154,7 +156,14 @@ def eliminar_sistema():
         
         if sistema:
             conn.execute('DELETE FROM Sistema WHERE Id_sistema = ?', (sistema_id,))
+            
+            user = current_user
+            fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+            descripcion_hist= (f" eliminó el sistema {nombre_sistema}.  {fecha_actual}")
+            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 2)', (user.nombre_usuario,descripcion_hist,fecha_actual))
+            
             flash(f"{nombre_sistema} ha sido eliminado.", "warning")
+            
             conn.commit()
             conn.close()
     
@@ -165,35 +174,55 @@ def eliminar_sistema():
 def editar_sistema(id_sistema, id_usuario, id_pc):
     conn = get_db_connection()
 
-    if request.method == 'POST':
-        nuevo_id_pc = request.form.get('nuevo_Id_pc')
-        activo = request.form.get('Activo')
+    try:
+        if request.method == 'POST':
+            nuevo_id_pc = request.form.get('nuevo_Id_pc')
+            activo = request.form.get('Activo')
 
-        conn.execute('''
-            UPDATE Usuario_Sistema_PC 
-            SET Activo = ?, Id_pc = ?
-            WHERE Id_usuario = ? AND Id_sistema = ? AND Id_pc = ?
-        ''', (activo, nuevo_id_pc, id_usuario, id_sistema, id_pc))
+            conn.execute('''
+                UPDATE Usuario_Sistema_PC 
+                SET Activo = ?, Id_pc = ?
+                WHERE Id_usuario = ? AND Id_sistema = ? AND Id_pc = ?
+            ''', (activo, nuevo_id_pc, id_usuario, id_sistema, id_pc))
 
-        conn.commit()
+            nombre_user = conn.execute(
+                'SELECT Nombre_user FROM Usuario WHERE Id_usuario = ?', (id_usuario,)).fetchone()
+            nombre_sis = conn.execute(
+                'SELECT Nombre_sistema FROM Sistema WHERE Id_sistema = ?', (id_sistema,)).fetchone()
+
+            
+            nombre_usuario = nombre_user['Nombre_user']
+            nombre_sistema = nombre_sis['Nombre_sistema']
+
+            user = current_user
+            fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+            descripcion_hist = (f"Actualizó {nombre_sistema} de {nombre_usuario}. {fecha_actual}")
+
+            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 2)', 
+                         (user.nombre_usuario, descripcion_hist, fecha_actual))
+
+            conn.commit()
+            flash("¡El PC o el estado del sistema han sido actualizados!", "success")
+            return redirect(url_for('index'))
+
+        user_pc = conn.execute('''
+            SELECT Usuario.Id_usuario, Usuario.Nombre_user, Usuario_Sistema_PC.Id_pc, Pc.Nombre_pc, 
+                   Sistema.Nombre_sistema, Usuario_Sistema_PC.Activo, Usuario_Sistema_PC.Id_sistema
+            FROM Usuario
+            INNER JOIN Usuario_Sistema_PC ON Usuario.Id_usuario = Usuario_Sistema_PC.Id_usuario
+            INNER JOIN Pc ON Pc.Id_pc = Usuario_Sistema_PC.Id_pc
+            INNER JOIN Sistema ON Usuario_Sistema_PC.Id_sistema = Sistema.Id_sistema
+            WHERE Usuario_Sistema_PC.Id_sistema = ? AND Usuario_Sistema_PC.Id_usuario = ? AND Usuario_Sistema_PC.Id_pc = ?
+        ''', (id_sistema, id_usuario, id_pc)).fetchone()
+
+        pcs = conn.execute("SELECT * FROM Pc").fetchall()
+
+    except Exception as e:
+        flash(f"Error: {str(e)}", "danger")
+
+    finally:
         conn.close()
 
-        flash("¡El PC o el estado del sistema han sido actualizados!", "success")
-        return redirect(url_for('index'))
-
-    user_pc = conn.execute('''
-        SELECT Usuario.Id_usuario, Usuario.Nombre_user, Usuario_Sistema_PC.Id_pc, Pc.Nombre_pc, 
-               Sistema.Nombre_sistema, Usuario_Sistema_PC.Activo, Usuario_Sistema_PC.Id_sistema
-        FROM Usuario
-        INNER JOIN Usuario_Sistema_PC ON Usuario.Id_usuario = Usuario_Sistema_PC.Id_usuario
-        INNER JOIN Pc ON Pc.Id_pc = Usuario_Sistema_PC.Id_pc
-        INNER JOIN Sistema ON Usuario_Sistema_PC.Id_sistema = Sistema.Id_sistema
-        WHERE Usuario_Sistema_PC.Id_sistema = ? AND Usuario_Sistema_PC.Id_usuario = ? AND Usuario_Sistema_PC.Id_pc = ?
-    ''', (id_sistema, id_usuario, id_pc)).fetchone()
-    
-    pcs = conn.execute("SELECT * FROM Pc").fetchall()
-    conn.close()
-    
     return render_template('editar_sistema.html', user_pc=user_pc, pcs=pcs)
 
 # BACKEND COMPUTADOR
@@ -228,10 +257,15 @@ def crear_computador():
         conn = get_db_connection()
         conn.execute('INSERT INTO Pc ( Nombre_pc, Placa, Almacenamiento, Ram, Fuente) VALUES (?,?,?,?,?)', (nombre_pc, placa_pc, almacenamiento, ram, nombre_fuente))
 
+        user = current_user
+        fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+        descripcion_hist= (f" agregó un nuevo computador.  {nombre_pc}.  {fecha_actual}")
+        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 3)', (user.nombre_usuario,descripcion_hist,fecha_actual))
+        
         conn.commit()
         conn.close()
         
-        flash("Computador creado exitosamente.", "success")
+        flash("Computador agregado exitosamente.", "success")
         return redirect('computadores')
     return render_template('computadores.html')
 
@@ -267,12 +301,23 @@ def editar_computador_form():
             'UPDATE Pc SET Nombre_pc = ?, PLaca = ?, Almacenamiento = ?, Ram = ?, Fuente = ? WHERE Id_pc = ?',
             (nombre_pc, placa_pc, almacenamiento, ram, nombre_fuente, id_pc)
         )
+
+        user = current_user
+        fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+        descripcion_hist= (f" actualizó la información de un computador.  {nombre_pc}.  {fecha_actual}")
+        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 3)', (user.nombre_usuario,descripcion_hist,fecha_actual))
+
         flash("Información del computador actualizada con éxito.", "success")
     elif action == 'delete':
         conn.execute(
             'DELETE FROM Pc WHERE Id_pc = ?',
             (id_pc,)
         )
+
+        user = current_user
+        fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+        descripcion_hist= (f" eliminó un computador.  {nombre_pc}.  {fecha_actual}")
+        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 3)', (user.nombre_usuario,descripcion_hist,fecha_actual))
         flash("Computador eliminado con éxito.", "danger")
 
     conn.commit()
@@ -332,7 +377,7 @@ def crear_usuario():
             user = current_user
             fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
             descripcion_hist = (f" agregó a un nuevo usuario {nombre_user}.  {fecha_actual}")
-            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha) VALUES (?,?,?)', (user.nombre_usuario, descripcion_hist, fecha_actual))
+            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 1)', (user.nombre_usuario, descripcion_hist, fecha_actual))
 
             conn.commit()
         except Exception as e:
@@ -374,7 +419,13 @@ def editar_usuario_form():
             'UPDATE Usuario SET Nombre_user = ?, Email = ? WHERE Id_usuario = ?',
             (nombre_usuario, email, id_usuario)
         )
+
+        user = current_user
+        fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+        descripcion_hist= (f" actualizó la información de un usuario {nombre_usuario}.  {fecha_actual}")
+        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 1)', (user.nombre_usuario,descripcion_hist,fecha_actual))
         flash("Información del usuario actualizada con éxito.", "success")
+
     elif action == 'delete':
         conn.execute(
             'DELETE FROM Usuario WHERE Id_usuario = ?',
@@ -383,7 +434,7 @@ def editar_usuario_form():
         user = current_user
         fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
         descripcion_hist= (f" eliminó a un usuario {nombre_usuario}.  {fecha_actual}")
-        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha) VALUES (?,?,?)', (user.nombre_usuario,descripcion_hist,fecha_actual))
+        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 1)', (user.nombre_usuario,descripcion_hist,fecha_actual))
         flash("Usuario eliminado con éxito.", "danger")
 
     
@@ -398,10 +449,38 @@ def editar_usuario_form():
 def historial():
     conn = get_db_connection()
 
-    registros = conn.execute("SELECT * FROM Historial ORDER BY fecha DESC").fetchall()
-    conn.close()
+    try:
+        categoria_id = request.args.get('categoria')
+        categorias = conn.execute("SELECT * FROM Categoria_historial").fetchall()
 
-    return render_template('historial.html', registros=registros)
+        if categoria_id:
+            # Inicializa params como una lista vacía
+            params = []
+
+            query = '''
+            SELECT * FROM Historial 
+            INNER JOIN Categoria_historial ON Categoria_historial.id_categoria = Historial.id_categoria
+            WHERE 1=1
+            '''
+            query += ' AND Historial.id_categoria = ? ORDER BY fecha DESC'
+            params.append(categoria_id)
+
+            historial_data = conn.execute(query, params).fetchall()
+
+            categoria_nombre = conn.execute('SELECT nombre_categoria FROM Categoria_historial WHERE id_categoria = ?', (categoria_id,)).fetchone()
+
+            return render_template('historial.html', historial_data=historial_data, categorias=categorias, categoria_nombre=categoria_nombre)
+        
+        
+        registros = conn.execute("SELECT * FROM Historial ORDER BY fecha DESC").fetchall()
+
+        return render_template('historial.html', registros=registros, categorias=categorias)
+
+    except Exception as e:
+        flash(f"Error: {str(e)}", "danger")
+
+    finally:
+        conn.close()
 
 
 def allowed_file(filename):
@@ -410,49 +489,45 @@ def allowed_file(filename):
 @app.route('/reportes', methods=['GET', 'POST'])
 @login_required
 def reportes():
-    # Conexión a la base de datos
     conn = get_db_connection()
     
-    # Obtener filtros de búsqueda (si existen)
     search = request.args.get('search')
     
     if search:
-        # Buscar reportes por asunto o ID de usuario
         query = f"SELECT * FROM Reportes WHERE asunto LIKE ? OR usuario_id LIKE ? ORDER BY fecha DESC"
         reportes = conn.execute(query, ('%' + search + '%', '%' + search + '%')).fetchall()
     else:
-        # Obtener todos los reportes
         reportes = conn.execute("SELECT * FROM Reportes ORDER BY fecha DESC").fetchall()
     
     conn.close()
     return render_template('reportes.html', reportes=reportes)
 
-@app.route('/crear_reporte', methods=['POST'])
-@login_required
-def crear_reporte():
-    # Recopilar datos del formulario
-    asunto = request.form['asunto']
-    descripcion = request.form['descripcion']
-    user = current_user
+# @app.route('/crear_reporte', methods=['POST'])
+# @login_required
+# def crear_reporte():
+#     # Recopilar datos del formulario
+#     asunto = request.form['asunto']
+#     descripcion = request.form['descripcion']
+#     user = current_user
     
-    file = request.files.get('file')
-    file_path = None
+#     file = request.files.get('file')
+#     file_path = None
     
-    if file and file.filename:
-        filename = secure_filename(file.filename)
-        file_path = os.path.join(filename)
-        file.save(file_path)
+#     if file and file.filename:
+#         filename = secure_filename(file.filename)
+#         file_path = os.path.join(filename)
+#         file.save(file_path)
     
-    conn = get_db_connection()
-    conn.execute(
-        'INSERT INTO Reportes (usuario_id, asunto, descripcion, fecha, archivo) VALUES (?, ?, ?, ?, ?)',
-        (user.nombre_usuario, asunto, descripcion, datetime.datetime.now().strftime('%Y-%m-%d %H:%M'), file_path)
-    )
-    conn.commit()
-    conn.close()
+#     conn = get_db_connection()
+#     conn.execute(
+#         'INSERT INTO Reportes (usuario_id, asunto, descripcion, fecha, archivo) VALUES (?, ?, ?, ?, ?)',
+#         (user.nombre_usuario, asunto, descripcion, datetime.datetime.now().strftime('%Y-%m-%d %H:%M'), file_path)
+#     )
+#     conn.commit()
+#     conn.close()
     
-    flash("Reporte creado exitosamente.", "success")
-    return redirect(url_for('reportes'))
+#     flash("Reporte creado exitosamente.", "success")
+#     return redirect(url_for('reportes'))
 
 @app.route('/ver_reporte/<int:id_reporte>', methods=['GET'])
 @login_required
@@ -461,11 +536,6 @@ def ver_reporte(id_reporte):
     reporte = conn.execute("SELECT * FROM Reportes WHERE id_reporte = ?", (id_reporte,)).fetchone()
     conn.close()
     return render_template('ver_reporte.html', reporte=reporte)
-
-@app.route('/ver_reporte/<filename>')
-@login_required
-def uploaded_file(filename):
-    return send_from_directory('uploads', filename)
 
 
 @app.route('/reporte_1', methods=['GET', 'POST'])
@@ -483,7 +553,7 @@ def reporte_1():
         num_implementacion = request.form['num_implementacion']
         fecha = datetime.datetime.now().strftime('%d-%m-%Y')
 
-        pdf_template_path = 'static/pdf/reporte_1.2.pdf'
+        pdf_template_path = 'static/pdf_plantillas/reporte_1.2.pdf'
         
         pdf_reader = PdfReader(pdf_template_path)
         pdf_writer = PdfWriter()
@@ -533,7 +603,9 @@ def reporte_2():
         num_solicitud = request.form['num_solicitud']
         fecha = datetime.datetime.now().strftime('%d-%m-%Y')
 
-        pdf_template_path = 'static/pdf/reporte_2.pdf'
+        fecha_solucion = datetime.datetime.strptime(fecha_solucion, '%Y-%m-%d').strftime('%d-%m-%Y')
+
+        pdf_template_path = 'static/pdf_plantillas/reporte_2.pdf'
         
         # Leer el PDF base
         pdf_reader = PdfReader(pdf_template_path)
@@ -570,6 +642,37 @@ def reporte_2():
         pdf_writer.write(output_pdf)
         output_pdf.seek(0)
 
-        return send_file(output_pdf, as_attachment=True, download_name=num_solicitud + '.pdf', mimetype='application/pdf')
+        user = current_user
+        
+        # Guardar el PDF como archivo
+        filename = secure_filename(f'{num_solicitud}.pdf')
+        file_path = os.path.join('pdf_reportes',filename)  # Cambia 'path_to_save' por el directorio adecuado
+        with open(file_path, 'wb') as f:
+            f.write(output_pdf.read())
+        
+        # Subir el archivo a la base de datos
+        conn = get_db_connection()
+        
+        conn.execute(
+            'INSERT INTO Reportes (usuario_id, asunto, descripcion, fecha, archivo) VALUES (?, ?, ?, ?, ?)',
+            (user.nombre_usuario, nombre_sistema, descripcion ,datetime.datetime.now().strftime('%Y-%m-%d %H:%M'), filename)
+        )
+
+        fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+        descripcion_hist= (f" ha realizado un nuevo reporte. ASUNTO: {nombre_sistema}.  {fecha_actual}")
+        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, id_categoria) VALUES (?,?,?, 4)', (user.nombre_usuario,descripcion_hist,fecha_actual))
+
+        conn.commit()
+        conn.close()
+        
+        flash("Reporte creado exitosamente.", "success")
+
+        #return send_file(output_pdf, as_attachment=True, download_name=filename, mimetype='application/pdf')
+        return redirect(url_for('reportes'))
 
     return render_template('reporte_2.html')
+
+@app.route('/ver_reporte/<filename>')
+@login_required
+def uploaded_file(filename):
+    return send_from_directory('pdf_reportes', filename)
