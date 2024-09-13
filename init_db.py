@@ -12,6 +12,7 @@ cur = connection.cursor()
 
 hashed_password = generate_password_hash('admin')
 cur.execute("INSERT INTO Usuario (Nombre_user, Email, Psw) VALUES (?, ?, ?);", ('admin', 'admin@sanantonio.cl', hashed_password))
+cur.execute("INSERT INTO Usuario_Sistema_PC (Id_usuario, Id_sistema, Id_pc, Activo) VALUES (?, ?, ?, FALSE)", (1, 1, 1))
 # cur.execute("INSERT INTO Usuario (Nombre_user, Email, Psw) VALUES ('JOVELASQUEZ', 'jvelasquez@sanantonio.cl');")
 # cur.execute("INSERT INTO Usuario (Nombre_user, Email, Psw) VALUES ('pepe', 'jvelasquez@sanantonio.cl');")
 # cur.execute("INSERT INTO Usuario (Nombre_user, Email, Psw) VALUES ('felipe', 'jvelasquez@sanantonio.cl');")
@@ -77,19 +78,6 @@ cur.execute("INSERT INTO Sistema (Nombre_sistema) VALUES ('PLATAFORMA MULTISERVI
 cur.execute("INSERT INTO Sistema (Nombre_sistema) VALUES ('CITYMIS');")
 cur.execute("INSERT INTO Sistema (Nombre_sistema) VALUES ('SISTEMA V-FORM BECAS MUNICIPALES');")
 cur.execute("INSERT INTO Sistema (Nombre_sistema) VALUES ('SISTEMA DE INFORMACIÓN TERRITORIAL DE SAN ANTONIO SITSA');")
-
-
-# cur.execute("INSERT INTO Usuario_PC (Id_usuario, Id_pc) VALUES (1, 1);")
-# cur.execute("INSERT INTO Usuario_PC (Id_usuario, Id_pc) VALUES (2, 2);")
-# cur.execute("INSERT INTO Usuario_PC (Id_usuario, Id_pc) VALUES (3, 2);")
-# cur.execute("INSERT INTO Usuario_PC (Id_usuario, Id_pc) VALUES (4, 3);")
-# cur.execute("INSERT INTO Usuario_PC (Id_usuario, Id_pc) VALUES (5, 2);")
-
-# cur.execute("INSERT INTO Usuario_Sistema (Id_usuario, Id_sistema, Activo) VALUES (1, 1, TRUE);")
-# cur.execute("INSERT INTO Usuario_Sistema (Id_usuario, Id_sistema, Activo) VALUES (2, 2, FALSE);")
-# cur.execute("INSERT INTO Usuario_Sistema (Id_usuario, Id_sistema, Activo) VALUES (4, 2, TRUE);")
-# cur.execute("INSERT INTO Usuario_Sistema (Id_usuario, Id_sistema, Activo) VALUES (3, 2, TRUE);")
-# cur.execute("INSERT INTO Usuario_Sistema (Id_usuario, Id_sistema, Activo) VALUES (4, 1, FALSE);")
 
 connection.commit()
 connection.close()

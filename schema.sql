@@ -54,7 +54,6 @@ CREATE TABLE Historial (
     usuario_historial VARCHAR(100),
     descripcion VARCHAR(100),
     fecha VARCHAR(100),
-    categoria VARCHAR(100),
     id_categoria INTEGER,
     FOREIGN KEY (id_categoria) REFERENCES Categoria_Historial(id_categoria)
 );

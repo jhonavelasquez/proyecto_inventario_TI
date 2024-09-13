@@ -660,7 +660,7 @@ def reporte_2():
 
         fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
         descripcion_hist= (f" ha realizado un nuevo reporte. ASUNTO: {nombre_sistema}.  {fecha_actual}")
-        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, id_categoria) VALUES (?,?,?, 4)', (user.nombre_usuario,descripcion_hist,fecha_actual))
+        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 4)', (user.nombre_usuario,descripcion_hist,fecha_actual))
 
         conn.commit()
         conn.close()
