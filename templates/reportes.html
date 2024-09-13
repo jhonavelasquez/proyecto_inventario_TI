@@ -14,7 +14,7 @@
         <form method="get" action="{{ url_for('reportes') }}" id="filtro-form">
             <div class="filtro">
                 <input class="form-control me-2" type="search" name="search"
-                    placeholder="Buscar por nombre o ID de usuario" aria-label="Search"
+                    placeholder="Buscar por Asunto del Reporte" aria-label="Search"
                     value="{{ request.args.get('search', '') }}">
                 <button class="btn btn-success" type="submit">Buscar</button>
             </div>

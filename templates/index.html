@@ -169,7 +169,7 @@
         </thead>
         <tbody>
             {% for row in user_pc_data %}
-            <tr class="clickable-row" data-href="{{ url_for('editar_sistema', id_sistema=row['Id_sistema'], id_usuario=row['Id_usuario'], id_pc=row['Id_pc']) }}">
+            <tr class="clickable-row" data-href="{{ url_for('editar_sistema', id_sistema=row['Id_sistema'], id_usuario=row['Id_usuario'], id_pc=row['Id_pc']) }}" >
                 <td>{{ row['Nombre_user'] }}</td>
                 <td>{{ row['Nombre_pc'] }}</td>
                 <td>{{ row['Nombre_sistema'] }}</td>

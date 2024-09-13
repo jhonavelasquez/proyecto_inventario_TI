@@ -81,8 +81,7 @@
           <li class="nav-item">
             <a href="{{ url_for('logout') }}" class="nav-link {% if request.endpoint == '#' %}active{% endif %}">
               {% if request.endpoint == '#' %}
-              <img id="icon-menu" src="{{ url_for('static', filename='img/icon-logout.png') }}"
-                alt="icon-documentos">
+              <img id="icon-menu" src="{{ url_for('static', filename='img/icon-logout.png') }}" alt="icon-documentos">
               {% endif %} <b>Cerrar Sesión</b></a>
           </li>
         </ul>
@@ -90,7 +89,7 @@
     </div>
   </nav>
 
-  <div class="sidebar" style="display: flex; flex-direction: column;">
+  <div class="sidebar" style="display: flex; flex-direction: column; height: 100vh;">
     <div class="tituloMenu">
       <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo-IMSA" width="100px">
     </div>
@@ -111,22 +110,29 @@
         src="{{ url_for('static', filename='img/icon-computador.png') }}" alt="icon-Pc">
       <b>Computadores</b>
     </a>
-    <a href="{{ url_for('reportes') }}" class="slide_right {% if request.endpoint == '#' %}active{% endif %}">
-      <img id="icon-reportes" class="menu-icon {% if request.endpoint == '#' %}show{% endif %}"
+    <a href="{{ url_for('reportes') }}" class="slide_right {% if request.endpoint == 'reportes' %}active{% endif %}">
+      <img id="icon-reportes" class="menu-icon {% if request.endpoint == 'reportes' %}show{% endif %}"
         src="{{ url_for('static', filename='img/icon-documento.png') }}" alt="icon-documentos">
       <b>Reportes</b>
     </a>
-    <a href="{{ url_for('historial') }}" class="slide_right {% if request.endpoint == '#' %}active{% endif %}">
-      <img id="icon-historial" class="menu-icon {% if request.endpoint == '#' %}show{% endif %}"
+    <a href="{{ url_for('historial') }}" class="slide_right {% if request.endpoint == 'historial' %}active{% endif %}">
+      <img id="icon-historial" class="menu-icon {% if request.endpoint == 'historial' %}show{% endif %}"
         src="{{ url_for('static', filename='img/icon-historial.png') }}" alt="icon-documentos">
       <b>Historial</b>
     </a>
-    <a href="{{ url_for('logout') }}" class="slide_right {% if request.endpoint == '#' %}active{% endif %}">
-      <img id="icon-historial" class="menu-icon {% if request.endpoint == '#' %}show{% endif %}"
-        src="{{ url_for('static', filename='img/icon-logout.png') }}" alt="icon-documentos">
-      <b>Cerrar Sesion</b>
-    </a>
+
+    <div class="menuAbajo">
+      <div class="logout">
+        <a href="{{ url_for('logout') }}">
+          <b>Cerrar Sesion</b>
+        </a>
+      </div>
+      <div class="ajustes">
+        <a href="{{ url_for('ajustes') }}"> <img id="icon-ajuste" src="{{ url_for('static', filename='img/icon-ajuste.png') }}" alt="logoAjuste"></a>
+      </div>
+    </div>
   </div>
+
 
   <div class="loading-screen" id="loading-screen">
     <div class="loading">
@@ -143,13 +149,12 @@
     {% endblock %}
   </div>
 
-  <!-- Optional JavaScript -->
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+  <!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
     integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
     crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
     integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-    crossorigin="anonymous"></script>
+    crossorigin="anonymous"></script> -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
     crossorigin="anonymous"></script>

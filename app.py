@@ -133,9 +133,10 @@ def crear_sistema():
             flash(f"No se pudo encontrar un PC asignado para el usuario con ID {usuario['Id_usuario']}.", "warning")
 
     user = current_user
-    fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+    fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
     descripcion_hist= (f" agregó un nuevo sistema.  {nombre_sistema}.  {fecha_actual}")
-    conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 2)', (user.nombre_usuario,descripcion_hist,fecha_actual))
+    conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 2)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
 
     conn.commit()
     conn.close()
@@ -158,9 +159,10 @@ def eliminar_sistema():
             conn.execute('DELETE FROM Sistema WHERE Id_sistema = ?', (sistema_id,))
             
             user = current_user
-            fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-            descripcion_hist= (f" eliminó el sistema {nombre_sistema}.  {fecha_actual}")
-            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 2)', (user.nombre_usuario,descripcion_hist,fecha_actual))
+            fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+            fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
+            descripcion_hist= (f" eliminó el sistema {nombre_sistema}.  [{fecha_actual}]")
+            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 2)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
             
             flash(f"{nombre_sistema} ha sido eliminado.", "warning")
             
@@ -195,11 +197,11 @@ def editar_sistema(id_sistema, id_usuario, id_pc):
             nombre_sistema = nombre_sis['Nombre_sistema']
 
             user = current_user
-            fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+            fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+            fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
             descripcion_hist = (f"Actualizó {nombre_sistema} de {nombre_usuario}. {fecha_actual}")
-
             conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 2)', 
-                         (user.nombre_usuario, descripcion_hist, fecha_actual))
+                         (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
 
             conn.commit()
             flash("¡El PC o el estado del sistema han sido actualizados!", "success")
@@ -258,9 +260,10 @@ def crear_computador():
         conn.execute('INSERT INTO Pc ( Nombre_pc, Placa, Almacenamiento, Ram, Fuente) VALUES (?,?,?,?,?)', (nombre_pc, placa_pc, almacenamiento, ram, nombre_fuente))
 
         user = current_user
-        fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+        fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+        fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
         descripcion_hist= (f" agregó un nuevo computador.  {nombre_pc}.  {fecha_actual}")
-        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 3)', (user.nombre_usuario,descripcion_hist,fecha_actual))
+        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 3)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
         
         conn.commit()
         conn.close()
@@ -303,9 +306,10 @@ def editar_computador_form():
         )
 
         user = current_user
-        fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+        fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+        fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
         descripcion_hist= (f" actualizó la información de un computador.  {nombre_pc}.  {fecha_actual}")
-        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 3)', (user.nombre_usuario,descripcion_hist,fecha_actual))
+        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 3)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
 
         flash("Información del computador actualizada con éxito.", "success")
     elif action == 'delete':
@@ -315,9 +319,10 @@ def editar_computador_form():
         )
 
         user = current_user
-        fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+        fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+        fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
         descripcion_hist= (f" eliminó un computador.  {nombre_pc}.  {fecha_actual}")
-        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 3)', (user.nombre_usuario,descripcion_hist,fecha_actual))
+        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 3)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
         flash("Computador eliminado con éxito.", "danger")
 
     conn.commit()
@@ -375,9 +380,10 @@ def crear_usuario():
                 print("se agrego a sistema")
 
             user = current_user
-            fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+            fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+            fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
             descripcion_hist = (f" agregó a un nuevo usuario {nombre_user}.  {fecha_actual}")
-            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 1)', (user.nombre_usuario, descripcion_hist, fecha_actual))
+            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 1)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
 
             conn.commit()
         except Exception as e:
@@ -421,9 +427,10 @@ def editar_usuario_form():
         )
 
         user = current_user
-        fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+        fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+        fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
         descripcion_hist= (f" actualizó la información de un usuario {nombre_usuario}.  {fecha_actual}")
-        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 1)', (user.nombre_usuario,descripcion_hist,fecha_actual))
+        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 1)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
         flash("Información del usuario actualizada con éxito.", "success")
 
     elif action == 'delete':
@@ -432,9 +439,10 @@ def editar_usuario_form():
             (id_usuario,)
         )
         user = current_user
-        fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+        fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+        fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
         descripcion_hist= (f" eliminó a un usuario {nombre_usuario}.  {fecha_actual}")
-        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 1)', (user.nombre_usuario,descripcion_hist,fecha_actual))
+        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 1)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
         flash("Usuario eliminado con éxito.", "danger")
 
     
@@ -658,9 +666,10 @@ def reporte_2():
             (user.nombre_usuario, nombre_sistema, descripcion ,datetime.datetime.now().strftime('%Y-%m-%d %H:%M'), filename)
         )
 
-        fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+        fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+        fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
         descripcion_hist= (f" ha realizado un nuevo reporte. ASUNTO: {nombre_sistema}.  {fecha_actual}")
-        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 4)', (user.nombre_usuario,descripcion_hist,fecha_actual))
+        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 4)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
 
         conn.commit()
         conn.close()
@@ -676,3 +685,8 @@ def reporte_2():
 @login_required
 def uploaded_file(filename):
     return send_from_directory('pdf_reportes', filename)
+
+@app.route('/ajustes')
+@login_required
+def ajustes():
+    return render_template('ajustes.html')
