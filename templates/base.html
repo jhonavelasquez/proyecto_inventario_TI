@@ -122,9 +122,9 @@
     </a>
 
     <div class="menuAbajo">
-      <div class="logout">
-        <a href="{{ url_for('logout') }}">
-          <b>Cerrar Sesion</b>
+      <div class="bodyCuenta">
+        <a href="{{ url_for('logout') }}" id="cuenta">
+          <img src="{{ url_for('static', filename='img/icon-usuario.png') }}" alt="" width="20px"><b style="font-size: small;">{{ user.nombre_usuario}}</b>
         </a>
       </div>
       <div class="ajustes">

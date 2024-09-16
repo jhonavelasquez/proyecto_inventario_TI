@@ -18,7 +18,6 @@
 
 .alert{
     width: 100%;
-    height: 100%;
 }
 
 .listReport{
@@ -26,16 +25,16 @@
 }
 
 #verReporte {
-    color: inherit; /* Mantiene el color heredado del padre */
-    text-decoration: none; /* Quita el subrayado */
+    color: inherit; 
+    text-decoration: none; 
 }
 
 #verReporte:hover {
-    text-decoration: underline; /* Agrega un subrayado al pasar el mouse, si lo deseas */
+    text-decoration: underline;
 }
 
 .rich-text {
-    white-space: pre-wrap !important; /* Mantiene los saltos de línea */
+    white-space: pre-wrap !important;
     background-color: #f9f9f9;
     padding: 10px;
     border: 1px solid #ccc;

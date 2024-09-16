@@ -11,7 +11,7 @@ from io import BytesIO
 
 
 app = Flask(__name__)
-app.secret_key = 's3cr3t_k3y_12345'
+app.secret_key = 'd9ddb8a50af95ba9a24052cb926e3b64ef04578fb6dc3d9b6ab9a13eec464195'
 app.config['UPLOAD_FOLDER'] = 'uploads'  # Carpeta para almacenar archivos subidos
 app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'png', 'jpg', 'jpeg', 'gif'}  # Tipos de archivos permitidos
 
@@ -32,7 +32,7 @@ def get_db_connection():
     return conn
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         nombre_usuario = request.form['nombre_usuario']
@@ -62,7 +62,7 @@ def logout():
     return redirect(url_for('login'))
 
 # BACKEND SISTEMA
-@app.route('/index', methods=['GET'])
+@app.route('/', methods=['GET'])
 @login_required
 def index():
     conn = get_db_connection()
@@ -225,7 +225,7 @@ def editar_sistema(id_sistema, id_usuario, id_pc):
     finally:
         conn.close()
 
-    return render_template('editar_sistema.html', user_pc=user_pc, pcs=pcs)
+    return render_template('editar_sistema.html', user_pc=user_pc, pcs=pcs, user=current_user)
 
 # BACKEND COMPUTADOR
 @app.route('/computadores', methods=['GET'])
@@ -244,7 +244,7 @@ def computadores():
     filtro_pcs = conn.execute(query, params).fetchall()
     conn.close()
 
-    return render_template('computadores.html', filtro_pcs=filtro_pcs)
+    return render_template('computadores.html', filtro_pcs=filtro_pcs,  user=current_user)
 
 @app.route('/crear_computador', methods=['POST'])
 @login_required
@@ -284,7 +284,7 @@ def editar_computador(id_pc):
     ''', (id_pc,)).fetchone()
     conn.close()
     
-    return render_template('editar_computador.html', pc=pc)
+    return render_template('editar_computador.html', pc=pc,  user=current_user)
 
 @app.route('/editar_computador_form', methods=['POST'])
 @login_required
@@ -349,7 +349,7 @@ def usuarios():
     users = conn.execute(query, params).fetchall()
     conn.close()
 
-    return render_template('usuarios.html', users=users, pcs=pcs)
+    return render_template('usuarios.html', users=users, pcs=pcs,  user=current_user)
 
 @app.route('/crear_usuario', methods=['GET', 'POST'])
 @login_required
@@ -408,7 +408,7 @@ def editar_usuario(id):
     ''', (id,)).fetchone()
     conn.close()
     
-    return render_template('editar_usuario.html', use=use)
+    return render_template('editar_usuario.html', use=use,  user=current_user)
 
 @app.route('/editar_usuario_form', methods=['POST'])
 @login_required
@@ -477,12 +477,12 @@ def historial():
 
             categoria_nombre = conn.execute('SELECT nombre_categoria FROM Categoria_historial WHERE id_categoria = ?', (categoria_id,)).fetchone()
 
-            return render_template('historial.html', historial_data=historial_data, categorias=categorias, categoria_nombre=categoria_nombre)
+            return render_template('historial.html', historial_data=historial_data, categorias=categorias, categoria_nombre=categoria_nombre,  user=current_user)
         
         
         registros = conn.execute("SELECT * FROM Historial ORDER BY fecha DESC").fetchall()
 
-        return render_template('historial.html', registros=registros, categorias=categorias)
+        return render_template('historial.html', registros=registros, categorias=categorias,  user=current_user)
 
     except Exception as e:
         flash(f"Error: {str(e)}", "danger")
@@ -508,7 +508,7 @@ def reportes():
         reportes = conn.execute("SELECT * FROM Reportes ORDER BY fecha DESC").fetchall()
     
     conn.close()
-    return render_template('reportes.html', reportes=reportes)
+    return render_template('reportes.html', reportes=reportes,  user=current_user)
 
 # @app.route('/crear_reporte', methods=['POST'])
 # @login_required
@@ -543,7 +543,7 @@ def ver_reporte(id_reporte):
     conn = get_db_connection()
     reporte = conn.execute("SELECT * FROM Reportes WHERE id_reporte = ?", (id_reporte,)).fetchone()
     conn.close()
-    return render_template('ver_reporte.html', reporte=reporte)
+    return render_template('ver_reporte.html', reporte=reporte,  user=current_user)
 
 
 @app.route('/reporte_1', methods=['GET', 'POST'])
@@ -654,11 +654,10 @@ def reporte_2():
         
         # Guardar el PDF como archivo
         filename = secure_filename(f'{num_solicitud}.pdf')
-        file_path = os.path.join('pdf_reportes',filename)  # Cambia 'path_to_save' por el directorio adecuado
+        file_path = os.path.join('pdf_reportes',filename)
         with open(file_path, 'wb') as f:
             f.write(output_pdf.read())
         
-        # Subir el archivo a la base de datos
         conn = get_db_connection()
         
         conn.execute(
@@ -676,7 +675,6 @@ def reporte_2():
         
         flash("Reporte creado exitosamente.", "success")
 
-        #return send_file(output_pdf, as_attachment=True, download_name=filename, mimetype='application/pdf')
         return redirect(url_for('reportes'))
 
     return render_template('reporte_2.html')
@@ -689,4 +687,4 @@ def uploaded_file(filename):
 @app.route('/ajustes')
 @login_required
 def ajustes():
-    return render_template('ajustes.html')
+    return render_template('ajustes.html',  user=current_user)
