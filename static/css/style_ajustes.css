@@ -1,0 +1,61 @@
+.contenedor{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#opcion a{
+    text-decoration: none;
+}
+
+#ModalAjustes{
+    margin-top: 80px;
+    width: 100% !important;
+    
+}
+
+#ModalAjustesContent{
+    height: 400px;
+    
+}
+
+#card{
+    width: 100%;
+    --bs-card-border-width: none;
+}
+
+#modal-body-ajustes{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-bottom: 100px;
+}
+
+#card ul{
+    --bs-list-group-border-color: #ebebeb;
+}
+
+ul a{
+    text-decoration: none;
+    
+}
+
+.list-group-item{
+    background-color: #ffffff !important;
+    color: #2b3034 !important;
+}
+
+.list-group-item:hover{
+    background-color: #f0f0f0 !important;
+    text-decoration: underline;
+}
+
+.list-group-item img{
+    width: 20px;
+    margin-right: 5px;
+}
+
+#logout{
+    color: rgb(252, 88, 88) !important;
+}

@@ -36,7 +36,7 @@
             <div class="doble-filtro-sistema">
                 <div >
                     <div class="filtro">
-                        <select class="form-select form-select-sm" name="sistema" aria-label="Selecciona un Sistema">
+                        <select class="form-select form-select-bg" name="sistema" aria-label="Selecciona un Sistema">
                             <option value="">Selecciona un Sistema</option>
                             {% for sistema in sistemas %}
                             <option value="{{ sistema['Id_sistema'] }}" {% if request.args.get('sistema')==sistema['Id_sistema'] %} selected {% endif %}>

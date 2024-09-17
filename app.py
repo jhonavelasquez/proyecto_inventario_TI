@@ -683,8 +683,3 @@ def reporte_2():
 @login_required
 def uploaded_file(filename):
     return send_from_directory('pdf_reportes', filename)
-
-@app.route('/ajustes')
-@login_required
-def ajustes():
-    return render_template('ajustes.html',  user=current_user)
