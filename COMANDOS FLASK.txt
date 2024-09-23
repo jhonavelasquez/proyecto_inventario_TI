@@ -8,6 +8,13 @@ pip install Flask-Migrate Flask-SQLAlchemy
 
 DEPENDENCIAS:
 pip install pypdf2
+pip install Flask-Mail
+pip install schedule
+
 
 MIGRAR BASE DE DATOS SQLITE3 A MYSQL:
 sqlite3 database.db .dump > databaseMySQL.sql
+
+
+PARA CORRER EL SERVIDOR CON LAS NOTIFICACIONES EN SEGUNDO PLANO
+python app.py

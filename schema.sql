@@ -5,7 +5,7 @@ DROP TABLE IF EXISTS Usuario_Sistema_PC;
 DROP TABLE IF EXISTS Reportes;
 DROP TABLE IF EXISTS Historial;
 DROP TABLE IF EXISTS Categoria_historial;
-
+DROP TABLE IF EXISTS Notificaciones;
 
 CREATE TABLE Usuario (
     Id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -34,6 +34,7 @@ CREATE TABLE Reportes (
     asunto VARCHAR(100) NOT NULL,
     descripcion VARCHAR(300) NOT NULL,
     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_solucion TIMESTAMP,
     archivo VARCHAR,
     FOREIGN KEY (usuario_id) REFERENCES Usuario(Id_usuario)
 );
@@ -61,4 +62,13 @@ CREATE TABLE Historial (
 CREATE TABLE Categoria_historial (
     id_categoria INTEGER PRIMARY KEY AUTOINCREMENT,
     nombre_categoria VARCHAR(100)
-)
+);
+
+CREATE TABLE Notificaciones (
+    id_usuario INTEGER, 
+    id_reporte INTEGER, 
+    fecha_notificacion TIMESTAMP, 
+    mensaje VARCHAR(200),
+    FOREIGN KEY (id_usuario) REFERENCES Usuario(Id_usuario),
+    FOREIGN KEY (id_reporte) REFERENCES Reportes(id_reporte)
+);

@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style_historial.css') }}">
 
 {% endblock %}
 {% block content %}
@@ -46,7 +47,7 @@
 <div class="mt-3">
     {% for registro in (registros or historial_data) %}
     <div class="alert alert-light" role="alert">
-        <strong>{{ registro['usuario_historial'] }}</strong> {{ registro['descripcion'] }}
+        {{ registro['usuario_historial'] }} {{ registro['descripcion'] }}
     </div>
     {% endfor %}
 </div>

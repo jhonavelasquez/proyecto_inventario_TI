@@ -6,14 +6,26 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from model import *
 import datetime
 import os
-from PyPDF2 import PdfReader, PdfWriter,PdfFileMerger
+from PyPDF2 import PdfReader, PdfWriter
 from io import BytesIO
-
+from flask_mail import Mail, Message
+import threading
+import time
+import schedule
 
 app = Flask(__name__)
 app.secret_key = 'd9ddb8a50af95ba9a24052cb926e3b64ef04578fb6dc3d9b6ab9a13eec464195'
-app.config['UPLOAD_FOLDER'] = 'uploads'  # Carpeta para almacenar archivos subidos
-app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'png', 'jpg', 'jpeg', 'gif'}  # Tipos de archivos permitidos
+
+#CONFIGURACION NOTIFICACIONES GMAIL
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'    # Servidor SMTP de Gmail
+app.config['MAIL_PORT'] = 587                   # Puerto para TLS
+app.config['MAIL_USE_TLS'] = True               # Usar TLS
+app.config['MAIL_USE_SSL'] = False              # Deshabilitar SSL si usas TLS
+app.config['MAIL_USERNAME'] = 'jonathan.vr484@gmail.com'   # Tu email de Gmail
+app.config['MAIL_PASSWORD'] = 'ycfs vvod evqw emwy'  # Contraseña de aplicación de Gmail
+app.config['MAIL_DEFAULT_SENDER'] = 'jonathan.vr484@gmail.com'  # Email predeterminado de envío
+
+mail = Mail(app)
 
 hashed_password = generate_password_hash("@j0n_v3l4squ3z#")
 check_password = check_password_hash(hashed_password, "contraseña_ingresada")
@@ -490,10 +502,6 @@ def historial():
     finally:
         conn.close()
 
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
-
 @app.route('/reportes', methods=['GET', 'POST'])
 @login_required
 def reportes():
@@ -509,33 +517,6 @@ def reportes():
     
     conn.close()
     return render_template('reportes.html', reportes=reportes,  user=current_user)
-
-# @app.route('/crear_reporte', methods=['POST'])
-# @login_required
-# def crear_reporte():
-#     # Recopilar datos del formulario
-#     asunto = request.form['asunto']
-#     descripcion = request.form['descripcion']
-#     user = current_user
-    
-#     file = request.files.get('file')
-#     file_path = None
-    
-#     if file and file.filename:
-#         filename = secure_filename(file.filename)
-#         file_path = os.path.join(filename)
-#         file.save(file_path)
-    
-#     conn = get_db_connection()
-#     conn.execute(
-#         'INSERT INTO Reportes (usuario_id, asunto, descripcion, fecha, archivo) VALUES (?, ?, ?, ?, ?)',
-#         (user.nombre_usuario, asunto, descripcion, datetime.datetime.now().strftime('%Y-%m-%d %H:%M'), file_path)
-#     )
-#     conn.commit()
-#     conn.close()
-    
-#     flash("Reporte creado exitosamente.", "success")
-#     return redirect(url_for('reportes'))
 
 @app.route('/ver_reporte/<int:id_reporte>', methods=['GET'])
 @login_required
@@ -611,7 +592,7 @@ def reporte_2():
         num_solicitud = request.form['num_solicitud']
         fecha = datetime.datetime.now().strftime('%d-%m-%Y')
 
-        fecha_solucion = datetime.datetime.strptime(fecha_solucion, '%Y-%m-%d').strftime('%d-%m-%Y')
+        fecha_solucion_str = datetime.datetime.strptime(fecha_solucion, '%Y-%m-%d').strftime('%d-%m-%Y')
 
         pdf_template_path = 'static/pdf_plantillas/reporte_2.pdf'
         
@@ -633,7 +614,7 @@ def reporte_2():
                 'Text5': num_solicitud,
                 'Text6': fecha,
                 'Text7': version,
-                'Text8': fecha_solucion,
+                'Text8': fecha_solucion_str,
                 'Text9': descripcion
             },
         )
@@ -661,9 +642,11 @@ def reporte_2():
         conn = get_db_connection()
         
         conn.execute(
-            'INSERT INTO Reportes (usuario_id, asunto, descripcion, fecha, archivo) VALUES (?, ?, ?, ?, ?)',
-            (user.nombre_usuario, nombre_sistema, descripcion ,datetime.datetime.now().strftime('%Y-%m-%d %H:%M'), filename)
+            'INSERT INTO Reportes (usuario_id, asunto, descripcion, fecha, fecha_solucion, archivo) VALUES (?, ?, ?, ?, ?, ?)',
+            (user.id, nombre_sistema, descripcion ,datetime.datetime.now().strftime('%Y-%m-%d %H:%M'), fecha_solucion, filename)
         )
+
+        print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M'), " ---- ", fecha_solucion)
 
         fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
         fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
@@ -677,9 +660,87 @@ def reporte_2():
 
         return redirect(url_for('reportes'))
 
-    return render_template('reporte_2.html')
+    return render_template('reporte_2.html', user=current_user)
 
 @app.route('/ver_reporte/<filename>')
 @login_required
 def uploaded_file(filename):
     return send_from_directory('pdf_reportes', filename)
+
+def enviar_correo(destinatario, asunto, cuerpo):
+    mail = Mail(app)
+    msg = Message(asunto, recipients=[destinatario])
+    msg.body = cuerpo
+    try:
+        mail.send(msg)
+        print(f"Correo enviado a {destinatario}")
+    except Exception as e:
+        print(f"Error enviando correo: {e}")
+
+def enviar_recordatorios():
+    with app.app_context():
+        conn = get_db_connection()
+        print("Revisión---")
+
+        try:
+            today = datetime.datetime.now()
+            fecha_15_dias = today + datetime.timedelta(days=15)
+
+            today_str = today.strftime('%Y-%m-%d')
+            fecha_15_dias_str = fecha_15_dias.strftime('%Y-%m-%d')
+
+            reportes = conn.execute(
+                'SELECT * FROM Reportes WHERE fecha_solucion BETWEEN ? AND ?',
+                (today, fecha_15_dias)
+            ).fetchall()
+
+            print(reportes)
+            print(f"Fecha de hoy: {today_str}")
+            print(f"Fecha en 15 días: {fecha_15_dias_str}")
+
+            for reporte in reportes:
+                usuario_id = reporte['usuario_id']  
+                nombre_sistema = reporte['asunto']
+                fecha_solucion = reporte['fecha_solucion']
+
+
+                notificacion_enviada = conn.execute(
+                    'SELECT * FROM Notificaciones WHERE id_reporte = ? AND fecha_notificacion = ?',
+                    (reporte['id_reporte'], today_str)
+                ).fetchone()
+
+                usuario_reporte = conn.execute('SELECT Id_usuario, Nombre_user, Email FROM Usuario WHERE Id_usuario = ?', (usuario_id,)).fetchone()
+                
+                print(usuario_reporte['Email'], " ----- ", nombre_sistema)
+                print("-------------------")
+                print(notificacion_enviada)
+                print("-------------------")
+
+                if not notificacion_enviada:
+                    subject = f"Recordatorio: El reporte '{nombre_sistema}' está cercano a su fecha de solución"
+                    body = f"Estimado {usuario_reporte['Nombre_user']}, el reporte '{nombre_sistema}' tiene fecha de solución el {fecha_solucion}. Por favor tome las medidas necesarias."
+                    enviar_correo(usuario_reporte['Email'], subject, body)
+
+                    conn.execute(
+                        'INSERT INTO Notificaciones ( id_usuario, id_reporte, fecha_notificacion, mensaje) VALUES (?, ?, ?, ?)',
+                        (usuario_id, reporte['id_reporte'], today_str, subject) 
+                    )
+                    conn.commit()
+
+        except Exception as e:
+            print(f"Error al enviar recordatorios: {e}")
+        finally:
+            conn.close()
+
+def iniciar_revisiones_periodicas():
+    schedule.every(1).minutes.do(enviar_recordatorios)
+
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+if __name__ == "__main__":
+    hilo_revisar_reportes = threading.Thread(target=iniciar_revisiones_periodicas)
+    hilo_revisar_reportes.start()
+
+    app.run(debug=True, use_reloader=False)

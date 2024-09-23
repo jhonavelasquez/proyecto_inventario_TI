@@ -1,0 +1,13 @@
+.alert{
+    width: 100%;
+    font-size: small;
+
+}
+
+
+@media screen and (max-width: 700px) {
+    .alert{
+        display: flex;
+        align-items: center;
+    }
+}
