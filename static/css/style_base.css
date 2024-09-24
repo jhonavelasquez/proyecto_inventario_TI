@@ -133,7 +133,7 @@ h1 {
 }
 
 /* Sidebar links */
-.sidebar > a {
+.sidebar>a {
     display: flex;
     align-items: center;
     /* Alinea el texto y la imagen */
@@ -148,14 +148,14 @@ h1 {
     transition: ease-out 0.4s;
 }
 
-.sidebar > a.active {
+.sidebar>a.active {
     background-color: #045aaa;
     color: white;
     padding-top: 15%;
     padding-bottom: 15%;
 }
 
-.sidebar > a:hover:not(.active) {
+.sidebar>a:hover:not(.active) {
     background-color: #555;
     color: white;
     padding-top: 15%;
@@ -216,53 +216,108 @@ div.content {
     display: inline-block;
 }
 
-.menuAbajo{
+.menuAbajo {
     display: flex;
     margin-top: auto;
     color: #d4d2d0;
     padding: 16px 16px 25px 16px;
     justify-content: space-around;
+    flex-direction: column;
 }
 
-.menuAbajo a{
+.menuAbajo a {
     color: #d4d2d0;
     text-decoration: none;
     cursor: pointer;
 }
 
-.menuAbajo a:hover{
+.menuAbajo a:hover {
     color: #ffffff;
     text-decoration: underline;
     cursor: pointer;
 }
 
-.bodyCuenta{
+.bodyCuenta {
     width: 80%;
     display: flex;
     justify-content: start;
     align-content: center;
 }
 
-#cuenta{
+#cuenta {
     display: flex;
     justify-content: start;
-    margin-top: auto;
 }
 
-#cuenta img{
+#cuenta img {
     margin-right: 8px;
 }
 
-.ajustes{
-    width: 15%;
-    display: flex;
-    justify-content: center;
-    align-content: center;
-}
 
-#icon-ajuste{
+#icon-ajuste {
     width: 20px;
 }
+
+
+.ajuste_notificacion {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.ajustes {
+    display: flex;
+    align-items: start;
+}
+
+.ajustes img {
+    padding-bottom: 10px;
+}
+
+
+.notificacion a {
+    display: flex;
+    flex-direction: row;
+}
+
+#numero_notificacion {
+    height: 22px;
+    width: 22px;
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+    border-radius: 50%;
+    background: #ff0000;
+    
+}
+
+#numero_notificacion:hover {
+    text-decoration: none;
+}
+
+.icon {
+    transition-duration: 0.3s;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    transform: translateZ(0);
+    box-shadow: 0 0 1px rgba(0, 0, 0, 0);
+}
+
+.icon:hover {
+    transform: translateY(-5px);
+}
+
+#icon-campana {
+    width: 25px;
+    height: 25px;
+}
+
+#registroNotificacion {
+    text-decoration: none;
+    color: #000;
+}
+
 
 .head {
     height: 100px;

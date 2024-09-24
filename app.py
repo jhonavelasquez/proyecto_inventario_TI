@@ -16,6 +16,8 @@ import schedule
 app = Flask(__name__)
 app.secret_key = 'd9ddb8a50af95ba9a24052cb926e3b64ef04578fb6dc3d9b6ab9a13eec464195'
 
+hrs_revisión = "16:46"
+
 #CONFIGURACION NOTIFICACIONES GMAIL
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'    # Servidor SMTP de Gmail
 app.config['MAIL_PORT'] = 587                   # Puerto para TLS
@@ -104,7 +106,11 @@ def index():
     user_pc_data = conn.execute(query, params).fetchall()
     conn.close()
 
-    return render_template('index.html', user_pc_data=user_pc_data, sistemas=sistemas, pcs=pcs,  user=current_user)
+    user=current_user
+    num_notificaciones_totales = get_total_notifications(user.id)
+    info_notificaciones = get_info_notifications(user.id)
+
+    return render_template('index.html', user_pc_data=user_pc_data, sistemas=sistemas, pcs=pcs,  user=current_user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
 
 @app.route('/crear_sistema', methods=['POST'])
 @login_required
@@ -230,6 +236,7 @@ def editar_sistema(id_sistema, id_usuario, id_pc):
         ''', (id_sistema, id_usuario, id_pc)).fetchone()
 
         pcs = conn.execute("SELECT * FROM Pc").fetchall()
+        
 
     except Exception as e:
         flash(f"Error: {str(e)}", "danger")
@@ -237,7 +244,11 @@ def editar_sistema(id_sistema, id_usuario, id_pc):
     finally:
         conn.close()
 
-    return render_template('editar_sistema.html', user_pc=user_pc, pcs=pcs, user=current_user)
+    user=current_user
+    num_notificaciones_totales = get_total_notifications(user.id)
+    info_notificaciones = get_info_notifications(user.id)
+
+    return render_template('editar_sistema.html', user_pc=user_pc, pcs=pcs, user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
 
 # BACKEND COMPUTADOR
 @app.route('/computadores', methods=['GET'])
@@ -255,8 +266,11 @@ def computadores():
 
     filtro_pcs = conn.execute(query, params).fetchall()
     conn.close()
+    user=current_user
+    num_notificaciones_totales = get_total_notifications(user.id)
+    info_notificaciones = get_info_notifications(user.id)
 
-    return render_template('computadores.html', filtro_pcs=filtro_pcs,  user=current_user)
+    return render_template('computadores.html', filtro_pcs=filtro_pcs,  user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
 
 @app.route('/crear_computador', methods=['POST'])
 @login_required
@@ -295,8 +309,12 @@ def editar_computador(id_pc):
         WHERE Pc.Id_pc = ?
     ''', (id_pc,)).fetchone()
     conn.close()
+
+    user=current_user
+    num_notificaciones_totales = get_total_notifications(user.id)
+    info_notificaciones = get_info_notifications(user.id)
     
-    return render_template('editar_computador.html', pc=pc,  user=current_user)
+    return render_template('editar_computador.html', pc=pc,  user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
 
 @app.route('/editar_computador_form', methods=['POST'])
 @login_required
@@ -361,7 +379,11 @@ def usuarios():
     users = conn.execute(query, params).fetchall()
     conn.close()
 
-    return render_template('usuarios.html', users=users, pcs=pcs,  user=current_user)
+    user=current_user
+    num_notificaciones_totales = get_total_notifications(user.id)
+    info_notificaciones = get_info_notifications(user.id)
+
+    return render_template('usuarios.html', users=users, pcs=pcs,  user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
 
 @app.route('/crear_usuario', methods=['GET', 'POST'])
 @login_required
@@ -405,8 +427,11 @@ def crear_usuario():
         
         flash("Usuario creado exitosamente.", "success")
         return redirect(url_for('usuarios'))
+    user=current_user
+    num_notificaciones_totales = get_total_notifications(user.id)
+    info_notificaciones = get_info_notifications(user.id)
 
-    return render_template('usuarios.html')
+    return render_template('usuarios.html', user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
 
 @app.route('/editar_usuario/<int:id>', methods=['GET'])
 @login_required
@@ -419,8 +444,12 @@ def editar_usuario(id):
         WHERE Usuario.Id_usuario = ?
     ''', (id,)).fetchone()
     conn.close()
+
+    user=current_user
+    num_notificaciones_totales = get_total_notifications(user.id)
+    info_notificaciones = get_info_notifications(user.id)
     
-    return render_template('editar_usuario.html', use=use,  user=current_user)
+    return render_template('editar_usuario.html', use=use,  user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
 
 @app.route('/editar_usuario_form', methods=['POST'])
 @login_required
@@ -464,17 +493,21 @@ def editar_usuario_form():
 
     return redirect(url_for('usuarios'))
 
+#BACKEND HISTORIAL
 @app.route('/historial', methods=['GET'])
 @login_required
 def historial():
     conn = get_db_connection()
+
+    user=current_user
+    num_notificaciones_totales = get_total_notifications(user.id)
+    info_notificaciones = get_info_notifications(user.id)
 
     try:
         categoria_id = request.args.get('categoria')
         categorias = conn.execute("SELECT * FROM Categoria_historial").fetchall()
 
         if categoria_id:
-            # Inicializa params como una lista vacía
             params = []
 
             query = '''
@@ -489,12 +522,12 @@ def historial():
 
             categoria_nombre = conn.execute('SELECT nombre_categoria FROM Categoria_historial WHERE id_categoria = ?', (categoria_id,)).fetchone()
 
-            return render_template('historial.html', historial_data=historial_data, categorias=categorias, categoria_nombre=categoria_nombre,  user=current_user)
+            return render_template('historial.html', historial_data=historial_data, categorias=categorias, categoria_nombre=categoria_nombre,  user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
         
         
         registros = conn.execute("SELECT * FROM Historial ORDER BY fecha DESC").fetchall()
 
-        return render_template('historial.html', registros=registros, categorias=categorias,  user=current_user)
+        return render_template('historial.html', registros=registros, categorias=categorias,  user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
 
     except Exception as e:
         flash(f"Error: {str(e)}", "danger")
@@ -502,6 +535,7 @@ def historial():
     finally:
         conn.close()
 
+#BACKEND REPORTES
 @app.route('/reportes', methods=['GET', 'POST'])
 @login_required
 def reportes():
@@ -516,7 +550,12 @@ def reportes():
         reportes = conn.execute("SELECT * FROM Reportes ORDER BY fecha DESC").fetchall()
     
     conn.close()
-    return render_template('reportes.html', reportes=reportes,  user=current_user)
+
+    user=current_user
+    num_notificaciones_totales = get_total_notifications(user.id)
+    info_notificaciones = get_info_notifications(user.id)
+
+    return render_template('reportes.html', reportes=reportes,  user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
 
 @app.route('/ver_reporte/<int:id_reporte>', methods=['GET'])
 @login_required
@@ -524,7 +563,12 @@ def ver_reporte(id_reporte):
     conn = get_db_connection()
     reporte = conn.execute("SELECT * FROM Reportes WHERE id_reporte = ?", (id_reporte,)).fetchone()
     conn.close()
-    return render_template('ver_reporte.html', reporte=reporte,  user=current_user)
+
+    user=current_user
+    num_notificaciones_totales = get_total_notifications(user.id)
+    info_notificaciones = get_info_notifications(user.id)
+
+    return render_template('ver_reporte.html', reporte=reporte,  user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
 
 
 @app.route('/reporte_1', methods=['GET', 'POST'])
@@ -579,6 +623,10 @@ def reporte_1():
 @app.route('/reporte_2', methods=['GET', 'POST'])
 @login_required
 def reporte_2():
+    user=current_user
+    num_notificaciones_totales = get_total_notifications(user.id)
+    info_notificaciones = get_info_notifications(user.id)
+
     if request.method == 'POST':
         nombre_sistema = request.form['nombre_sistema']
         responsable_sistema = request.form['responsable_sistema']
@@ -596,7 +644,6 @@ def reporte_2():
 
         pdf_template_path = 'static/pdf_plantillas/reporte_2.pdf'
         
-        # Leer el PDF base
         pdf_reader = PdfReader(pdf_template_path)
         pdf_writer = PdfWriter()
 
@@ -630,10 +677,7 @@ def reporte_2():
         output_pdf = BytesIO()
         pdf_writer.write(output_pdf)
         output_pdf.seek(0)
-
-        user = current_user
         
-        # Guardar el PDF como archivo
         filename = secure_filename(f'{num_solicitud}.pdf')
         file_path = os.path.join('pdf_reportes',filename)
         with open(file_path, 'wb') as f:
@@ -660,13 +704,76 @@ def reporte_2():
 
         return redirect(url_for('reportes'))
 
-    return render_template('reporte_2.html', user=current_user)
+    return render_template('reporte_2.html', user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
 
 @app.route('/ver_reporte/<filename>')
 @login_required
 def uploaded_file(filename):
     return send_from_directory('pdf_reportes', filename)
 
+
+#NOTIFICACIONES EN EL SISTEMA
+def get_total_notifications(user_id):
+    conn = get_db_connection()
+    total_notifications = conn.execute(
+        'SELECT COUNT(*) FROM Notificaciones WHERE id_usuario = ?  AND leido = false',
+        (user_id,)
+    ).fetchone()[0]
+    conn.close()
+
+    return total_notifications
+
+def get_info_notifications(user_id):
+    conn = get_db_connection()
+    info_notifiaciones= conn.execute(
+        'SELECT * FROM Notificaciones WHERE id_usuario = ? ORDER BY id_notificacion DESC LIMIT 6',
+        (user_id,)
+    ).fetchall()
+    conn.close()
+
+    return info_notifiaciones
+
+@app.route('/marcar_notificaciones_leidas', methods=['POST'])
+@login_required
+def marcar_notificaciones_leidas():
+    user_id = current_user.id
+    conn = get_db_connection()
+
+    conn.execute('UPDATE Notificaciones SET leido = true WHERE id_usuario = ? AND leido = false', (user_id,))
+    conn.commit()
+    conn.close()
+
+    return '', 204
+
+@app.route('/notificaciones', methods=['GET'])
+@login_required
+def obtener_notificaciones():
+    user_id = current_user.id
+    conn = get_db_connection()
+
+    num_notificaciones_enviadas = 0
+    num_notificaciones_totales = 0
+    
+    notificaciones = conn.execute('SELECT * FROM Notificaciones WHERE id_usuario = ? AND leido = false', (user_id,)).fetchall()
+
+    if notificaciones:
+        num_notificaciones_enviadas = conn.execute(
+            'SELECT COUNT(*) FROM Notificaciones WHERE id_usuario = ? AND leido = false',
+            (user_id,)
+        ).fetchone()[0]
+        
+        # conn.execute('UPDATE Notificaciones SET leido = true WHERE id_usuario = ? AND leido = false', (user_id,))
+        # conn.commit()  
+
+    num_notificaciones_totales = conn.execute(
+        'SELECT COUNT(*) FROM Notificaciones WHERE id_usuario = ?',
+        (user_id,)
+    ).fetchone()[0]
+
+    return render_template('prueba.html', num_notificaciones_enviadas=num_notificaciones_enviadas, num_notificaciones_totales=num_notificaciones_totales)
+
+
+#NOTIFICACION POR EMAIL
 def enviar_correo(destinatario, asunto, cuerpo):
     mail = Mail(app)
     msg = Message(asunto, recipients=[destinatario])
@@ -722,18 +829,38 @@ def enviar_recordatorios():
                     enviar_correo(usuario_reporte['Email'], subject, body)
 
                     conn.execute(
-                        'INSERT INTO Notificaciones ( id_usuario, id_reporte, fecha_notificacion, mensaje) VALUES (?, ?, ?, ?)',
+                        'INSERT INTO Notificaciones ( id_usuario, id_reporte, fecha_notificacion, mensaje, leido) VALUES (?, ?, ?, ?, false)',
                         (usuario_id, reporte['id_reporte'], today_str, subject) 
                     )
                     conn.commit()
-
+        
         except Exception as e:
             print(f"Error al enviar recordatorios: {e}")
         finally:
             conn.close()
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#REVISION DIARIA NOTIFICACION
 def iniciar_revisiones_periodicas():
     schedule.every(1).minutes.do(enviar_recordatorios)
+    schedule.every().day.at(hrs_revisión).do(enviar_recordatorios)
 
     while True:
         schedule.run_pending()
@@ -744,3 +871,5 @@ if __name__ == "__main__":
     hilo_revisar_reportes.start()
 
     app.run(debug=True, use_reloader=False)
+
+

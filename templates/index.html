@@ -8,20 +8,7 @@
 <!-- Incluir Select2 después -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
-<script>document.addEventListener("DOMContentLoaded", function () {
-    const loadingScreen = document.getElementById('loading-screen');
 
-    // Mostrar la pantalla de carga antes de enviar el formulario
-    document.getElementById('filtro-form').addEventListener('submit', function () {
-        loadingScreen.classList.add('show');  // Mostrar la pantalla de carga
-    });
-
-    // Ocultar la pantalla de carga después de 3 segundos
-    setTimeout(function () {
-        loadingScreen.classList.remove('show');  // Ocultar la pantalla de carga
-    }, 3000); // 3000ms = 3 segundos de retardo
-});
-</script>
 {% endblock %}
 
 {% block content %}
@@ -59,7 +46,7 @@
     </div>
 
     <div class="Botones_Sistema">
-        <button class="button_slide slide_right" data-bs-toggle="modal" data-bs-target="#ModalAgregarSistema"><img src="{{ url_for('static', filename='img/icon-agregar.png') }}" alt="icon-agregar" width="20px"><b> Agregar Nuevo Sistema</b></button>
+        <button class="button_slide slide_right" data-bs-toggle="modal" data-bs-target="#agregarSistema"><img src="{{ url_for('static', filename='img/icon-agregar.png') }}" alt="icon-agregar" width="20px"><b> Agregar Nuevo Sistema</b></button>
 
         <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#ModelEliminarSistema"><b>Eliminar Sistema</b></button>
     </div>
@@ -73,11 +60,11 @@
 
 
 <!-- AGREGAR SISTEMA -->
-<div class="modal fade" id="ModalAgregarSistema" tabindex="-1" aria-labelledby="ModalAgregarSistema" aria-hidden="true">
+<div class="modal fade" id="agregarSistema" tabindex="-1" aria-labelledby="agregarSistema" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="ModalAgregarSistema" >Agregar Nuevo Sistema</h5>
+                <h5 class="modal-title" id="agregarSistema" >Agregar Nuevo Sistema</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="post" action="{{ url_for('crear_sistema') }}">
@@ -192,6 +179,7 @@
 {% endif %}
 
 <script>
+    // registro de la tabla clickeable para movil.
     $(document).ready(function() {
         function handleRowClick() {
             if ($(window).width() <= 700) {
@@ -203,10 +191,10 @@
             }
         }
 
-        handleRowClick(); // Ejecutar la función al cargar la página
+        handleRowClick();
 
         $(window).resize(function() {
-            handleRowClick(); // Ejecutar la función cada vez que cambie el tamaño de la pantalla
+            handleRowClick();
         });
     });
 </script>

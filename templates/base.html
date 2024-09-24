@@ -16,16 +16,14 @@
     document.addEventListener("DOMContentLoaded", function () {
       const loadingScreen = document.getElementById('loading-screen');
 
-      // Mostrar la pantalla de carga antes de enviar el formulario
       document.getElementById('filtro-form').addEventListener('submit', function () {
         loadingScreen.classList.add('show');
       });
 
-      // Ocultar la pantalla de carga 4 segundos después de que la página ha cargado completamente
       window.addEventListener('load', function () {
         setTimeout(function () {
           loadingScreen.classList.remove('show');
-        }, 3000); // 4000ms = 4 segundos de retardo
+        }, 1000); // 4000 = 4 segundos de retardo
       });
     });
 
@@ -42,7 +40,7 @@
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
-      </button>
+      </button>k
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
           <li class="nav-item">
@@ -121,23 +119,37 @@
         src="{{ url_for('static', filename='img/icon-historial.png') }}" alt="icon-documentos">
       <b>Historial</b>
     </a>
-
     <div class="menuAbajo">
+      <div class="ajuste_notificacion">
+        <div class="notificacion">
+          <a href="" class="icon" data-bs-toggle="modal" data-bs-target="#ModalNotifiaciones">
+            <img id="icon-campana" src="{{ url_for('static', filename='img/icon-campana.png') }}" alt="logoCampana">
+            <div>
+              {% if num_notificaciones_totales > 0 %}
+              <strong id="numero_notificacion">{{ num_notificaciones_totales }}</strong>
+              {% endif %}
+            </div>
+          </a>
+        </div>
+        <div class="ajustes">
+          <a href="" class="icon" data-bs-toggle="modal" data-bs-target="#ModalAjustes">
+            <img id="icon-ajuste" src="{{ url_for('static', filename='img/icon-ajuste.png') }}" alt="logoAjuste"></a>
+        </div>
+      </div>
       <div class="bodyCuenta">
         <a href="#" id="cuenta">
           <img src="{{ url_for('static', filename='img/icon-usuario.png') }}" alt="" width="20px"><b
             style="font-size: small;">{{ user.nombre_usuario}}</b>
         </a>
       </div>
-      <div class="ajustes">
-        <a href="" data-bs-toggle="modal" data-bs-target="#ModalAjustes"> <img id="icon-ajuste"
-            src="{{ url_for('static', filename='img/icon-ajuste.png') }}" alt="logoAjuste"></a>
-      </div>
+
     </div>
+
   </div>
 
   <!-- AJUSTES-->
-  <div class="modal fade" id="ModalAjustes" tabindex="-1" aria-labelledby="ModalAjustes"  id="ModalAjustes" aria-hidden="true">
+  <div class="modal fade" id="ModalAjustes" tabindex="-1" aria-labelledby="ModalAjustes" id="ModalAjustes"
+    aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content" id="ModalAjustesContent">
         <div class="modal-header">
@@ -160,6 +172,47 @@
       </div>
     </div>
   </div>
+
+  <!-- NOTIFICACIONES -->
+<div class="modal fade" id="ModalNotifiaciones" tabindex="-1" aria-labelledby="ModalNotifiaciones" aria-hidden="true">
+  <div class="modal-dialog  modal-dialog-scrollable">
+      <div class="modal-content" id="ModalNotifiacionesContent">
+          <div class="modal-header">
+              <h5 class="modal-title" id="ModalNotifiaciones">Notificaciones</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="modal-body-ajustes">
+              <ol class="list-group list-group-flush">
+                  {% for row in info_notificaciones %}
+                      <li class="list-group-item">
+                        <a href="{{ url_for('ver_reporte', id_reporte=row['id_notificacion']) }}" id="registroNotificacion">
+                          {{ row.mensaje }}<br>
+                          {{ row.fecha_notificacion }}
+                        </a>
+                      </li>
+                  {% else %}
+                      <li class="list-group-item">No tienes notificaciones.</li>
+                  {% endfor %}
+              </ol>
+          </div>
+      </div>
+  </div>
+</div>
+
+<script>
+  $('#ModalNotifiaciones').on('shown.bs.modal', function () {
+      $.ajax({
+          url: "{{ url_for('marcar_notificaciones_leidas') }}",
+          type: 'POST',
+          success: function() {
+              console.log("Notificaciones marcadas como leídas.");
+          },
+          error: function() {
+              console.error("Error al marcar las notificaciones.");
+          }
+      });
+  });
+</script>
 
   <div class="loading-screen" id="loading-screen">
     <div class="loading">

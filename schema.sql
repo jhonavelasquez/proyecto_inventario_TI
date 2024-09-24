@@ -65,10 +65,12 @@ CREATE TABLE Categoria_historial (
 );
 
 CREATE TABLE Notificaciones (
+    id_notificacion INTEGER PRIMARY KEY AUTOINCREMENT,
     id_usuario INTEGER, 
     id_reporte INTEGER, 
     fecha_notificacion TIMESTAMP, 
     mensaje VARCHAR(200),
+    leido BOOLEAN,
     FOREIGN KEY (id_usuario) REFERENCES Usuario(Id_usuario),
     FOREIGN KEY (id_reporte) REFERENCES Reportes(id_reporte)
 );
