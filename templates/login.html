@@ -31,6 +31,7 @@
     <div class="contenedor">
         <div class="card text-start mb-3">
             <form id="loginForm" method="post" action="{{ url_for('login') }}">
+                {{ form.hidden_tag() }}
                 <div class="modal-body">
                     <div class="titulo">
                         <h2>Iniciar Sesión</h2>
@@ -40,14 +41,11 @@
                     </div>
 
                     <div class="form-floating mb-3">
-                        <input type="text" id="nombre_usuario" name="nombre_usuario" class="form-control"
-                            placeholder="Nombre Usuario" onkeyup="javascript:this.value=this.value.toUpperCase();"
-                            required>
+                        {{ form.nombre_usuario(class='form-control', placeholder='Nombre Usuario', onkeyup="javascript:this.value=this.value.toUpperCase();") }}
                         <label for="nombre_usuario">Nombre Usuario</label>
                     </div>
                     <div class="form-floating mb-3">
-                        <input type="password" class="form-control" id="contrasena" name="contrasena" placeholder=""
-                            required>
+                        {{ form.contrasena(class='form-control', placeholder='') }}
                         <label for="contrasena" class="form-label">Contraseña</label>
                         <button type="button"
                             class="btn btn-transparent position-absolute top-50 end-0 translate-middle-y"
@@ -59,7 +57,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="botonlogin slide_right">Iniciar Sesión</button>
+                    {{ form.submit(class='botonlogin slide_right') }}
                 </div>
             </form>
             {% with messages = get_flashed_messages(with_categories=True) %}
