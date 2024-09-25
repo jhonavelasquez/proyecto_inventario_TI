@@ -10,10 +10,14 @@ with open('schema.sql') as f:
 cur = connection.cursor()
 
 hashed_password = generate_password_hash('admin')
-cur.execute("INSERT INTO Usuario (Nombre_user, Email, Psw) VALUES (?, ?, ?);", ('ADMIN', 'admin@sanantonio.cl', hashed_password))
+cur.execute("INSERT INTO Usuario (Nombre_user, Email, Psw, id_tipo_usuario) VALUES (?, ?, ?, ?);", ('ADMIN', 'admin@AAA.cl', hashed_password, 1))
 cur.execute("INSERT INTO Usuario_Sistema_PC (Id_usuario, Id_sistema, Id_pc, Activo) VALUES (?, ?, ?, FALSE)", (1, 1, 1))
 
 #cur.execute('INSERT INTO Notificaciones ( id_usuario, id_reporte, fecha_notificacion, mensaje) VALUES (?, ?, ?, ?)',(1, 1, '2024-09-23', 'Recordatorio: El reporte está cercano a su fecha de solución'))
+
+cur.execute("INSERT INTO Tipo_usuario (id_tipo_usuario, nombre_tipo_usuario) VALUES (1, 'Administrador');")
+cur.execute("INSERT INTO Tipo_usuario (id_tipo_usuario, nombre_tipo_usuario) VALUES (2, 'Lector');")
+cur.execute("INSERT INTO Tipo_usuario (id_tipo_usuario, nombre_tipo_usuario) VALUES (3, 'Editor');")
 
 cur.execute("INSERT INTO Pc (Nombre_pc, Placa, Almacenamiento, Ram, Fuente) VALUES ('SA2101051', 'ASUS ROG STRIX', 512, 16, 'Corsair 650W');")
 cur.execute("INSERT INTO Pc (Nombre_pc, Placa, Almacenamiento, Ram, Fuente) VALUES ('SA2000000', 'HP Network', 512, 8, 'Corsair 550W');")

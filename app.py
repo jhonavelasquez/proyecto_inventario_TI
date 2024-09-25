@@ -3,20 +3,28 @@ from flask import Flask, render_template, request, redirect, url_for, flash, sen
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask_wtf.csrf import CSRFProtect
+from forms import LoginForm
 from model import *
 import datetime
 import os
+
 from PyPDF2 import PdfReader, PdfWriter
 from io import BytesIO
+
 from flask_mail import Mail, Message
+
 import threading
 import time
 import schedule
+import signal
+import sys
+
 
 app = Flask(__name__)
 app.secret_key = 'd9ddb8a50af95ba9a24052cb926e3b64ef04578fb6dc3d9b6ab9a13eec464195'
 
-hrs_revisión = "16:46"
+hrs_revisión = "07:00"
 
 #CONFIGURACION NOTIFICACIONES GMAIL
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'    # Servidor SMTP de Gmail
@@ -27,7 +35,14 @@ app.config['MAIL_USERNAME'] = 'jonathan.vr484@gmail.com'   # Tu email de Gmail
 app.config['MAIL_PASSWORD'] = 'ycfs vvod evqw emwy'  # Contraseña de aplicación de Gmail
 app.config['MAIL_DEFAULT_SENDER'] = 'jonathan.vr484@gmail.com'  # Email predeterminado de envío
 
+app.config.update(
+    SESSION_COOKIE_SECURE=True,  # Cookies solo se envían por HTTPS
+    SESSION_COOKIE_HTTPONLY=True, # Evitar acceso desde JavaScript
+    SESSION_COOKIE_SAMESITE='Lax' # Ayuda a prevenir CSRF
+)
+
 mail = Mail(app)
+csrf = CSRFProtect(app)
 
 hashed_password = generate_password_hash("@j0n_v3l4squ3z#")
 check_password = check_password_hash(hashed_password, "contraseña_ingresada")
@@ -48,24 +63,26 @@ def get_db_connection():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        nombre_usuario = request.form['nombre_usuario']
-        password = request.form['contrasena']
-        user = Usuario.get_by_nombre_usuario(nombre_usuario)
+    try:
+        form = LoginForm()
+        if form.validate_on_submit():
+            nombre_usuario = form.nombre_usuario.data
+            password = form.contrasena.data
+            user = Usuario.get_by_nombre_usuario(nombre_usuario)
 
-        if user:
-            print(f"user: {user.nombre_usuario}, psw: {user.password}")  # Esto es solo para depuración
+            if user and check_password_hash(user.password, password):
+                print("Contraseña correcta")
+                login_user(user)
+                flash('Inicio de sesión exitoso.', 'success')
+                return redirect(url_for('index'))
+            else:
+                flash('Credenciales inválidas. Por favor, inténtalo de nuevo.', 'danger')
 
-        if user and check_password_hash(user.password, password):
-            print("Contraseña correcta") 
-            login_user(user)
-            flash('Inicio de sesión exitoso.', 'success')
-            return redirect(url_for('index'))
-        else:
-            print("Credenciales inválidas")
-            flash('Credenciales inválidas. Por favor, inténtalo de nuevo.', 'danger')
+    except Exception as e:
+        print(f"Error en login: {e}")
+        flash('Ocurrió un error al intentar iniciar sesión. Por favor, inténtalo de nuevo.', 'danger')
 
-    return render_template('login.html')
+    return render_template('login.html', form=form)
 
 
 @app.route('/logout')
@@ -115,77 +132,96 @@ def index():
 @app.route('/crear_sistema', methods=['POST'])
 @login_required
 def crear_sistema():
-    conn = get_db_connection()
-    nombre_sistema = request.form['nombre_sistema']
+    try:
+        conn = get_db_connection()
+        nombre_sistema = request.form['nombre_sistema']
 
-    sistemas = conn.execute("SELECT Nombre_sistema FROM Sistema").fetchall()
-    for sistema in sistemas:
-        if nombre_sistema == sistema['Nombre_sistema']:
-            flash("El sistema ya existe y no será añadido de nuevo.", "warning")
-            conn.close()
-            return redirect(url_for('index'))
+        sistemas = conn.execute("SELECT Nombre_sistema FROM Sistema").fetchall()
+        for sistema in sistemas:
+            if nombre_sistema == sistema['Nombre_sistema']:
+                flash("El sistema ya existe y no será añadido de nuevo.", "warning")
+                conn.close()
+                return redirect(url_for('index'))
 
-    conn.execute('INSERT INTO Sistema (Nombre_sistema) VALUES (?)', (nombre_sistema,))
-    conn.commit()
+        conn.execute('INSERT INTO Sistema (Nombre_sistema) VALUES (?)', (nombre_sistema,))
+        conn.commit()
 
-    id_sistema = conn.execute(
-        'SELECT Id_sistema FROM Sistema WHERE Nombre_sistema = ?', (nombre_sistema,)).fetchone()['Id_sistema']
+        id_sistema = conn.execute(
+            'SELECT Id_sistema FROM Sistema WHERE Nombre_sistema = ?', (nombre_sistema,)).fetchone()['Id_sistema']
 
-    usuarios = conn.execute("SELECT Id_usuario FROM Usuario").fetchall()
-    for usuario in usuarios:
-        id_pc_mas_utilizado = conn.execute('''
-            SELECT Id_pc
-            FROM Usuario_Sistema_PC
-            WHERE Id_usuario = ?
-            GROUP BY Id_pc
-            ORDER BY COUNT(*) DESC
-            LIMIT 1
-        ''', (usuario['Id_usuario'],)).fetchone()
+        usuarios = conn.execute("SELECT Id_usuario FROM Usuario").fetchall()
+        for usuario in usuarios:
+            id_pc_mas_utilizado = conn.execute('''
+                SELECT Id_pc
+                FROM Usuario_Sistema_PC
+                WHERE Id_usuario = ?
+                GROUP BY Id_pc
+                ORDER BY COUNT(*) DESC
+                LIMIT 1
+            ''', (usuario['Id_usuario'],)).fetchone()
 
-        if id_pc_mas_utilizado:
-            conn.execute(
-                "INSERT INTO Usuario_Sistema_PC (Id_usuario, Id_sistema, Id_pc, Activo) VALUES (?, ?, ?, FALSE)",
-                (usuario['Id_usuario'], id_sistema, id_pc_mas_utilizado['Id_pc'])
-            )
-        else:
-            flash(f"No se pudo encontrar un PC asignado para el usuario con ID {usuario['Id_usuario']}.", "warning")
+            if id_pc_mas_utilizado:
+                conn.execute(
+                    "INSERT INTO Usuario_Sistema_PC (Id_usuario, Id_sistema, Id_pc, Activo) VALUES (?, ?, ?, FALSE)",
+                    (usuario['Id_usuario'], id_sistema, id_pc_mas_utilizado['Id_pc'])
+                )
+            else:
+                flash(f"No se pudo encontrar un PC asignado para el usuario con ID {usuario['Id_usuario']}.", "warning")
 
-    user = current_user
-    fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-    fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
-    descripcion_hist= (f" agregó un nuevo sistema.  {nombre_sistema}.  {fecha_actual}")
-    conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 2)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
+        user = current_user
+        fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+        fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
+        descripcion_hist= (f" agregó un nuevo sistema.  {nombre_sistema}.  {fecha_actual}")
+        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 2)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
 
-    conn.commit()
-    conn.close()
+        conn.commit()
+        conn.close()
 
-    flash("Sistema creado exitosamente.", "success")
+        flash("Sistema creado exitosamente.", "success")
+    except sqlite3.Error as db_error:
+        print(f"Database error: {db_error}")
+        flash("Error al crear el sistema. Por favor, inténtalo de nuevo.", "danger")
+    except Exception as e:
+        print(f"Error: {e}")
+        flash("Ocurrió un error inesperado. Por favor, inténtalo de nuevo.", "danger")
+    finally:
+        conn.close()
+
     return redirect(url_for('index'))
 
 
 @app.route('/eliminar_sistema', methods=['POST'])
 @login_required
 def eliminar_sistema():
-    conn = get_db_connection()
-    sistema_id = request.form.get('sistema')
-    
-    if sistema_id:
-        sistema = conn.execute('SELECT Nombre_sistema FROM Sistema WHERE Id_sistema = ?', (sistema_id,)).fetchone()
-        nombre_sistema = sistema['Nombre_sistema'] 
+    try:
+        conn = get_db_connection()
+        sistema_id = request.form.get('sistema')
         
-        if sistema:
-            conn.execute('DELETE FROM Sistema WHERE Id_sistema = ?', (sistema_id,))
-            
-            user = current_user
-            fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-            fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
-            descripcion_hist= (f" eliminó el sistema {nombre_sistema}.  [{fecha_actual}]")
-            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 2)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
-            
-            flash(f"{nombre_sistema} ha sido eliminado.", "warning")
-            
-            conn.commit()
-            conn.close()
+        if sistema_id:
+                sistema = conn.execute('SELECT Nombre_sistema FROM Sistema WHERE Id_sistema = ?', (sistema_id,)).fetchone()
+                nombre_sistema = sistema['Nombre_sistema'] 
+                
+                if sistema:
+                    conn.execute('DELETE FROM Sistema WHERE Id_sistema = ?', (sistema_id,))
+                    
+                    user = current_user
+                    fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+                    fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
+                    descripcion_hist= (f" eliminó el sistema {nombre_sistema}.  [{fecha_actual}]")
+                    conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 2)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
+                    
+                    flash(f"{nombre_sistema} ha sido eliminado.", "warning")
+                    
+                    conn.commit()
+
+    except sqlite3.Error as db_error:
+        print(f"Database error: {db_error}")
+        flash("Error al eliminar el sistema. Por favor, inténtalo de nuevo.", "danger")
+    except Exception as e:
+        print(f"Error: {e}")
+        flash("Ocurrió un error inesperado. Por favor, inténtalo de nuevo.", "danger")
+    finally:
+        conn.close()
     
     return redirect(url_for('index'))
 
@@ -368,8 +404,12 @@ def usuarios():
 
     search_query = request.args.get('search', '')
 
-    query = '''SELECT Usuario.Id_usuario, Usuario.Nombre_user, Usuario.Email FROM Usuario Where 1 = 1'''
+    query = '''SELECT Usuario.Id_usuario, Usuario.Nombre_user, Usuario.Email, Usuario.id_tipo_usuario, Tipo_usuario.nombre_tipo_usuario
+                FROM Usuario
+                INNER JOIN Tipo_usuario ON Tipo_usuario.id_tipo_usuario = Usuario.id_tipo_usuario
+                Where 1 = 1'''
     pcs = conn.execute("SELECT * FROM Pc").fetchall()
+    tipo_usuario = conn.execute("SELECT * FROM Tipo_usuario").fetchall()
 
     params = []
     if search_query:
@@ -383,7 +423,7 @@ def usuarios():
     num_notificaciones_totales = get_total_notifications(user.id)
     info_notificaciones = get_info_notifications(user.id)
 
-    return render_template('usuarios.html', users=users, pcs=pcs,  user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
+    return render_template('usuarios.html', users=users, pcs=pcs,  user=user, tipo_usuario=tipo_usuario, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
 
 @app.route('/crear_usuario', methods=['GET', 'POST'])
 @login_required
@@ -392,13 +432,14 @@ def crear_usuario():
         nombre_user = request.form['nombre_user']
         email_user = request.form['email_user']
         psw = request.form['psw']
-        id_pc = request.form.get('computador') 
+        id_pc = request.form.get('computador')
+        tipo_usuario = request.form.get('tipo_usuario')
 
         hashed_password = generate_password_hash(psw)
         conn = get_db_connection()
 
         try:
-            conn.execute('INSERT INTO Usuario (Nombre_user, Email, Psw) VALUES (?, ?, ?)', (nombre_user, email_user, hashed_password))
+            conn.execute('INSERT INTO Usuario (Nombre_user, Email, Psw, id_tipo_usuario) VALUES (?, ?, ?, ?)', (nombre_user, email_user, hashed_password, tipo_usuario))
 
             id_usuario = conn.execute(
                 'SELECT Id_usuario FROM Usuario WHERE Nombre_user = ? AND Email = ?', (nombre_user, email_user)).fetchone()['Id_usuario']
@@ -406,18 +447,16 @@ def crear_usuario():
             sistemas = conn.execute("SELECT Id_sistema FROM Sistema").fetchall()
 
             for sistema in sistemas:
-                print(f"Inserción: Usuario ID: {id_usuario}, Sistema ID: {sistema['Id_sistema']}, PC ID: {id_pc}")
                 conn.execute(
                     "INSERT INTO Usuario_Sistema_PC (Id_usuario, Id_sistema, Id_pc, Activo) VALUES (?, ?, ?, FALSE)",
                     (id_usuario, sistema['Id_sistema'], id_pc)
                 )
-                print("se agrego a sistema")
 
             user = current_user
             fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
             fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
             descripcion_hist = (f" agregó a un nuevo usuario {nombre_user}.  {fecha_actual}")
-            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 1)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
+            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 1)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
 
             conn.commit()
         except Exception as e:
@@ -427,6 +466,7 @@ def crear_usuario():
         
         flash("Usuario creado exitosamente.", "success")
         return redirect(url_for('usuarios'))
+    
     user=current_user
     num_notificaciones_totales = get_total_notifications(user.id)
     info_notificaciones = get_info_notifications(user.id)
@@ -544,10 +584,17 @@ def reportes():
     search = request.args.get('search')
     
     if search:
-        query = f"SELECT * FROM Reportes WHERE asunto LIKE ? OR usuario_id LIKE ? ORDER BY fecha DESC"
+        query = '''SELECT Reportes.id_reporte, Reportes.asunto, Reportes.fecha, Reportes.fecha_solucion, Reportes.descripcion, Usuario.Nombre_user 
+                           FROM Reportes 
+                           INNER JOIN Usuario ON Usuario.id_usuario = Reportes.usuario_id WHERE asunto LIKE ? OR usuario_id LIKE ? ORDER BY fecha DESC'''
         reportes = conn.execute(query, ('%' + search + '%', '%' + search + '%')).fetchall()
     else:
-        reportes = conn.execute("SELECT * FROM Reportes ORDER BY fecha DESC").fetchall()
+        reportes = conn.execute('''
+                           SELECT Reportes.id_reporte, Reportes.asunto, Reportes.fecha, Reportes.fecha_solucion, Reportes.descripcion, Usuario.Nombre_user 
+                           FROM Reportes 
+                           INNER JOIN Usuario ON Usuario.id_usuario = Reportes.usuario_id
+                           ORDER BY fecha DESC
+                           ''').fetchall()
     
     conn.close()
 
@@ -557,12 +604,19 @@ def reportes():
 
     return render_template('reportes.html', reportes=reportes,  user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
 
+
 @app.route('/ver_reporte/<int:id_reporte>', methods=['GET'])
 @login_required
 def ver_reporte(id_reporte):
     conn = get_db_connection()
-    reporte = conn.execute("SELECT * FROM Reportes WHERE id_reporte = ?", (id_reporte,)).fetchone()
+    reporte = conn.execute('''
+                           SELECT Reportes.id_reporte, Reportes.asunto, Reportes.fecha, Reportes.fecha_solucion, Reportes.descripcion, Reportes.archivo, Usuario.Nombre_user 
+                           FROM Reportes 
+                           INNER JOIN Usuario ON Usuario.id_usuario = Reportes.usuario_id
+                           WHERE id_reporte = ?
+                           ''', (id_reporte,)).fetchone()
     conn.close()
+
 
     user=current_user
     num_notificaciones_totales = get_total_notifications(user.id)
@@ -711,6 +765,32 @@ def reporte_2():
 def uploaded_file(filename):
     return send_from_directory('pdf_reportes', filename)
 
+@app.route('/notificaciones', methods=['GET'])
+@login_required
+def obtener_notificaciones():
+    user_id = current_user.id
+    conn = get_db_connection()
+
+    num_notificaciones_enviadas = 0
+    num_notificaciones_totales = 0
+    
+    notificaciones = conn.execute('SELECT * FROM Notificaciones WHERE id_usuario = ? AND leido = false', (user_id,)).fetchall()
+
+    if notificaciones:
+        num_notificaciones_enviadas = conn.execute(
+            'SELECT COUNT(*) FROM Notificaciones WHERE id_usuario = ? AND leido = false',
+            (user_id,)
+        ).fetchone()[0]
+        
+        # conn.execute('UPDATE Notificaciones SET leido = true WHERE id_usuario = ? AND leido = false', (user_id,))
+        # conn.commit()  
+
+    num_notificaciones_totales = conn.execute(
+        'SELECT COUNT(*) FROM Notificaciones WHERE id_usuario = ?',
+        (user_id,)
+    ).fetchone()[0]
+
+    return render_template('prueba.html', num_notificaciones_enviadas=num_notificaciones_enviadas, num_notificaciones_totales=num_notificaciones_totales)
 
 #NOTIFICACIONES EN EL SISTEMA
 def get_total_notifications(user_id):
@@ -745,51 +825,25 @@ def marcar_notificaciones_leidas():
 
     return '', 204
 
-@app.route('/notificaciones', methods=['GET'])
-@login_required
-def obtener_notificaciones():
-    user_id = current_user.id
-    conn = get_db_connection()
-
-    num_notificaciones_enviadas = 0
-    num_notificaciones_totales = 0
-    
-    notificaciones = conn.execute('SELECT * FROM Notificaciones WHERE id_usuario = ? AND leido = false', (user_id,)).fetchall()
-
-    if notificaciones:
-        num_notificaciones_enviadas = conn.execute(
-            'SELECT COUNT(*) FROM Notificaciones WHERE id_usuario = ? AND leido = false',
-            (user_id,)
-        ).fetchone()[0]
-        
-        # conn.execute('UPDATE Notificaciones SET leido = true WHERE id_usuario = ? AND leido = false', (user_id,))
-        # conn.commit()  
-
-    num_notificaciones_totales = conn.execute(
-        'SELECT COUNT(*) FROM Notificaciones WHERE id_usuario = ?',
-        (user_id,)
-    ).fetchone()[0]
-
-    return render_template('prueba.html', num_notificaciones_enviadas=num_notificaciones_enviadas, num_notificaciones_totales=num_notificaciones_totales)
-
 
 #NOTIFICACION POR EMAIL
 def enviar_correo(destinatario, asunto, cuerpo):
-    mail = Mail(app)
-    msg = Message(asunto, recipients=[destinatario])
-    msg.body = cuerpo
     try:
+        mail = Mail(app)
+        msg = Message(asunto, recipients=[destinatario])
+        msg.body = cuerpo
         mail.send(msg)
         print(f"Correo enviado a {destinatario}")
     except Exception as e:
         print(f"Error enviando correo: {e}")
 
 def enviar_recordatorios():
-    with app.app_context():
-        conn = get_db_connection()
-        print("Revisión---")
+    try:
+        with app.app_context():
+            conn = get_db_connection()
+            print("Revisión---")
 
-        try:
+        
             today = datetime.datetime.now()
             fecha_15_dias = today + datetime.timedelta(days=15)
 
@@ -834,42 +888,33 @@ def enviar_recordatorios():
                     )
                     conn.commit()
         
-        except Exception as e:
-            print(f"Error al enviar recordatorios: {e}")
-        finally:
-            conn.close()
+    except Exception as e:
+        print(f"Error al enviar recordatorios: {e}")
+    finally:
+        conn.commit()
+        conn.close()
+        pass
 
+stop_thread = False
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#REVISION DIARIA NOTIFICACION
 def iniciar_revisiones_periodicas():
     schedule.every(1).minutes.do(enviar_recordatorios)
-    schedule.every().day.at(hrs_revisión).do(enviar_recordatorios)
+    schedule.every().day.at("08:00").do(enviar_recordatorios)  # Cambia "08:00" a tu hora deseada
 
-    while True:
+    while not stop_thread:
         schedule.run_pending()
         time.sleep(1)
 
-if __name__ == "__main__":
-    hilo_revisar_reportes = threading.Thread(target=iniciar_revisiones_periodicas)
-    hilo_revisar_reportes.start()
+# detener revisiones periodicas al detener la app
+def signal_handler(sig, frame):
+    global stop_thread
+    stop_thread = True
+    print("Deteniendo revisiones periódicas...")
+    sys.exit(0)
 
-    app.run(debug=True, use_reloader=False)
+signal.signal(signal.SIGINT, signal_handler)
 
+
+hilo_revisar_reportes = threading.Thread(target=iniciar_revisiones_periodicas)
+hilo_revisar_reportes.start()
 

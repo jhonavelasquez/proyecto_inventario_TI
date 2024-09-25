@@ -37,6 +37,10 @@ body{
     color: #FFF;
 }
 
+.titulo h2 {
+    color: #ffffff !important; /* Cambia a tu color deseado, por ejemplo, negro */
+  }
+
 .modal-body{
     width: 100%;
 }
