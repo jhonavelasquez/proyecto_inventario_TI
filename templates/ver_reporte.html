@@ -17,8 +17,9 @@
         <div class="report-details-body">
             <div class="headReporte">
                 <h5>Asunto: {{reporte['asunto']}}</h5>
-                <p class="fecha">Fecha: {{reporte['fecha']}} <br>De: {{reporte['usuario_id']}}</p>
+                <p class="fecha">Fecha: {{reporte['fecha']}} <br>De: {{reporte['Nombre_user']}}</p>
             </div>
+            <p class="fecha">Fecha de Solución: {{reporte['fecha_solucion']}}</p>
             <hr>
             {% if reporte['archivo'] %}
             <div class="archivoReporte">
@@ -27,8 +28,11 @@
                 <hr>
             </div>
             {% endif %}
+            
+            
             <div class="descripcionReporte">
-                <p><strong>Descripción:</strong></p>
+                
+                <p><strong>Descripción:</strong>  </p>
                 <div class="descripcion-text">{{ reporte['descripcion'] }}</div>
             </div>
         </div>
