@@ -210,6 +210,10 @@ div.content {
     margin-right: 10px;
 }
 
+#menu-link{
+    margin: 15px 0px 15px 0px;
+}
+
 /* Muestra la imagen cuando el enlace está activo o cuando se pasa el cursor */
 .sidebar a.active .menu-icon,
 .sidebar a:hover .menu-icon {
@@ -221,7 +225,6 @@ div.content {
     margin-top: auto;
     color: #d4d2d0;
     padding: 16px 16px 25px 16px;
-    justify-content: space-around;
     flex-direction: column;
 }
 
@@ -246,10 +249,13 @@ div.content {
 
 #cuenta {
     display: flex;
-    justify-content: start;
+    align-items: center;
 }
 
-#cuenta img {
+#icon-cuenta{
+    width: 25px;
+    border: solid 1px;
+    border-radius: 50%;
     margin-right: 8px;
 }
 
