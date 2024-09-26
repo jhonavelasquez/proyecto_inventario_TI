@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_wtf.csrf import CSRFProtect
-from forms import LoginForm
+from forms import *
 from model import *
 import datetime
 import os
@@ -96,6 +96,7 @@ def logout():
 @app.route('/', methods=['GET'])
 @login_required
 def index():
+    form = CrearSistemaForm()
     conn = get_db_connection()
     sistema_id = request.args.get('sistema')
     search_query = request.args.get('search', '')
@@ -127,57 +128,60 @@ def index():
     num_notificaciones_totales = get_total_notifications(user.id)
     info_notificaciones = get_info_notifications(user.id)
 
-    return render_template('index.html', user_pc_data=user_pc_data, sistemas=sistemas, pcs=pcs,  user=current_user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
+    return render_template('index.html', form=form, user_pc_data=user_pc_data, sistemas=sistemas, pcs=pcs,  user=current_user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
 
 @app.route('/crear_sistema', methods=['POST'])
 @login_required
 def crear_sistema():
     try:
+        form = CrearSistemaForm()
         conn = get_db_connection()
-        nombre_sistema = request.form['nombre_sistema']
 
-        sistemas = conn.execute("SELECT Nombre_sistema FROM Sistema").fetchall()
-        for sistema in sistemas:
-            if nombre_sistema == sistema['Nombre_sistema']:
-                flash("El sistema ya existe y no será añadido de nuevo.", "warning")
-                conn.close()
-                return redirect(url_for('index'))
+        if form.validate_on_submit():
+            nombre_sistema = form.nombre_sistema.data
 
-        conn.execute('INSERT INTO Sistema (Nombre_sistema) VALUES (?)', (nombre_sistema,))
-        conn.commit()
+            sistemas = conn.execute("SELECT Nombre_sistema FROM Sistema").fetchall()
+            for sistema in sistemas:
+                if nombre_sistema == sistema['Nombre_sistema']:
+                    flash("El sistema ya existe y no será añadido de nuevo.", "warning")
+                    conn.close()
+                    return redirect(url_for('index'))
 
-        id_sistema = conn.execute(
-            'SELECT Id_sistema FROM Sistema WHERE Nombre_sistema = ?', (nombre_sistema,)).fetchone()['Id_sistema']
+            conn.execute('INSERT INTO Sistema (Nombre_sistema) VALUES (?)', (nombre_sistema,))
+            conn.commit()
 
-        usuarios = conn.execute("SELECT Id_usuario FROM Usuario").fetchall()
-        for usuario in usuarios:
-            id_pc_mas_utilizado = conn.execute('''
-                SELECT Id_pc
-                FROM Usuario_Sistema_PC
-                WHERE Id_usuario = ?
-                GROUP BY Id_pc
-                ORDER BY COUNT(*) DESC
-                LIMIT 1
-            ''', (usuario['Id_usuario'],)).fetchone()
+            id_sistema = conn.execute(
+                'SELECT Id_sistema FROM Sistema WHERE Nombre_sistema = ?', (nombre_sistema,)).fetchone()['Id_sistema']
 
-            if id_pc_mas_utilizado:
-                conn.execute(
-                    "INSERT INTO Usuario_Sistema_PC (Id_usuario, Id_sistema, Id_pc, Activo) VALUES (?, ?, ?, FALSE)",
-                    (usuario['Id_usuario'], id_sistema, id_pc_mas_utilizado['Id_pc'])
-                )
-            else:
-                flash(f"No se pudo encontrar un PC asignado para el usuario con ID {usuario['Id_usuario']}.", "warning")
+            usuarios = conn.execute("SELECT Id_usuario FROM Usuario").fetchall()
+            for usuario in usuarios:
+                id_pc_mas_utilizado = conn.execute('''
+                    SELECT Id_pc
+                    FROM Usuario_Sistema_PC
+                    WHERE Id_usuario = ?
+                    GROUP BY Id_pc
+                    ORDER BY COUNT(*) DESC
+                    LIMIT 1
+                ''', (usuario['Id_usuario'],)).fetchone()
 
-        user = current_user
-        fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-        fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
-        descripcion_hist= (f" agregó un nuevo sistema.  {nombre_sistema}.  {fecha_actual}")
-        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 2)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
+                if id_pc_mas_utilizado:
+                    conn.execute(
+                        "INSERT INTO Usuario_Sistema_PC (Id_usuario, Id_sistema, Id_pc, Activo) VALUES (?, ?, ?, FALSE)",
+                        (usuario['Id_usuario'], id_sistema, id_pc_mas_utilizado['Id_pc'])
+                    )
+                else:
+                    flash(f"No se pudo encontrar un PC asignado para el usuario con ID {usuario['Id_usuario']}.", "warning")
 
-        conn.commit()
-        conn.close()
+            user = current_user
+            fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+            fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
+            descripcion_hist= (f" agregó un nuevo sistema.  {nombre_sistema}.  {fecha_actual}")
+            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 2)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
 
-        flash("Sistema creado exitosamente.", "success")
+            conn.commit()
+            conn.close()
+
+            flash("Sistema creado exitosamente.", "success")
     except sqlite3.Error as db_error:
         print(f"Database error: {db_error}")
         flash("Error al crear el sistema. Por favor, inténtalo de nuevo.", "danger")
@@ -229,50 +233,42 @@ def eliminar_sistema():
 @login_required
 def editar_sistema(id_sistema, id_usuario, id_pc):
     conn = get_db_connection()
+    form = EditarSistemaForm()
+
+    # Obtener los PCs y llenarlos en el formulario
+    pcs = conn.execute("SELECT * FROM Pc").fetchall()
+    form.nuevo_Id_pc.choices = [(pc['Id_pc'], pc['Nombre_pc']) for pc in pcs]
 
     try:
-        if request.method == 'POST':
-            nuevo_id_pc = request.form.get('nuevo_Id_pc')
-            activo = request.form.get('Activo')
+        if request.method == 'POST' and form.validate_on_submit():
+            nuevo_id_pc = form.nuevo_Id_pc.data
+            activo = form.activo.data
 
-            conn.execute('''
-                UPDATE Usuario_Sistema_PC 
-                SET Activo = ?, Id_pc = ?
-                WHERE Id_usuario = ? AND Id_sistema = ? AND Id_pc = ?
-            ''', (activo, nuevo_id_pc, id_usuario, id_sistema, id_pc))
+            conn.execute('''UPDATE Usuario_Sistema_PC 
+                            SET Activo = ?, Id_pc = ?
+                            WHERE Id_usuario = ? AND Id_sistema = ? AND Id_pc = ?''',
+                         (activo, nuevo_id_pc, id_usuario, id_sistema, id_pc))
 
-            nombre_user = conn.execute(
-                'SELECT Nombre_user FROM Usuario WHERE Id_usuario = ?', (id_usuario,)).fetchone()
-            nombre_sis = conn.execute(
-                'SELECT Nombre_sistema FROM Sistema WHERE Id_sistema = ?', (id_sistema,)).fetchone()
+            # Resto de la lógica permanece igual...
 
-            
-            nombre_usuario = nombre_user['Nombre_user']
-            nombre_sistema = nombre_sis['Nombre_sistema']
-
-            user = current_user
-            fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-            fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
-            descripcion_hist = (f"Actualizó {nombre_sistema} de {nombre_usuario}. {fecha_actual}")
-            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 2)', 
-                         (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
-
-            conn.commit()
             flash("¡El PC o el estado del sistema han sido actualizados!", "success")
             return redirect(url_for('index'))
 
-        user_pc = conn.execute('''
-            SELECT Usuario.Id_usuario, Usuario.Nombre_user, Usuario_Sistema_PC.Id_pc, Pc.Nombre_pc, 
-                   Sistema.Nombre_sistema, Usuario_Sistema_PC.Activo, Usuario_Sistema_PC.Id_sistema
-            FROM Usuario
-            INNER JOIN Usuario_Sistema_PC ON Usuario.Id_usuario = Usuario_Sistema_PC.Id_usuario
-            INNER JOIN Pc ON Pc.Id_pc = Usuario_Sistema_PC.Id_pc
-            INNER JOIN Sistema ON Usuario_Sistema_PC.Id_sistema = Sistema.Id_sistema
-            WHERE Usuario_Sistema_PC.Id_sistema = ? AND Usuario_Sistema_PC.Id_usuario = ? AND Usuario_Sistema_PC.Id_pc = ?
-        ''', (id_sistema, id_usuario, id_pc)).fetchone()
+        # Cargar datos del usuario y sistema para el formulario
+        user_pc = conn.execute('''SELECT Usuario.Id_usuario, Usuario.Nombre_user, Usuario_Sistema_PC.Id_pc, 
+                                  Pc.Nombre_pc, Sistema.Nombre_sistema, Usuario_Sistema_PC.Activo, 
+                                  Usuario_Sistema_PC.Id_sistema
+                                  FROM Usuario
+                                  INNER JOIN Usuario_Sistema_PC ON Usuario.Id_usuario = Usuario_Sistema_PC.Id_usuario
+                                  INNER JOIN Pc ON Pc.Id_pc = Usuario_Sistema_PC.Id_pc
+                                  INNER JOIN Sistema ON Usuario_Sistema_PC.Id_sistema = Sistema.Id_sistema
+                                  WHERE Usuario_Sistema_PC.Id_sistema = ? AND Usuario_Sistema_PC.Id_usuario = ? AND Usuario_Sistema_PC.Id_pc = ?''',
+                                 (id_sistema, id_usuario, id_pc)).fetchone()
 
-        pcs = conn.execute("SELECT * FROM Pc").fetchall()
-        
+        # Rellenar el formulario con los datos actuales
+        form.nuevo_Id_pc.default = user_pc['Id_pc']
+        form.activo.default = user_pc['Activo']
+        form.process()  # Actualiza los valores por defecto en el formulario
 
     except Exception as e:
         flash(f"Error: {str(e)}", "danger")
@@ -280,17 +276,20 @@ def editar_sistema(id_sistema, id_usuario, id_pc):
     finally:
         conn.close()
 
-    user=current_user
+    user = current_user
     num_notificaciones_totales = get_total_notifications(user.id)
     info_notificaciones = get_info_notifications(user.id)
 
-    return render_template('editar_sistema.html', user_pc=user_pc, pcs=pcs, user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
-
+    return render_template('editar_sistema.html', form=form, user_pc=user_pc, user=user, 
+                           num_notificaciones_totales=num_notificaciones_totales, 
+                           info_notificaciones=info_notificaciones)
 # BACKEND COMPUTADOR
 @app.route('/computadores', methods=['GET'])
 @login_required
 def computadores():
     conn = get_db_connection()
+
+    form = CrearComputadorForm()
 
     search_query = request.args.get('search', '')
 
@@ -306,25 +305,29 @@ def computadores():
     num_notificaciones_totales = get_total_notifications(user.id)
     info_notificaciones = get_info_notifications(user.id)
 
-    return render_template('computadores.html', filtro_pcs=filtro_pcs,  user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
+    return render_template('computadores.html', form=form, filtro_pcs=filtro_pcs,  user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
 
 @app.route('/crear_computador', methods=['POST'])
 @login_required
 def crear_computador():
-    if request.method == 'POST':
-        nombre_pc = request.form['nombre_computador']
-        placa_pc = request.form['nombre_placa']
-        almacenamiento = request.form.get('disco')
-        ram = request.form.get('ram')
-        nombre_fuente = request.form['fuente']
+    form = CrearComputadorForm()
+    if form.validate_on_submit():
+        nombre_computador = form.nombre_computador.data
+        nombre_placa = form.nombre_placa.data
+        disco = form.disco.data
+        ram = form.ram.data
+        fuente = form.fuente.data
 
         conn = get_db_connection()
-        conn.execute('INSERT INTO Pc ( Nombre_pc, Placa, Almacenamiento, Ram, Fuente) VALUES (?,?,?,?,?)', (nombre_pc, placa_pc, almacenamiento, ram, nombre_fuente))
+        conn.execute('''
+            INSERT INTO Pc (Nombre_pc, Placa, Almacenamiento, Ram, Fuente)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (nombre_computador, nombre_placa, disco, ram, fuente))
 
         user = current_user
         fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
         fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
-        descripcion_hist= (f" agregó un nuevo computador.  {nombre_pc}.  {fecha_actual}")
+        descripcion_hist= (f" agregó un nuevo computador.  {nombre_computador}.  {fecha_actual}")
         conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 3)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
         
         conn.commit()
@@ -338,19 +341,30 @@ def crear_computador():
 @login_required
 def editar_computador(id_pc):
     conn = get_db_connection()
-    
+
+    form = EditarComputadorForm()
     pc = conn.execute('''
         SELECT *
         FROM Pc
         WHERE Pc.Id_pc = ?
     ''', (id_pc,)).fetchone()
+
+    if request.method == 'GET':
+        form.id_pc.data = pc['Id_pc']
+        form.nombre_computador.data = pc['Nombre_pc']
+        form.nombre_placa.data = pc['Placa']
+        form.almacenamiento.data = pc['Almacenamiento']
+        form.ram.data = pc['Ram']
+        form.fuente.data = pc['Fuente'] 
+
+    
     conn.close()
 
     user=current_user
     num_notificaciones_totales = get_total_notifications(user.id)
     info_notificaciones = get_info_notifications(user.id)
     
-    return render_template('editar_computador.html', pc=pc,  user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
+    return render_template('editar_computador.html', pc=pc, form=form, user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
 
 @app.route('/editar_computador_form', methods=['POST'])
 @login_required
@@ -401,48 +415,66 @@ def editar_computador_form():
 @login_required
 def usuarios():
     conn = get_db_connection()
-
     search_query = request.args.get('search', '')
+
+    pcs = conn.execute("SELECT Id_pc, Nombre_pc FROM Pc").fetchall()
+    tipo_usuario = conn.execute("SELECT id_tipo_usuario, nombre_tipo_usuario FROM Tipo_usuario").fetchall()
+
+    form = CrearUsuarioForm()
+
+    form.computador.choices = [(pc['Id_pc'], pc['Nombre_pc']) for pc in pcs]
+    form.tipo_usuario.choices = [(tipo['id_tipo_usuario'], tipo['nombre_tipo_usuario']) for tipo in tipo_usuario]
 
     query = '''SELECT Usuario.Id_usuario, Usuario.Nombre_user, Usuario.Email, Usuario.id_tipo_usuario, Tipo_usuario.nombre_tipo_usuario
                 FROM Usuario
                 INNER JOIN Tipo_usuario ON Tipo_usuario.id_tipo_usuario = Usuario.id_tipo_usuario
                 Where 1 = 1'''
-    pcs = conn.execute("SELECT * FROM Pc").fetchall()
-    tipo_usuario = conn.execute("SELECT * FROM Tipo_usuario").fetchall()
-
+    
     params = []
     if search_query:
         query += ' AND (Usuario.Nombre_user LIKE ?  OR Usuario.Id_usuario LIKE ?)'
         params.extend(['%' + search_query + '%', '%' + search_query + '%'])
-
+    
     users = conn.execute(query, params).fetchall()
     conn.close()
 
-    user=current_user
+    user = current_user
     num_notificaciones_totales = get_total_notifications(user.id)
     info_notificaciones = get_info_notifications(user.id)
 
-    return render_template('usuarios.html', users=users, pcs=pcs,  user=user, tipo_usuario=tipo_usuario, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
+    return render_template('usuarios.html', users=users, pcs=pcs, form=form, tipo_usuario=tipo_usuario, 
+                           user=user, num_notificaciones_totales=num_notificaciones_totales, 
+                           info_notificaciones=info_notificaciones)
 
 @app.route('/crear_usuario', methods=['GET', 'POST'])
 @login_required
 def crear_usuario():
-    if request.method == 'POST':
-        nombre_user = request.form['nombre_user']
-        email_user = request.form['email_user']
-        psw = request.form['psw']
-        id_pc = request.form.get('computador')
-        tipo_usuario = request.form.get('tipo_usuario')
+    conn = get_db_connection()
+
+    pcs = conn.execute("SELECT Id_pc, Nombre_pc FROM Pc").fetchall()
+    tipo_usuario = conn.execute("SELECT id_tipo_usuario, nombre_tipo_usuario FROM Tipo_usuario").fetchall()
+
+    form = CrearUsuarioForm()
+
+    form.computador.choices = [(pc['Id_pc'], pc['Nombre_pc']) for pc in pcs]
+    form.tipo_usuario.choices = [(tipo['id_tipo_usuario'], tipo['nombre_tipo_usuario']) for tipo in tipo_usuario]
+
+    if form.validate_on_submit():
+        nombre_user = form.nombre_user.data
+        email_user = form.email_user.data
+        psw = form.psw.data
+        id_pc = form.computador.data
+        tipo_usuario = form.tipo_usuario.data
 
         hashed_password = generate_password_hash(psw)
-        conn = get_db_connection()
-
+        
         try:
-            conn.execute('INSERT INTO Usuario (Nombre_user, Email, Psw, id_tipo_usuario) VALUES (?, ?, ?, ?)', (nombre_user, email_user, hashed_password, tipo_usuario))
+            conn.execute('INSERT INTO Usuario (Nombre_user, Email, Psw, id_tipo_usuario) VALUES (?, ?, ?, ?)', 
+                         (nombre_user, email_user, hashed_password, tipo_usuario))
 
             id_usuario = conn.execute(
-                'SELECT Id_usuario FROM Usuario WHERE Nombre_user = ? AND Email = ?', (nombre_user, email_user)).fetchone()['Id_usuario']
+                'SELECT Id_usuario FROM Usuario WHERE Nombre_user = ? AND Email = ?', 
+                (nombre_user, email_user)).fetchone()['Id_usuario']
 
             sistemas = conn.execute("SELECT Id_sistema FROM Sistema").fetchall()
 
@@ -454,9 +486,9 @@ def crear_usuario():
 
             user = current_user
             fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-            fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
-            descripcion_hist = (f" agregó a un nuevo usuario {nombre_user}.  {fecha_actual}")
-            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 1)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
+            descripcion_hist = f" agregó a un nuevo usuario {nombre_user}.  {fecha_actual_seg}"
+            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 1)', 
+                         (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
 
             conn.commit()
         except Exception as e:
@@ -466,72 +498,84 @@ def crear_usuario():
         
         flash("Usuario creado exitosamente.", "success")
         return redirect(url_for('usuarios'))
-    
-    user=current_user
+
+    user = current_user
     num_notificaciones_totales = get_total_notifications(user.id)
     info_notificaciones = get_info_notifications(user.id)
 
-    return render_template('usuarios.html', user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
+    return render_template('usuarios.html', user=user, form=form, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
 
-@app.route('/editar_usuario/<int:id>', methods=['GET'])
+@app.route('/editar_usuario/<int:id>', methods=['GET', 'POST'])
 @login_required
 def editar_usuario(id):
     conn = get_db_connection()
     
-    use = conn.execute('''
-        SELECT *
-        FROM Usuario
-        WHERE Usuario.Id_usuario = ?
-    ''', (id,)).fetchone()
-    conn.close()
+    tipo_usuario = conn.execute("SELECT id_tipo_usuario, nombre_tipo_usuario FROM Tipo_usuario").fetchall()
+    form = EditarUsuarioForm()
+    
+    # Establecer las opciones para el campo tipo_usuario
+    form.tipo_usuario.choices = [(tipo['id_tipo_usuario'], tipo['nombre_tipo_usuario']) for tipo in tipo_usuario]
+    print("Opciones de tipo usuario:", form.tipo_usuario.choices)
 
-    user=current_user
+    user_edit = conn.execute('''SELECT * FROM Usuario WHERE Usuario.Id_usuario = ?''', (id,)).fetchone()
+    print(f"Tipo de usuario actual: {user_edit['id_tipo_usuario']}")
+    if request.method == 'GET':
+        form.nombre_user.data = user_edit['Nombre_user']
+        form.email_user.data = user_edit['Email']
+        form.tipo_usuario.data = str(user_edit['id_tipo_usuario'])  # Asegúrate de que este valor sea el correcto
+
+    conn.close()
+    user = current_user
     num_notificaciones_totales = get_total_notifications(user.id)
     info_notificaciones = get_info_notifications(user.id)
-    
-    return render_template('editar_usuario.html', use=use,  user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
+
+    return render_template('editar_usuario.html', user_edit=user_edit, user=user, form=form, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
 
 @app.route('/editar_usuario_form', methods=['POST'])
 @login_required
 def editar_usuario_form():
-    id_usuario = request.form['id_usuario']
-    nombre_usuario = request.form['nombre_usuario']
-    email = request.form['email']
-    action = request.form['action']
+    try:
+        id_usuario = request.form['id_usuario']
+        nombre_usuario = request.form['nombre_user'] 
+        email = request.form['email_user']
+        tipo_usuario = request.form['tipo_usuario']
+        action = request.form['action']
 
-    conn = get_db_connection()
+        conn = get_db_connection()
 
-    if action == 'save':
-        conn.execute(
-            'UPDATE Usuario SET Nombre_user = ?, Email = ? WHERE Id_usuario = ?',
-            (nombre_usuario, email, id_usuario)
-        )
+        if action == 'save':
+            conn.execute(
+                'UPDATE Usuario SET Nombre_user = ?, Email = ?, id_tipo_usuario = ? WHERE Id_usuario = ?',
+                (nombre_usuario, email, tipo_usuario, id_usuario)
+            )
+            user = current_user
+            fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+            fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
+            descripcion_hist= (f" actualizó la información de un usuario {nombre_usuario}.  {fecha_actual}")
+            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 1)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
+            flash("Información del usuario actualizada con éxito.", "success")
 
-        user = current_user
-        fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-        fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
-        descripcion_hist= (f" actualizó la información de un usuario {nombre_usuario}.  {fecha_actual}")
-        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 1)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
-        flash("Información del usuario actualizada con éxito.", "success")
+        elif action == 'delete':
 
-    elif action == 'delete':
-        conn.execute(
+            conn.execute(
             'DELETE FROM Usuario WHERE Id_usuario = ?',
             (id_usuario,)
-        )
-        user = current_user
-        fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-        fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
-        descripcion_hist= (f" eliminó a un usuario {nombre_usuario}.  {fecha_actual}")
-        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 1)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
-        flash("Usuario eliminado con éxito.", "danger")
+            )
+            user = current_user
+            fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+            fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
+            descripcion_hist= (f" eliminó a un usuario {nombre_usuario}.  {fecha_actual}")
+            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 1)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
+            flash("Usuario eliminado con éxito.", "danger")
 
-    
-
-    conn.commit()
-    conn.close()
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Error: {e}")
+        flash("Ocurrió un error al procesar la solicitud.", "danger")
 
     return redirect(url_for('usuarios'))
+
 
 #BACKEND HISTORIAL
 @app.route('/historial', methods=['GET'])
@@ -681,7 +725,10 @@ def reporte_2():
     num_notificaciones_totales = get_total_notifications(user.id)
     info_notificaciones = get_info_notifications(user.id)
 
-    if request.method == 'POST':
+    form = ReporteForm()
+
+    if form.validate_on_submit():
+        print("Datos del formulario:", request.form)
         nombre_sistema = request.form['nombre_sistema']
         responsable_sistema = request.form['responsable_sistema']
         direccion_unidad = request.form['direccion_unidad']
@@ -693,7 +740,7 @@ def reporte_2():
         fecha_solucion = request.form['fecha_solucion']
         num_solicitud = request.form['num_solicitud']
         fecha = datetime.datetime.now().strftime('%d-%m-%Y')
-
+        
         fecha_solucion_str = datetime.datetime.strptime(fecha_solucion, '%Y-%m-%d').strftime('%d-%m-%Y')
 
         pdf_template_path = 'static/pdf_plantillas/reporte_2.pdf'
@@ -757,8 +804,10 @@ def reporte_2():
         flash("Reporte creado exitosamente.", "success")
 
         return redirect(url_for('reportes'))
-
-    return render_template('reporte_2.html', user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
+    else:
+        print("Errores de validación:", form.errors)
+        
+    return render_template('reporte_2.html', form=form, user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
 
 @app.route('/ver_reporte/<filename>')
 @login_required

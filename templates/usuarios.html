@@ -38,43 +38,47 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="post" action="{{ url_for('crear_usuario') }}">
+                {{ form.hidden_tag() }}
                 <div class="modal-body">
                     <div class="form-floating mb-5 position-relative">
-                        <input type="text" class="form-control" id="userName" name="nombre_user" placeholder="" onkeyup="javascript:this.value=this.value.toUpperCase();" required>
+                        {{ form.nombre_user(class="form-control", id="userName", onkeyup="javascript:this.value=this.value.toUpperCase();", placeholder="") }}
                         <label for="userName" class="form-label">Nombre del Usuario</label>
                     </div>
+                    
                     <div class="form-floating mb-5 position-relative">
-                        <input type="text" class="form-control" id="email_user" name="email_user" placeholder="" onkeyup="javascript:this.value=this.value.toUpperCase();" required>
+                        {{ form.email_user(class="form-control", id="email_user", onkeyup="javascript:this.value=this.value.toUpperCase();", placeholder="") }}
                         <label for="email_user" class="form-label">Email</label>
                     </div>
+                    
                     <div class="form-floating mb-5 position-relative">
-                        <input type="password" class="form-control" id="psw" name="psw" placeholder="" required>
+                        {{ form.psw(class="form-control", id="psw", placeholder="") }}
                         <label for="psw" class="form-label">Contraseña</label>
                         <button type="button" class="btn btn-light position-absolute top-50 end-0 translate-middle-y" id="togglePassword">
-                            <img src="{{ url_for('static', filename='img/icon-psw.png') }}"  alt="icon-psw" id="icon-psw">
+                            <img src="{{ url_for('static', filename='img/icon-psw.png') }}" alt="icon-psw" id="icon-psw">
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
+                    
                     <div class="form-floating mb-5 position-relative">
-                        <input type="password" class="form-control" id="psw_confirm" name="psw_confirm" placeholder="" required>
+                        {{ form.psw_confirmar(class="form-control", id="psw_confirm", placeholder="") }}
                         <label for="psw_confirm" class="form-label">Confirmar Contraseña</label>
                         <button type="button" class="btn btn-outline-secondary position-absolute top-50 end-0 translate-middle-y" id="togglePassword2">
-                            <img src="{{ url_for('static', filename='img/icon-psw.png') }}"  alt="icon-psw" id="icon-psw">
+                            <img src="{{ url_for('static', filename='img/icon-psw.png') }}" alt="icon-psw" id="icon-psw">
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
+                    
                     <div class="form-floating mb-5">
-                        <select class="form-select" id="computador" name="computador">
-                            <option selected>Asignar Computador</option>
-                            {% for pc in pcs %}
-                            <option value="{{ pc['Id_pc'] }}">
-                                {{ pc['Nombre_pc'] }}
-                            </option>
-                            {% endfor %}
-                        </select>
+                        {{ form.computador(class="form-select", id="computador") }}
                         <label for="computador">Computador</label>
                     </div>
+
+                    <div class="form-floating mb-5">
+                        {{ form.tipo_usuario(class="form-select", id="tipo_usuario") }}
+                        <label for="tipo_usuario">Tipo de usuario</label>
+                    </div>
                 </div>
+                
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                     <button type="submit" class="btn btn-primary">Guardar</button>
@@ -83,6 +87,7 @@
         </div>
     </div>
 </div>
+
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -135,6 +140,7 @@
             <th>ID</th>
             <th>Nombre del Usuario</th>
             <th class="responsive">Email</th>
+            <th class="responsive">Rol</th>
             <th></th>
         </tr>
     </thead>
@@ -144,6 +150,7 @@
             <td>{{ row['Id_usuario'] }}</td>
             <td>{{ row['Nombre_user'] }}</td>
             <td class="responsive">{{ row['email'] }}</td>
+            <td class="responsive">{{ row['nombre_tipo_usuario'] }}</td>
             <td>
                 <a href="{{ url_for('editar_usuario', id=row['Id_usuario']) }}" class="btn btn-warning">Editar</a>
             </td>

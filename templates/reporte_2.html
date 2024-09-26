@@ -10,49 +10,46 @@
     <div class="block-reveal" style="--bc: #2b3034; --d: 0.5s">Generar Reporte</div>
 </h1>
 <div class="contenedor">
-    <!-- <div>
-        <h2>Reporte 2</h2>
-    </div> -->
     <form method="POST" action="{{ url_for('reporte_2') }}" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
         <div class="columna-left">
             <div class="row g-2">
                 <div class="col-sm">
-                    <label for="num_solicitud" class="form-label">N° Solicitud:</label>
-                    <input type="text" class="form-control" id="num_solicitud" name="num_solicitud" required>
+                    {{ form.num_solicitud.label(class="form-label") }}
+                    {{ form.num_solicitud(class="form-control") }}
                 </div>
                 <div class="col-sm">
-                    <label for="version" class="form-label">Versión:</label>
-                    <input type="text" class="form-control" id="version" name="version" required>
+                    {{ form.version.label(class="form-label") }}
+                    {{ form.version(class="form-control") }}
                 </div>
             </div>
             <div class="mb-3">
-                <label for="nombre_sistema" class="form-label">Nombre del Sistema:</label>
-                <input type="text" class="form-control" id="nombre_sistema" name="nombre_sistema" required>
+                {{ form.nombre_sistema.label(class="form-label") }}
+                {{ form.nombre_sistema(class="form-control") }}
             </div>
             <div class="mb-3">
-                <label for="responsable_sistema" class="form-label">Responsable del sistema:</label>
-                <input type="text" class="form-control" id="responsable_sistema" name="responsable_sistema" required>
+                {{ form.responsable_sistema.label(class="form-label") }}
+                {{ form.responsable_sistema(class="form-control") }}
             </div>
             <div class="mb-3">
-                <label for="direccion_unidad" class="form-label">Dirección/Unidad:</label>
-                <input type="text" class="form-control" id="direccion_unidad" name="direccion_unidad" required>
+                {{ form.direccion_unidad.label(class="form-label") }}
+                {{ form.direccion_unidad(class="form-control") }}
             </div>
             <div class="mb-3">
-                <label for="nombre_solicitante" class="form-label">Nombre Solicitante:</label>
-                <input type="text" class="form-control" id="nombre_solicitante" name="nombre_solicitante" required>
+                {{ form.nombre_solicitante.label(class="form-label") }}
+                {{ form.nombre_solicitante(class="form-control") }}
             </div>
             <div class="mb-3">
-                <label for="fecha_solucion" class="form-label">Fecha de Solución:</label>
-                <input type="date" class="form-control" id="fecha_solucion" name="fecha_solucion" required>
+                {{ form.fecha_solucion.label(class="form-label") }}
+                {{ form.fecha_solucion(class="form-control") }}
             </div>
             <div class="mb-3">
-                <label for="responsable_ddi" class="form-label">Responsable DDI:</label>
-                <input type="text" class="form-control" id="responsable_ddi" name="responsable_ddi" required>
+                {{ form.responsable_ddi.label(class="form-label") }}
+                {{ form.responsable_ddi(class="form-control") }}
             </div>
             <div class="mb-3">
-                <label for="responsable_solicitud" class="form-label">Responsable Solicitud:</label>
-                <input type="text" class="form-control" id="responsable_solicitud" name="responsable_solicitud"
-                    required>
+                {{ form.responsable_solicitud.label(class="form-label") }}
+                {{ form.responsable_solicitud(class="form-control") }}
             </div>
         </div>
         <div class="columna-right">
@@ -63,19 +60,16 @@
             <br>
             <button type="submit" class="btn btn-primary">Generar PDF</button>
         </div>
-
     </form>
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
     <script>
         var options = {
-        placeholder: 'Escribe tu reporte aquí...',
-        theme: 'snow',
-         modules: {
-                toolbar: [
-                ]
+            placeholder: 'Escribe tu reporte aquí...',
+            theme: 'snow',
+            modules: {
+                toolbar: []
             }
         };
-        
         
         var quill = new Quill('#editor', options);
 
@@ -83,7 +77,6 @@
         const hiddenDescription = document.querySelector('#descripcion-hidden');
 
         form.addEventListener('submit', function () {
-            // Extraer el texto plano del editor Quill
             const plainText = quill.getText();
             hiddenDescription.value = plainText;
         });

@@ -28,8 +28,7 @@
 </div>
 
 <!-- AGREGAR COMPUTADOR -->
-<div class="modal fade" id="ModalAgregarComputador" tabindex="-1" aria-labelledby="ModalAgregarComputador"
-    aria-hidden="true">
+<div class="modal fade" id="ModalAgregarComputador" tabindex="-1" aria-labelledby="ModalAgregarComputador" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -37,31 +36,28 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="post" action="{{ url_for('crear_computador') }}">
+                {{ form.hidden_tag() }}
                 <div class="modal-body">
                     <div class="form-floating mb-3">
-                        <input type="text" id="nombre_computador" name="nombre_computador" class="form-control"
-                            placeholder="" onkeyup="javascript:this.value=this.value.toUpperCase();">
+                        {{ form.nombre_computador(class="form-control", onkeyup="javascript:this.value=this.value.toUpperCase();") }}
                         <label for="nombre_computador">Nombre del Computador</label>
                     </div>
                     <div class="form-floating mb-3">
-                        <input type="text" id="nombre_placa" name="nombre_placa" class="form-control" placeholder=""
-                        onkeyup="javascript:this.value=this.value.toUpperCase();">
+                        {{ form.nombre_placa(class="form-control", onkeyup="javascript:this.value=this.value.toUpperCase();") }}
                         <label for="nombre_placa">Nombre de Placa</label>
                     </div>
                     <div class="form-floating mb-3">
-                        <input type="number" id="disco" name="disco" class="form-control" placeholder=""
-                            value="">
+                        {{ form.disco(class="form-control") }}
                         <label for="disco">Total Almacenamiento (GB)</label>
                     </div>
                     <div class="form-floating mb-3">
-                        <input type="number" id="ram" name="ram" class="form-control" placeholder="" value="">
+                        {{ form.ram(class="form-control") }}
                         <label for="ram">Total de Ram (GB)</label>
                     </div>
                     <div class="form-floating mb-3">
-                        <input type="text" id="fuente" name="fuente" class="form-control" placeholder="" onkeyup="javascript:this.value=this.value.toUpperCase();">
+                        {{ form.fuente(class="form-control", onkeyup="javascript:this.value=this.value.toUpperCase();") }}
                         <label for="fuente">Fuente de Poder</label>
                     </div>
-                    
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -71,6 +67,7 @@
         </div>
     </div>
 </div>
+
 
 
 {% with messages = get_flashed_messages(with_categories=true) %}

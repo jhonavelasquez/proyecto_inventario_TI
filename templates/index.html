@@ -64,25 +64,26 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="agregarSistema" >Agregar Nuevo Sistema</h5>
+                <h5 class="modal-title" id="agregarSistema">Agregar Nuevo Sistema</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="post" action="{{ url_for('crear_sistema') }}">
+            <form method="POST" action="{{ url_for('crear_sistema') }}">
+                {{ form.hidden_tag() }}
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="systemName" class="form-label">Nombre del Sistema</label>
-                        <input type="text" class="form-control" id="systemName" name="nombre_sistema" required>
+                        {{ form.nombre_sistema.label(class="form-label") }}
+                        {{ form.nombre_sistema(class="form-control") }} <!-- Aquí se utiliza el campo de formulario -->
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    {{ form.submit(class="btn btn-primary") }}
                 </div>
             </form>
-
         </div>
     </div>
 </div>
+
 
 
 

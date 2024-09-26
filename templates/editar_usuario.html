@@ -12,21 +12,26 @@
         <a id="botonBack" href="{{url_for('usuarios')}}" aria-valuetext="a"><img id="imgBack" src="{{ url_for('static', filename='img/icon-back.png')}}" alt="icon-back" width="30px"></a>
     </div>
     <form id="editForm" method="post" action="{{ url_for('editar_usuario_form') }}">
+        {{ form.hidden_tag() }}
         <div class="modal-body">
-            <input type="hidden" name="id_usuario" id="id_usuario" value="{{ use['Id_usuario'] }}">
+            <input type="hidden" name="id_usuario" id="id_usuario" value="{{ user_edit['Id_usuario'] }}">
             <input type="hidden" name="action" id="action" value="">
             <h2>Editar Usuario</h2>
-            <p>Actualiza la informacion del usuario <b>{{ use['Nombre_user'] }} (#{{ use['Id_usuario'] }}) </b></p>
+            <p>Actualiza la informacion del usuario <b>{{ user_edit['Nombre_user'] }} (#{{ user_edit['Id_usuario'] }}) </b></p>
             
             <div class="form-floating mb-3">
-                <input type="text" id="nombre_usuario" name="nombre_usuario" class="form-control" placeholder="" value="{{ use['Nombre_user'] }}">
+                {{ form.nombre_user(class="form-control", id="nombre_usuario", onkeyup="javascript:this.value=this.value.toUpperCase();", placeholder="") }}
                 <label for="nombre_usuario">Nombre</label>
             </div>
-
+            
             <div class="form-floating mb-3">
-                <input type="email" id="email" name="email" class="form-control" placeholder="" value="{{ use['Email'] }}">
+                {{ form.email_user(class="form-control", id="email_user", onkeyup="javascript:this.value=this.value.toUpperCase();", placeholder="") }}
                 <label for="email">Email</label>
             </div>
+            <div class="form-floating mb-5">
+                {{ form.tipo_usuario(class="form-select", id="tipo_usuario") }}
+                <label for="tipo_usuario">Tipo de usuario</label>
+            </div>            
             
         </div>
         <div class="Botones_editarUsuario">

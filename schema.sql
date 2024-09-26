@@ -6,6 +6,7 @@ DROP TABLE IF EXISTS Reportes;
 DROP TABLE IF EXISTS Historial;
 DROP TABLE IF EXISTS Categoria_historial;
 DROP TABLE IF EXISTS Notificaciones;
+DROP TABLE IF EXISTS Tipo_usuario;
 
 CREATE TABLE Usuario (
     Id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
