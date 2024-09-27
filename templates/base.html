@@ -83,22 +83,25 @@
         src="{{ url_for('static', filename='img/icon-sistemas.png') }}" alt="icon-Sistema">
       <b id="menu-link">Sistema</b>
     </a>
+    {% if session['id_tipo_usuario'] == 1 %}
     <a href="{{ url_for('usuarios') }}" class="slide_right {% if request.endpoint == 'usuarios' %}active{% endif %}">
       <img id="icon-usuarios" class="menu-icon {% if request.endpoint == 'usuarios' %}show{% endif %}"
         src="{{ url_for('static', filename='img/icon-usuarios.png') }}" alt="icon-Usuarios">
       <b id="menu-link">Usuarios</b>
     </a>
+    {% endif %}
     <a href="{{ url_for('computadores') }}"
       class="slide_right {% if request.endpoint == 'computadores' %}active{% endif %}">
       <img id="icon-computadores" class="menu-icon {% if request.endpoint == 'computadores' %}show{% endif %}"
         src="{{ url_for('static', filename='img/icon-computador.png') }}" alt="icon-Pc">
       <b id="menu-link">Computadores</b>
     </a>
+    {% if session['id_tipo_usuario'] == 1 %}
     <a href="{{ url_for('reportes') }}" class="slide_right {% if request.endpoint == 'reportes' %}active{% endif %}">
       <img id="icon-reportes" class="menu-icon {% if request.endpoint == 'reportes' %}show{% endif %}"
         src="{{ url_for('static', filename='img/icon-documento.png') }}" alt="icon-documentos">
       <b id="menu-link">Reportes</b>
-
+    {% endif %}
     </a>
     <a href="{{ url_for('historial') }}" class="slide_right {% if request.endpoint == 'historial' %}active{% endif %}">
       <img id="icon-historial" class="menu-icon {% if request.endpoint == 'historial' %}show{% endif %}"

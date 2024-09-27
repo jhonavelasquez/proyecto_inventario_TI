@@ -13,7 +13,7 @@ CREATE TABLE Usuario (
     Nombre_user VARCHAR(100),
     Email VARCHAR(100),
     Psw VARCHAR(100),
-    id_tipo_usuario,
+    id_tipo_usuario INTEGER,
     FOREIGN KEY (id_tipo_usuario) REFERENCES Tipo_usuario(id_tipo_usuario)
 );
 
@@ -22,6 +22,7 @@ CREATE TABLE Tipo_usuario (
     id_tipo_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
     nombre_tipo_usuario VARCHAR(100)
 );
+
 
 CREATE TABLE Pc (
     Id_pc INTEGER PRIMARY KEY AUTOINCREMENT,

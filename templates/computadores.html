@@ -22,8 +22,10 @@
         </form>
     </div>
     <div class="Botones_Computador">
+        {% if session['id_tipo_usuario'] == 1 or session['id_tipo_usuario'] == 3 %}
         <button class="button_slide slide_right" data-bs-toggle="modal" data-bs-target="#ModalAgregarComputador"><img id="agregar" src="{{ url_for('static', filename='img/icon-agregar.png') }}" alt="icon-agregar" width="30px"><b>Agregar Nuevo
             Computador</b></button>
+        {% endif %}
     </div>
 </div>
 
@@ -91,7 +93,9 @@
             <th class="responsive">Almacenamiento</th>
             <th class="responsive">Ram</th>
             <th class="responsive">Fuente</th>
+            {% if session['id_tipo_usuario'] == 1 or session['id_tipo_usuario'] == 3 %}
             <th class="responsive"></th>
+            {% endif %}
         </tr>
     </thead>
     <tbody>
@@ -102,9 +106,11 @@
             <td class="responsive">{{ row['Almacenamiento'] }} GB</td>
             <td class="responsive">{{ row['Ram'] }} GB</td>
             <td class="responsive">{{ row['Fuente'] }}</td>
+            {% if session['id_tipo_usuario'] == 1 or session['id_tipo_usuario'] == 3 %}
             <td >
                 <a href="{{ url_for('editar_computador', id_pc=row['Id_pc']) }}" class="btn btn-warning">Editar</a>
             </td>
+            {% endif %}
         </tr>
         {% endfor %}
     </tbody>

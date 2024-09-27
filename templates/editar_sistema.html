@@ -13,18 +13,18 @@
         </a>
     </div>
     <form id="editForm" method="post" action="{{ url_for('editar_sistema', id_sistema=user_pc['Id_sistema'], id_usuario=user_pc['Id_usuario'], id_pc=user_pc['Id_pc']) }}">
-        {{ form.hidden_tag() }} <!-- Asegúrate de que 'form' esté definido -->
+        {{ form.hidden_tag() }}
         <h2>Editar Sistema</h2>
         <p>Asigna un nuevo computador a <b>{{ user_pc['Nombre_user'] }}</b> o actívale el sistema <b>{{ user_pc['Nombre_sistema'] }}</b></p>
         
         <div class="form-floating mb-3">
-            {{ form.nuevo_Id_pc.label(class="form-label") }}
-            {{ form.nuevo_Id_pc(class="form-select") }} <!-- Campo de selección de PC -->
+            {{ form.nuevo_Id_pc(class="form-select", id="nuevo_Id_pc") }}
+                <label for="nuevo_Id_pc">Seleccionar Computador</label>
         </div>
 
-        <div class="form-floating mb-3">
-            {{ form.activo.label(class="form-label") }}
-            {{ form.activo(class="form-check-input") }} <!-- Campo de checkbox para estado -->
+        <div class="form-check mb-3" id="checkActivo">
+            {{ form.activo(class="form-check-input") }} <!-- Campo checkbox -->
+            {{ form.activo.label(class="form-check-label ms-2") }} <!-- Label al lado del checkbox -->
         </div>
 
         <button type="submit" class="btn btn-primary">Guardar cambios</button>

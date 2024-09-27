@@ -13,8 +13,11 @@ class CrearSistemaForm(FlaskForm):
 
 class EditarSistemaForm(FlaskForm):
     nuevo_Id_pc = SelectField('Seleccionar Computador', coerce=int, validators=[DataRequired()])
-    activo = BooleanField('Activo')
+    activo = BooleanField('Activar Sistema')
     submit = SubmitField('Guardar cambios')
+
+class EliminarSistemaForm(FlaskForm):
+    sistema = SelectField('Seleccionar Sistema', coerce=int, validators=[DataRequired()])
 
 class CrearUsuarioForm(FlaskForm):
     nombre_user = StringField('Nombre de usuario', validators=[DataRequired()])

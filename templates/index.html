@@ -21,18 +21,19 @@
     <div class="filtros">
         <form method="get" action="{{ url_for('index') }}" id="filtro-form">
             <div class="doble-filtro-sistema">
-                <div >
+                <div>
                     <div class="filtro">
                         <select class="form-select form-select-bg" name="sistema" aria-label="Selecciona un Sistema">
                             <option value="">Selecciona un Sistema</option>
                             {% for sistema in sistemas %}
-                            <option value="{{ sistema['Id_sistema'] }}" {% if request.args.get('sistema')==sistema['Id_sistema'] %} selected {% endif %}>
+                            <option value="{{ sistema['Id_sistema'] }}" {% if
+                                request.args.get('sistema')==sistema['Id_sistema'] %} selected {% endif %}>
                                 {{ sistema['Nombre_sistema'] }}
                             </option>
                             {% endfor %}
                         </select>
                     </div>
-        
+
                     <div class="filtro">
                         <input class="form-control me-2" type="search" name="search"
                             placeholder="Buscar por nombre de usuario o nombre del PC" aria-label="Search"
@@ -41,19 +42,24 @@
                 </div>
                 <button class="btn btn-success" type="button" id="filtro-boton">Buscar</button>
             </div>
-            
+
         </form>
     </div>
 
     <div class="Botones_Sistema">
-        <button class="button_slide slide_right" data-bs-toggle="modal" data-bs-target="#agregarSistema"><img src="{{ url_for('static', filename='img/icon-agregar.png') }}" alt="icon-agregar" width="20px"><b> Agregar Nuevo Sistema</b></button>
+        {% if session['id_tipo_usuario'] == 1 or session['id_tipo_usuario'] == 3 %}
+        <button class="button_slide slide_right" data-bs-toggle="modal" data-bs-target="#agregarSistema"><img
+                src="{{ url_for('static', filename='img/icon-agregar.png') }}" alt="icon-agregar" width="20px"><b>
+                Agregar Nuevo Sistema</b></button>
 
-        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#ModelEliminarSistema"><b>Eliminar Sistema</b></button>
+        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#ModelEliminarSistema"><b>Eliminar
+                Sistema</b></button>
+        {% endif %}
     </div>
 </div>
 
 <script>
-    document.getElementById('filtro-boton').addEventListener('click', function() {
+    document.getElementById('filtro-boton').addEventListener('click', function () {
         document.getElementById('filtro-form').submit();
     });
 </script>
@@ -68,16 +74,16 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST" action="{{ url_for('crear_sistema') }}">
-                {{ form.hidden_tag() }}
+                {{ formCrear.hidden_tag() }}
                 <div class="modal-body">
                     <div class="mb-3">
-                        {{ form.nombre_sistema.label(class="form-label") }}
-                        {{ form.nombre_sistema(class="form-control") }} <!-- Aquí se utiliza el campo de formulario -->
+                        {{ formCrear.nombre_sistema.label(class="form-label") }}
+                        {{ formCrear.nombre_sistema(class="form-control") }}
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    {{ form.submit(class="btn btn-primary") }}
+                    {{ formCrear.submit(class="btn btn-primary") }}
                 </div>
             </form>
         </div>
@@ -97,17 +103,11 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="post" action="{{ url_for('eliminar_sistema') }}">
+                {{ formEliminar.hidden_tag() }}
                 <div class="modal-body">
                     <div class="mb-3">
-                        <select class="form-select form-select-sm" name="sistema" aria-label="Selecciona un Sistema"
-                            required>
-                            <option value="">Selecciona un Sistema</option>
-                            {% for sistema in sistemas %}
-                            <option value="{{ sistema['Id_sistema'] }}">
-                                {{ sistema['Nombre_sistema'] }}
-                            </option>
-                            {% endfor %}
-                        </select>
+                        <label for="sistema">Seleccionar Sistema</label>
+                        {{ formEliminar.sistema(class="form-select", id="sistema") }}
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -121,12 +121,12 @@
 
 
 <div class="loading-screen" id="loading-screen">
-  <div class="loading">
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-  </div>
+    <div class="loading">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
 </div>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
@@ -152,19 +152,25 @@
                 <th>Computador</th>
                 <th>Sistema</th>
                 <th>Activo</th>
+                {% if session['id_tipo_usuario'] == 1 or session['id_tipo_usuario'] == 3 %}
                 <th></th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
             {% for row in user_pc_data %}
-            <tr class="clickable-row" data-href="{{ url_for('editar_sistema', id_sistema=row['Id_sistema'], id_usuario=row['Id_usuario'], id_pc=row['Id_pc']) }}" >
+            <tr class="clickable-row"
+                data-href="{{ url_for('editar_sistema', id_sistema=row['Id_sistema'], id_usuario=row['Id_usuario'], id_pc=row['Id_pc']) }}">
                 <td>{{ row['Nombre_user'] }}</td>
                 <td>{{ row['Nombre_pc'] }}</td>
                 <td>{{ row['Nombre_sistema'] }}</td>
                 <td>{{ 'Sí' if row['Activo'] else 'No' }}</td>
+                {% if session['id_tipo_usuario'] == 1 or session['id_tipo_usuario'] == 3 %}
                 <td class="editar-responsivo">
-                    <a href="{{ url_for('editar_sistema', id_sistema=row['Id_sistema'], id_usuario=row['Id_usuario'], id_pc=row['Id_pc']) }}" class="btn btn-warning">Editar</a>
+                    <a href="{{ url_for('editar_sistema', id_sistema=row['Id_sistema'], id_usuario=row['Id_usuario'], id_pc=row['Id_pc']) }}"
+                        class="btn btn-warning">Editar</a>
                 </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>
@@ -181,10 +187,10 @@
 
 <script>
     // registro de la tabla clickeable para movil.
-    $(document).ready(function() {
+    $(document).ready(function () {
         function handleRowClick() {
             if ($(window).width() <= 700) {
-                $(".clickable-row").click(function() {
+                $(".clickable-row").click(function () {
                     window.location = $(this).data("href");
                 });
             } else {
@@ -194,7 +200,7 @@
 
         handleRowClick();
 
-        $(window).resize(function() {
+        $(window).resize(function () {
             handleRowClick();
         });
     });
