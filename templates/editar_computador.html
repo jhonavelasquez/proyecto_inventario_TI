@@ -1,15 +1,17 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style_editar_usuario.css')}}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style_editar_computador.css')}}">
 {% endblock %}
 
 {% block content %}
-
+<h1 class="block-effect" style="--td:0.3s">
+    <div class="block-reveal" style="--bc: #2b3034; --d: 0.5s">Computadores</div>
+</h1>
 <div class="card text-start mb-3">
     <div class="bodyBack">
         <a id="botonBack" href="{{ url_for('computadores') }}" aria-valuetext="a">
-            <img id="imgBack" src="{{ url_for('static', filename='img/icon-back.png')}}" alt="icon-back" width="30px">
+            <i class="bi bi-arrow-left-circle"  style="font-size: 2rem; color: cornflowerblue;"></i>
         </a>
     </div>
     <form id="editForm" method="post" action="{{ url_for('editar_computador_form') }}">
@@ -40,9 +42,8 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button type="submit" class="btn btn-danger" onclick="document.getElementById('action').value='delete';">Eliminar</button>
-            <a href="{{ url_for('computadores') }}"><button type="button" class="btn btn-secondary">Cerrar</button></a>
             <button type="submit" class="btn btn-primary" onclick="document.getElementById('action').value='save';">Guardar cambios</button>
+            <button type="submit" class="btn btn-danger" onclick="document.getElementById('action').value='delete';"><i class="bi bi-trash-fill" style="margin-right: 5px;"></i>Eliminar</button>
         </div>
     </form>
 </div>

@@ -242,7 +242,7 @@ def eliminar_sistema():
                 user = current_user
                 fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
                 fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
-                descripcion_hist = (f" eliminó el sistema {nombre_sistema}.  [{fecha_actual}]")
+                descripcion_hist = (f" eliminó el sistema {nombre_sistema}.  {fecha_actual}")
                 conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 2)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
 
                 flash(f"{nombre_sistema} ha sido eliminado.", "warning")
@@ -565,16 +565,13 @@ def editar_usuario(id):
     tipo_usuario = conn.execute("SELECT id_tipo_usuario, nombre_tipo_usuario FROM Tipo_usuario").fetchall()
     form = EditarUsuarioForm()
     
-    # Establecer las opciones para el campo tipo_usuario
     form.tipo_usuario.choices = [(tipo['id_tipo_usuario'], tipo['nombre_tipo_usuario']) for tipo in tipo_usuario]
-    print("Opciones de tipo usuario:", form.tipo_usuario.choices)
 
     user_edit = conn.execute('''SELECT * FROM Usuario WHERE Usuario.Id_usuario = ?''', (id,)).fetchone()
-    print(f"Tipo de usuario actual: {user_edit['id_tipo_usuario']}")
     if request.method == 'GET':
         form.nombre_user.data = user_edit['Nombre_user']
         form.email_user.data = user_edit['Email']
-        form.tipo_usuario.data = str(user_edit['id_tipo_usuario'])  # Asegúrate de que este valor sea el correcto
+        form.tipo_usuario.data = user_edit['id_tipo_usuario']
 
     conn.close()
     user = current_user
@@ -592,33 +589,41 @@ def editar_usuario_form():
         nombre_usuario = request.form['nombre_user'] 
         email = request.form['email_user']
         tipo_usuario = request.form['tipo_usuario']
+        psw = request.form['psw'].strip()
         action = request.form['action']
+
+        hashed_password = generate_password_hash(psw)
 
         conn = get_db_connection()
 
         if action == 'save':
-            conn.execute(
-                'UPDATE Usuario SET Nombre_user = ?, Email = ?, id_tipo_usuario = ? WHERE Id_usuario = ?',
-                (nombre_usuario, email, tipo_usuario, id_usuario)
-            )
+            if psw:
+                conn.execute(
+                    'UPDATE Usuario SET Nombre_user = ?, Email = ?, id_tipo_usuario = ?, Psw = ? WHERE Id_usuario = ?',
+                    (nombre_usuario, email, tipo_usuario, hashed_password, id_usuario)
+                )
+            else:
+                conn.execute(
+                    'UPDATE Usuario SET Nombre_user = ?, Email = ?, id_tipo_usuario = ? WHERE Id_usuario = ?',
+                    (nombre_usuario, email, tipo_usuario, id_usuario)
+                )
             user = current_user
             fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
             fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
-            descripcion_hist= (f" actualizó la información de un usuario {nombre_usuario}.  {fecha_actual}")
-            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 1)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
+            descripcion_hist = f"actualizó la información de un usuario {nombre_usuario}. {fecha_actual}"
+            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 1)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
             flash("Información del usuario actualizada con éxito.", "success")
 
         elif action == 'delete':
-
             conn.execute(
-            'DELETE FROM Usuario WHERE Id_usuario = ?',
-            (id_usuario,)
+                'DELETE FROM Usuario WHERE Id_usuario = ?',
+                (id_usuario,)
             )
             user = current_user
             fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
             fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
-            descripcion_hist= (f" eliminó a un usuario {nombre_usuario}.  {fecha_actual}")
-            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 1)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
+            descripcion_hist = f"eliminó a un usuario {nombre_usuario}. {fecha_actual}"
+            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 1)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
             flash("Usuario eliminado con éxito.", "danger")
 
         conn.commit()
@@ -630,47 +635,81 @@ def editar_usuario_form():
     return redirect(url_for('usuarios'))
 
 
+
 #BACKEND HISTORIAL
 @app.route('/historial', methods=['GET'])
 @login_required
 def historial():
     conn = get_db_connection()
 
-    user=current_user
+    user = current_user
     num_notificaciones_totales = get_total_notifications(user.id)
     info_notificaciones = get_info_notifications(user.id)
+
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
 
     try:
         categoria_id = request.args.get('categoria')
         categorias = conn.execute("SELECT * FROM Categoria_historial").fetchall()
 
+        historial_data = []
+        total_records = 0
+
         if categoria_id:
             params = []
 
             query = '''
-            SELECT * FROM Historial 
+            SELECT Historial.*, Categoria_historial.nombre_categoria 
+            FROM Historial 
             INNER JOIN Categoria_historial ON Categoria_historial.id_categoria = Historial.id_categoria
             WHERE 1=1
             '''
             query += ' AND Historial.id_categoria = ? ORDER BY fecha DESC'
             params.append(categoria_id)
 
+            total_records = conn.execute(query, params).fetchall()
+            total_records = len(total_records)
+
+            offset = (page - 1) * per_page
+            query += " LIMIT ? OFFSET ?"
+            params += [per_page, offset]
+
             historial_data = conn.execute(query, params).fetchall()
 
             categoria_nombre = conn.execute('SELECT nombre_categoria FROM Categoria_historial WHERE id_categoria = ?', (categoria_id,)).fetchone()
-
-            return render_template('historial.html', historial_data=historial_data, categorias=categorias, categoria_nombre=categoria_nombre,  user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
         
-        
-        registros = conn.execute("SELECT * FROM Historial ORDER BY fecha DESC").fetchall()
+        else:
+            historial_data = conn.execute("SELECT * FROM Historial ORDER BY fecha DESC LIMIT ? OFFSET ?", (per_page, (page - 1) * per_page)).fetchall()
+            total_records = conn.execute("SELECT COUNT(*) FROM Historial").fetchone()[0]
 
-        return render_template('historial.html', registros=registros, categorias=categorias,  user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
+        total_pages = (total_records // per_page) + (1 if total_records % per_page > 0 else 0)
+
+        start_page = max(1, page - 1)
+        end_page = min(total_pages, page + 1)
+
+        return render_template('historial.html', 
+                                historial_data=historial_data, 
+                                categorias=categorias, 
+                                categoria_nombre=categoria_nombre if categoria_id else None,
+                                user=user, 
+                                num_notificaciones_totales=num_notificaciones_totales, 
+                                info_notificaciones=info_notificaciones, 
+                                total=total_records, 
+                                per_page=per_page, 
+                                page=page,
+                                start_page=start_page,
+                                end_page=end_page,
+                                total_pages=total_pages)
 
     except Exception as e:
         flash(f"Error: {str(e)}", "danger")
+        return redirect(url_for('historial'))  # Redirigir en caso de error
 
     finally:
         conn.close()
+
+
 
 #BACKEND REPORTES
 @app.route('/reportes', methods=['GET', 'POST'])
@@ -872,6 +911,32 @@ def reporte_2():
 def uploaded_file(filename):
     return send_from_directory('pdf_reportes', filename)
 
+
+@app.route('/cuenta')
+@requiere_tipo_usuario(1,2,3)
+@login_required
+def cuenta():
+    user=current_user
+    num_notificaciones_totales = get_total_notifications(user.id)
+    info_notificaciones = get_info_notifications(user.id)
+    return render_template('miCuenta.html', user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @app.route('/notificaciones', methods=['GET'])
 @requiere_tipo_usuario(1)
 @login_required
@@ -890,8 +955,8 @@ def obtener_notificaciones():
             (user_id,)
         ).fetchone()[0]
         
-        # conn.execute('UPDATE Notificaciones SET leido = true WHERE id_usuario = ? AND leido = false', (user_id,))
-        # conn.commit()  
+        conn.execute('UPDATE Notificaciones SET leido = true WHERE id_usuario = ? AND leido = false', (user_id,))
+        conn.commit()  
 
     num_notificaciones_totales = conn.execute(
         'SELECT COUNT(*) FROM Notificaciones WHERE id_usuario = ?',
@@ -922,13 +987,19 @@ def get_info_notifications(user_id):
     return info_notifiaciones
 
 @app.route('/marcar_notificaciones_leidas', methods=['POST'])
-@requiere_tipo_usuario(1,2,3)
-@login_required
+#@login_required
 def marcar_notificaciones_leidas():
+    print("Datos recibidos:", request.form)
     user_id = current_user.id
     conn = get_db_connection()
 
-    conn.execute('UPDATE Notificaciones SET leido = true WHERE id_usuario = ? AND leido = false', (user_id,))
+    notificaciones = conn.execute('SELECT * FROM Notificaciones WHERE id_usuario = ? AND leido = false', (user_id,)).fetchall()
+    
+    if notificaciones:
+        conn.execute('UPDATE Notificaciones SET leido = true WHERE id_usuario = ? AND leido = false', (user_id,))
+        print("NOTIFICACIONES ACTULIZADAS")
+    else:
+        print("TODAS LAS NOTIFACIONES ESTÁN LEIDAS.")
     conn.commit()
     conn.close()
 

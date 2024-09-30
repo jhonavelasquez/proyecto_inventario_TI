@@ -23,8 +23,12 @@
 }
 
 .card{
-    margin-top: 10%;
     padding: 3% 10% 3% 10%;
+}
+
+.modal-footer{
+    display: flex !important;
+    justify-content: space-between !important;
 }
 
 @media screen and (max-width: 700px) {  

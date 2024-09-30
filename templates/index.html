@@ -48,12 +48,11 @@
 
     <div class="Botones_Sistema">
         {% if session['id_tipo_usuario'] == 1 or session['id_tipo_usuario'] == 3 %}
-        <button class="button_slide slide_right" data-bs-toggle="modal" data-bs-target="#agregarSistema"><img
-                src="{{ url_for('static', filename='img/icon-agregar.png') }}" alt="icon-agregar" width="20px"><b>
-                Agregar Nuevo Sistema</b></button>
+        <button class="button_slide slide_right" data-bs-toggle="modal" data-bs-target="#agregarSistema">
+            <i class="bi bi-plus-circle" style="margin-right: 5px;"></i><b>Agregar Nuevo Sistema</b></button>
 
-        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#ModelEliminarSistema"><b>Eliminar
-                Sistema</b></button>
+        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#ModelEliminarSistema">
+            <i class="bi bi-trash-fill" style="margin-right: 5px;"></i><b>Eliminar Sistema</b></button>
         {% endif %}
     </div>
 </div>
@@ -168,7 +167,7 @@
                 {% if session['id_tipo_usuario'] == 1 or session['id_tipo_usuario'] == 3 %}
                 <td class="editar-responsivo">
                     <a href="{{ url_for('editar_sistema', id_sistema=row['Id_sistema'], id_usuario=row['Id_usuario'], id_pc=row['Id_pc']) }}"
-                        class="btn btn-warning">Editar</a>
+                        class="btn btn-warning"><i class="bi bi-pencil-square" style="margin-right: 5px;"></i>Editar</a>
                 </td>
                 {% endif %}
             </tr>
@@ -186,16 +185,17 @@
 {% endif %}
 
 <script>
+    var id_tipo_usuario = {{ session['id_tipo_usuario'] | tojson }};
     // registro de la tabla clickeable para movil.
     $(document).ready(function () {
         function handleRowClick() {
-            if ($(window).width() <= 700) {
+            if ($(window).width() <= 700 && ( id_tipo_usuario == 1 || id_tipo_usuario == 3)) {
                 $(".clickable-row").click(function () {
                     window.location = $(this).data("href");
                 });
             } else {
                 $(".clickable-row").off("click");
-            }
+            }   
         }
 
         handleRowClick();

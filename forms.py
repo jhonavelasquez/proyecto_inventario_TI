@@ -30,10 +30,9 @@ class CrearUsuarioForm(FlaskForm):
 class EditarUsuarioForm(FlaskForm):
     nombre_user = StringField('Nombre de usuario', validators=[DataRequired()])
     email_user = StringField('Correo electrónico', validators=[DataRequired(), Email()])
-    psw = PasswordField('Contraseña', validators=[DataRequired()])
-    psw_confirmar = PasswordField('Confirmar contraseña', validators=[DataRequired(), EqualTo('psw', message='Las contraseñas deben coincidir')])
+    psw = StringField('Contraseña')
     tipo_usuario = SelectField('Tipo de usuario', coerce=int, validators=[DataRequired()])
-
+    
 
 class CrearComputadorForm(FlaskForm):
     nombre_computador = StringField('Nombre del Computador', validators=[DataRequired()])

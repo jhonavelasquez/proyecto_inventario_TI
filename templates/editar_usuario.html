@@ -5,11 +5,14 @@
 {% endblock %}
 
 {% block content %}
-
-
+<h1 class="block-effect" style="--td:0.3s">
+    <div class="block-reveal" style="--bc: #2b3034; --d: 0.5s">Usuarios</div>
+</h1>
 <div class="card text-start mb-3">
     <div class="bodyBack">
-        <a id="botonBack" href="{{url_for('usuarios')}}" aria-valuetext="a"><img id="imgBack" src="{{ url_for('static', filename='img/icon-back.png')}}" alt="icon-back" width="30px"></a>
+        <a id="botonBack" href="{{url_for('usuarios')}}" aria-valuetext="a">
+            <i class="bi bi-arrow-left-circle"  style="font-size: 2rem; color: cornflowerblue;"></i>
+        </a>
     </div>
     <form id="editForm" method="post" action="{{ url_for('editar_usuario_form') }}">
         {{ form.hidden_tag() }}
@@ -17,32 +20,50 @@
             <input type="hidden" name="id_usuario" id="id_usuario" value="{{ user_edit['Id_usuario'] }}">
             <input type="hidden" name="action" id="action" value="">
             <h2>Editar Usuario</h2>
-            <p>Actualiza la informacion del usuario <b>{{ user_edit['Nombre_user'] }} (#{{ user_edit['Id_usuario'] }}) </b></p>
-            
-            <div class="form-floating mb-3">
-                {{ form.nombre_user(class="form-control", id="nombre_usuario", onkeyup="javascript:this.value=this.value.toUpperCase();", placeholder="") }}
+            <p>Actualiza la informacion del usuario <b>{{ user_edit['Nombre_user'] }} (#{{ user_edit['Id_usuario'] }})
+                </b></p>
+
+            <div class="form-floating mb-4">
+                {{ form.nombre_user(class="form-control", id="nombre_usuario",
+                onkeyup="javascript:this.value=this.value.toUpperCase();", placeholder="") }}
                 <label for="nombre_usuario">Nombre</label>
             </div>
-            
-            <div class="form-floating mb-3">
-                {{ form.email_user(class="form-control", id="email_user", onkeyup="javascript:this.value=this.value.toUpperCase();", placeholder="") }}
-                <label for="email">Email</label>
+
+            <div class="form-floating mb-4">
+                {{ form.email_user(class="form-control", id="email_user",
+                onkeyup="javascript:this.value=this.value.toUpperCase();", placeholder="") }}
+                <label for="email">Correo Electrónico</label>
             </div>
-            <div class="form-floating mb-5">
+            <div class="form-floating mb-4 position-relative">
+                {{ form.psw(class="form-control", id="psw", placeholder="") }}
+                <label for="psw">Actualizar contraseña</label>
+                <button type="button"
+                    class="btn btn-link p-0 m-0 position-absolute top-50 end-0 translate-middle-y me-3"
+                    data-bs-toggle="tooltip" data-bs-placement="right"
+                    data-bs-title="Si desea actualizar la contraseña del usuario, ingrese una nueva. Si no desea modificar la contraseña, deje este campo vacío.">
+                    <i class="bi bi-question-circle"></i>
+                </button>
+            </div>
+
+
+
+            <div class="form-floating mb-4">
                 {{ form.tipo_usuario(class="form-select", id="tipo_usuario") }}
                 <label for="tipo_usuario">Tipo de usuario</label>
-            </div>            
-            
+            </div>
+
         </div>
         <div class="Botones_editarUsuario">
             <div class="botones">
-                <button id="guardar" type="submit" class="btn btn-primary" onclick="document.getElementById('action').value='save';">Guardar cambios</button>
+                <button id="guardar" type="submit" class="btn btn-primary"
+                    onclick="document.getElementById('action').value='save';">Guardar cambios</button>
             </div>
             <div class="BotonEliminar">
-                <button type="submit" class="btn btn-danger" onclick="document.getElementById('action').value='delete';">Eliminar</button>
+                <button type="submit" class="btn btn-danger"
+                    onclick="document.getElementById('action').value='delete';">Eliminar</button>
             </div>
         </div>
-    </form>    
+    </form>
 </div>
 
 

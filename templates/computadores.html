@@ -23,7 +23,8 @@
     </div>
     <div class="Botones_Computador">
         {% if session['id_tipo_usuario'] == 1 or session['id_tipo_usuario'] == 3 %}
-        <button class="button_slide slide_right" data-bs-toggle="modal" data-bs-target="#ModalAgregarComputador"><img id="agregar" src="{{ url_for('static', filename='img/icon-agregar.png') }}" alt="icon-agregar" width="30px"><b>Agregar Nuevo
+        <button class="button_slide slide_right" data-bs-toggle="modal" data-bs-target="#ModalAgregarComputador">
+            <i class="bi bi-plus-circle" style="margin-right: 5px;"></i><b>Agregar Nuevo
             Computador</b></button>
         {% endif %}
     </div>
@@ -108,7 +109,7 @@
             <td class="responsive">{{ row['Fuente'] }}</td>
             {% if session['id_tipo_usuario'] == 1 or session['id_tipo_usuario'] == 3 %}
             <td >
-                <a href="{{ url_for('editar_computador', id_pc=row['Id_pc']) }}" class="btn btn-warning">Editar</a>
+                <a href="{{ url_for('editar_computador', id_pc=row['Id_pc']) }}" class="btn btn-warning"><i class="bi bi-pencil-square" style="margin-right: 5px;"></i>Editar</a>
             </td>
             {% endif %}
         </tr>

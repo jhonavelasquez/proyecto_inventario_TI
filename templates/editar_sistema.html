@@ -5,17 +5,19 @@
 {% endblock %}
 
 {% block content %}
-
+<h1 class="block-effect" style="--td:0.3s">
+    <div class="block-reveal" style="--bc: #2b3034; --d: 0.5s">Sistemas</div>
+</h1>
 <div class="card text-start mb-3">
     <div class="bodyBack">
         <a id="botonBack" href="{{ url_for('index') }}" aria-valuetext="a">
-            <img id="imgBack" src="{{ url_for('static', filename='img/icon-back.png') }}" alt="icon-back" width="30px">
+            <i class="bi bi-arrow-left-circle"  style="font-size: 2rem; color: cornflowerblue;"></i>
         </a>
     </div>
     <form id="editForm" method="post" action="{{ url_for('editar_sistema', id_sistema=user_pc['Id_sistema'], id_usuario=user_pc['Id_usuario'], id_pc=user_pc['Id_pc']) }}">
         {{ form.hidden_tag() }}
         <h2>Editar Sistema</h2>
-        <p>Asigna un nuevo computador a <b>{{ user_pc['Nombre_user'] }}</b> o actívale el sistema <b>{{ user_pc['Nombre_sistema'] }}</b></p>
+        <p>Asigna un nuevo computador a <b>{{ user_pc['Nombre_user'] }}</b> o cambia el estado del sistema <b>{{ user_pc['Nombre_sistema'] }}</b></p>
         
         <div class="form-floating mb-3">
             {{ form.nuevo_Id_pc(class="form-select", id="nuevo_Id_pc") }}
@@ -23,8 +25,8 @@
         </div>
 
         <div class="form-check mb-3" id="checkActivo">
-            {{ form.activo(class="form-check-input") }} <!-- Campo checkbox -->
-            {{ form.activo.label(class="form-check-label ms-2") }} <!-- Label al lado del checkbox -->
+            {{ form.activo(class="form-check-input") }} 
+            {{ form.activo.label(class="form-check-label ms-2") }} 
         </div>
 
         <button type="submit" class="btn btn-primary">Guardar cambios</button>

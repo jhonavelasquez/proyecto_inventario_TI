@@ -1,0 +1,112 @@
+html{
+    font-family: 'Segoe UI';
+}
+.container{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid black;
+}
+.carta{
+    width: 100%;
+    border: 1px solid black;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgb(255, 255, 255);
+    color: rgb(0, 0, 0);
+}
+.fondoCarta{
+    margin-top: -7rem;
+    width: 100%;
+    height: 400px;
+    z-index: 1;
+}
+.fotoPerfil{
+    position: relative;
+    margin-top: -4.5rem;
+    border-radius: 80px;
+    width: 150px;
+    border: 2px solid black;
+    z-index: 2;
+}
+.carta p:nth-child(3){
+    margin-top: 0.5rem;
+    font-size: 25px;
+    font-weight: bold;
+}
+.carta p:nth-child(4){
+    font-size: 20px;
+    margin-top: -24px;
+}
+
+.info{
+    width: 100%;
+    height: 30px;
+    display: flex;
+    justify-content: space-between ;
+    margin-bottom: -0.5rem;
+    align-items: center;
+}
+
+.info div:nth-child(1){
+    width: 50%;
+    font-size: 20px;
+    position: relative;
+    text-align: center;
+    border-right: 1px solid rgb(36, 34, 34);
+}
+
+.info div:nth-child(2){
+    width: 50%;
+    font-size: 20px;
+    position: relative;
+    text-align: center;
+}
+.influencia{
+    width: 100%;
+    height: 70px;
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    background: rgb(255, 255, 255);
+}
+.influencia div{
+    text-align: center;
+    font-size: 20px;
+}
+.influencia div:nth-child(1){
+    text-align: center;
+    grid-column: 1;
+    grid-row: 1;
+    margin-top: 10px;
+    border-right: 1px solid rgba(245, 245, 245, 0.123);
+}
+.influencia div:nth-child(3){
+    margin-top: 10px;
+}
+.influencia div:nth-child(2){
+    text-align: center;
+    grid-column: 1;
+    grid-row: 2;
+    margin-bottom: 6px;
+    border-right: 1px solid rgba(245, 245, 245, 0.123);
+}
+.boton{
+    width: 100%;
+    height: 40px;
+    display: flex;
+    background: rgba(255, 255, 255, 0.89);
+    justify-content: center;
+}
+#botonSeguir{
+    background-color: transparent;
+    border: 0cap;
+    font-size: 24px;
+    color: white;
+    font-weight: bold;
+}

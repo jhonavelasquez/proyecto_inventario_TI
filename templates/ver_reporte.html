@@ -5,10 +5,15 @@
 {% endblock %}
 
 {% block content %}
+<h1 class="block-effect" style="--td:0.3s">
+    <div class="block-reveal" style="--bc: #2b3034; --d: 0.5s">Reportes</div>
+</h1>
+
 <div class="card text-start mb-3">
     <div class="bodyBack">
-        <a id="botonBack" href="{{url_for('reportes')}}" aria-valuetext="a"><img id="imgBack"
-                src="{{ url_for('static', filename='img/icon-back.png')}}" alt="icon-back" width="30px"></a>
+        <a id="botonBack" href="{{url_for('reportes')}}" aria-valuetext="a">
+            <i class="bi bi-arrow-left-circle"  style="font-size: 2rem; color: cornflowerblue;"></i>
+        </a>
     </div>
     <div class="report-details" id="ReportDetails">
         <div class="report-details-header">

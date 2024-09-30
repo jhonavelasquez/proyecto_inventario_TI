@@ -4,6 +4,25 @@
 
 }
 
+.table>:not(caption)>*>* {
+    padding: .9rem .5rem !important;
+}
+
+.table{
+
+    --bs-table-border-color: #f1f3f6 !important;
+}
+
+.page-link{
+    color: #02519a !important;
+}
+
+.active>.page-link, .page-link.active{
+    background-color: #02519a !important;
+    border-color: #02519a !important;
+    color: #ffffff !important;
+}
+
 
 @media screen and (max-width: 700px) {
     .alert{
