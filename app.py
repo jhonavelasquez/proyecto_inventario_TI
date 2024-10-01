@@ -911,16 +911,83 @@ def reporte_2():
 def uploaded_file(filename):
     return send_from_directory('pdf_reportes', filename)
 
-
-@app.route('/cuenta')
-@requiere_tipo_usuario(1,2,3)
+#BACKEND MI CUENTA
+@app.route('/cuenta', methods=['GET', 'POST'])
+@requiere_tipo_usuario(1, 2, 3)
 @login_required
 def cuenta():
-    user=current_user
+    user = current_user
     num_notificaciones_totales = get_total_notifications(user.id)
     info_notificaciones = get_info_notifications(user.id)
-    return render_template('miCuenta.html', user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
 
+    form = EditarMiCuenta()
+
+    conn = get_db_connection()
+
+    if form.validate_on_submit():
+        nuevo_email = form.email_user.data
+        nueva_password = form.psw.data
+
+        conn.execute(
+                'UPDATE Usuario SET email = ? WHERE id_usuario = ?',
+                (nuevo_email, user.id)
+            )
+        user.email = nuevo_email
+
+        if nueva_password:
+            hashed_password = generate_password_hash(nueva_password)
+            conn.execute(
+                'UPDATE Usuario SET psw = ? WHERE id_usuario = ?',
+                (hashed_password, user.id)
+            )
+            user.password = nuevo_email
+        
+        conn.commit()
+        flash('Tus datos se han actualizado correctamente', 'success')
+        return redirect(url_for('cuenta'))
+
+    tipo_usuario = conn.execute(
+        'SELECT nombre_tipo_usuario FROM Tipo_usuario WHERE id_tipo_usuario = ?', 
+        (user.id_tipo_usuario,)
+    ).fetchone()
+
+    tipo_usuario = tipo_usuario['nombre_tipo_usuario'] if tipo_usuario else 'Desconocido'
+
+    try:
+        id_pc_mas_utilizado = conn.execute(''' 
+                        SELECT Id_pc 
+                        FROM Usuario_Sistema_PC 
+                        WHERE Id_usuario = ? 
+                        GROUP BY Id_pc 
+                        ORDER BY COUNT(*) DESC 
+                        LIMIT 1 
+                    ''', (user.id,)).fetchone()
+
+        if id_pc_mas_utilizado:
+            id_pc_mas_utilizado = id_pc_mas_utilizado['Id_pc']
+
+            nombre = conn.execute('SELECT Nombre_pc FROM Pc WHERE Id_pc = ?', (id_pc_mas_utilizado,)).fetchone()
+            if nombre:
+                nombre = nombre['Nombre_pc']
+            else:
+                nombre = 'Computador no encontrado'
+        else:
+            nombre = 'Computador no asignado'
+    except Exception as e:
+        nombre = 'Computador no asignado'
+        print(f"Error al obtener el nombre del PC: {e}")
+
+
+    conn.close()
+
+    data = {'user': user, 'tipo_usuario': tipo_usuario, 'nombre': nombre}
+
+    return render_template('miCuenta.html',
+                           user=user,
+                           data=data, 
+                           form=form, 
+                           num_notificaciones_totales=num_notificaciones_totales, 
+                           info_notificaciones=info_notificaciones)
 
 
 
@@ -1046,7 +1113,7 @@ def enviar_recordatorios():
 
 
                 notificacion_enviada = conn.execute(
-                    'SELECT * FROM Notificaciones WHERE id_reporte = ? AND fecha_notificacion = ?',
+                    'SELECT * FROM Notificaciones WHERE id_reporte = ? AND DATE(fecha_notificacion) = ?',
                     (reporte['id_reporte'], today_str)
                 ).fetchone()
 

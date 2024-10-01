@@ -9,7 +9,14 @@
 <h1 class="block-effect" style="--td:0.3s">
     <div class="block-reveal" style="--bc: #2b3034; --d: 0.5s">Usuarios</div>
 </h1>
-
+{% block breadcrumb %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Usuarios</li>
+        </ol>
+    </nav>
+{% endblock %}
 
 <div class="head">
     <div class="filtros">
@@ -49,16 +56,15 @@
                     <div class="form-floating mb-5 position-relative">
                         {{ form.email_user(class="form-control", id="email_user",
                         onkeyup="javascript:this.value=this.value.toUpperCase();", placeholder="") }}
-                        <label for="email_user" class="form-label">Email</label>
+                        <label for="email_user" class="form-label">Correo Electrónico</label>
                     </div>
 
                     <div class="form-floating mb-5 position-relative">
                         {{ form.psw(class="form-control", id="psw", placeholder="") }}
                         <label for="psw" class="form-label">Contraseña</label>
                         <button type="button" class="btn btn-light position-absolute top-50 end-0 translate-middle-y"
+                            style="background-color:transparent; border: none;"
                             id="togglePassword">
-                            <img src="{{ url_for('static', filename='img/icon-psw.png') }}" alt="icon-psw"
-                                id="icon-psw">
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
@@ -67,10 +73,9 @@
                         {{ form.psw_confirmar(class="form-control", id="psw_confirm", placeholder="") }}
                         <label for="psw_confirm" class="form-label">Confirmar Contraseña</label>
                         <button type="button"
-                            class="btn btn-outline-secondary position-absolute top-50 end-0 translate-middle-y"
+                            class="btn btn-light position-absolute top-50 end-0 translate-middle-y"
+                            style="background-color:transparent; border: none;"
                             id="togglePassword2">
-                            <img src="{{ url_for('static', filename='img/icon-psw.png') }}" alt="icon-psw"
-                                id="icon-psw">
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
@@ -116,11 +121,11 @@
 
         document.addEventListener("submit", (e) => {
             if (passwordField.value !== confirmPasswordField.value) {
-                e.preventDefault(); // Prevenir que la página se recargue
-                err.innerHTML = "Las contraseñas no coinciden"; // Notificar al usuario
+                e.preventDefault(); 
+                err.innerHTML = "Las contraseñas no coinciden";
                 setTimeout(() => {
                     err.innerHTML = " ";
-                }, 1200); // Esperar 1.2 segundos y quitar el mensaje
+                }, 1200);
             }
         });
     });
@@ -143,20 +148,18 @@
 <table class="table table-responsive-md table-striped mt-3 table-hover">
     <thead>
         <tr>
-            <th>ID</th>
-            <th>Nombre del Usuario</th>
+            <th>Usuario</th>
             <th class="responsive">Email</th>
-            <th class="responsive">Rol</th>
+            <th class="responsive-rol">Rol</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
         {% for row in users %}
         <tr>
-            <td>{{ row['Id_usuario'] }}</td>
             <td>{{ row['Nombre_user'] }}</td>
             <td class="responsive">{{ row['email'] }}</td>
-            <td class="responsive">{{ row['nombre_tipo_usuario'] }}</td>
+            <td class="responsive-rol">{{ row['nombre_tipo_usuario'] }}</td>
             <td>
                 <a href="{{ url_for('editar_usuario', id=row['Id_usuario']) }}" class="btn btn-warning"><i class="bi bi-pencil-square" style="margin-right: 5px;"></i>Editar</a>
             </td>

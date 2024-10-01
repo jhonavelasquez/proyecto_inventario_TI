@@ -9,8 +9,17 @@
 <h1 class="block-effect" style="--td:0.3s">
     <div class="block-reveal" style="--bc: #2b3034; --d: 0.5s">Generar Reporte</div>
 </h1>
+{% block breadcrumb %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('reportes') }}">Reportes</a></li>
+            <li class="breadcrumb-item active" aria-current="page"> Crear Rerporte</li>
+        </ol>
+    </nav>
+{% endblock %}
 <div class="bodyBack" style="margin-left: 3%;">
-    <a id="botonBack" href="{{ url_for('index') }}" aria-valuetext="a">
+    <a id="botonBack" href="{{ url_for('reportes') }}" aria-valuetext="a">
         <i class="bi bi-arrow-left-circle"  style="font-size: 2rem; color: cornflowerblue;"></i>
     </a>
 </div>
@@ -64,7 +73,7 @@
             </div>
             <input type="hidden" name="descripcion" id="descripcion-hidden">
             <br>
-            <button type="submit" class="btn btn-primary">Generar PDF</button>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-filetype-pdf" style="margin-right: 5px;"></i> Generar PDF</button>
         </div>
     </form>
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>

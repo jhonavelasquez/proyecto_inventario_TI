@@ -10,14 +10,11 @@ body {
     height: 100vh;
 }
 
-/* ANIMACION TITULO */
-/* reset */
 *,
 *::before,
 *::after {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
 }
 
 
@@ -33,7 +30,6 @@ p {
 
 .block-effect {
     font-size: calc(8px + 6vw);
-    margin-left: -20px;
 }
 
 .block-reveal {
@@ -59,13 +55,13 @@ p {
     top: 0;
     left: 0;
 
-    background: var(--bc);
+    background: #FFF;
     animation: revealingIn var(--td) var(--d) forwards, revealingOut var(--td) var(--t) forwards;
 }
 
 @keyframes revealBlock {
     100% {
-        color: #0f0f0f;
+        color: #000000;
     }
 }
 
@@ -327,6 +323,9 @@ li a{
     color: #000;
 }
 
+.breadcrumb-item.active{
+    color: #474747 !important;
+}
 
 .head {
     height: 100px;
@@ -505,6 +504,7 @@ li a{
 
     div.content {
         margin-left: 0;
+        margin-top: 60px;
     }
 
     .head {
@@ -554,6 +554,10 @@ li a{
         text-align: center;
         float: none;
         padding: 10px;
+    }
+
+    .breadcrumb-item{
+        display: none;
     }
 
     .responsive {

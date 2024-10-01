@@ -18,7 +18,7 @@
 
 <body>
 
-  <nav class="navbar navbar-expand-lg bg-body-tertiary" id="menuResponsivo" style="display: none;" data-bs-theme="dark">
+  <nav class="navbar navbar-expand-lg bg-body-tertiary fixed-top" id="menuResponsivo" style="display: none;" data-bs-theme="dark">
     <div class="container-fluid" id="barra-nav">
       <div>
         <a class="navbar-brand" href="{{ url_for('index') }}"><img
@@ -87,7 +87,7 @@
               class="nav-link {% if request.endpoint == 'logout' %}active{% endif %}">
               {% if request.endpoint == 'logout' %}
               <img id="icon-menu" src="{{ url_for('static', filename='img/icon-logout.png') }}" alt="icon-documentos">{%
-              endif %} <b>Cerrar Sesión</b></a>
+              endif %} <b><i class="bi bi-box-arrow-left" style="margin-right: 3px;"></i> Cerrar Sesión</b></a>
           </li>
         </ul>
       </div>
@@ -166,10 +166,10 @@
   </div>
 
   <!-- NOTIFICACIONES -->
-  <div class="modal fade" id="ModalNotifiaciones" tabindex="-1" aria-labelledby="ModalNotificaciones"
+  <div class="modal fade" id="ModalNotifiaciones" tabindex="-1" aria-labelledby="ModalNotifiaciones"
     aria-hidden="true">
     <div class="modal-dialog  modal-dialog-scrollable">
-      <div class="modal-content" id="ModalNotificacionesContent">
+      <div class="modal-content" id="ModalNotifiacionesContent">
         <div class="modal-header">
           <h5 class="modal-title" id="ModalNotifiaciones">Notificaciones</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -193,8 +193,10 @@
   </div>
 
   <div class="content">
+    
     {% block content %}
-
+      {% block breadcrumb %}
+      {% endblock %}
     {% endblock %}
   </div>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -209,7 +211,7 @@
       })
     });
 
-    $('#ModalNotificaciones').on('shown.bs.modal', function () {
+    $('#ModalNotifiaciones').on('shown.bs.modal', function () {
       $.ajax({
         url: "{{ url_for('marcar_notificaciones_leidas') }}",
         type: 'POST',

@@ -9,7 +9,14 @@
 <h1 class="block-effect" style="--td:0.3s">
     <div class="block-reveal" style="--bc: #2b3034; --d: 0.5s">Computadores</div>
 </h1>
-
+{% block breadcrumb %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Computadores</li>
+        </ol>
+    </nav>
+{% endblock %}
 
 <div class="head">
     <div class="filtros">

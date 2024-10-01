@@ -65,3 +65,10 @@ class ReporteForm(FlaskForm):
     responsable_solicitud = StringField('Responsable Solicitud', validators=[DataRequired()])
     descripcion = TextAreaField('Descripción', validators=[DataRequired()])
     submit = SubmitField('Generar PDF')
+
+class EditarMiCuenta(FlaskForm):
+    email_user = StringField('Correo electrónico', validators=[DataRequired(), Email()])
+    psw = StringField('Contraseña')
+    psw_confirmar = PasswordField('Confirmar contraseña', validators=[ EqualTo('psw', message='Las contraseñas deben coincidir')])
+
+    
