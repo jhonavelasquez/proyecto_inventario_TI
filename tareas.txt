@@ -1,0 +1,29 @@
+///// Inventario Sistema Informático /////
+
+- arreglar el leído de las notificaciones en todas las vistas 			        X
+- editar usuario traiga el tipo de usuario que corresponde (no administrador) 	X
+- agregar input para editar password en editar usuario				            X
+- token de la vista editar sistema arreglar 					                X
+- token de la vista eliminar sistema arreglar 					                X
+- arreglar notificacionde reportes, no se marca como leida. 			        X
+- permitir seleccionar el registro de la tabla sistemas en tamaño de moviles a solo los roles permitidos X
+- Pagination en historial 							                            X
+- Pagination en reporte								                            X
+
+
+- Arreglar notificaciones duplicadas  	  -----				Al ingresar reportes nuevos no se duplica, solo cada 									vez que lo inicio por primera vez en el dia
+
+
+- Crear perfil de usuario 							X
+- agregar breadcrumb (barra de urls)						X
+- responsiva tabla de usuarios ahora que se agregó la columna rol		X
+- mostrar segundos en la fecha de notificaciones				X
+- resaltar la notificación nueva 						X	
+- validar que no se repita el numero de solicitud				
+- problema de fecha today_str filtra por los segundos por eso siempre envía	X
+DATE_FORMAT(Reportes.fecha, '%Y-%m-%d')
+- agregar filtrado por fecha en reportes					
+- modificar lógica de computadores, slot para almacenamiento, tipo de almacenamiento si 
+es m.2 o disco duro o ssd, igual la ram, slot de ram, cantidad de fan, nombre de cooler y 
+tipo de cooler(ventilación o liquida), procesador, grafica, agregar el tipo de 
+fuente(modular o no modular), fecha de último mantenimiento, (historial del computador).

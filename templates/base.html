@@ -18,7 +18,8 @@
 
 <body>
 
-  <nav class="navbar navbar-expand-lg bg-body-tertiary fixed-top" id="menuResponsivo" style="display: none;" data-bs-theme="dark">
+  <nav class="navbar navbar-expand-lg bg-body-tertiary fixed-top" id="menuResponsivo" style="display: none;"
+    data-bs-theme="dark">
     <div class="container-fluid" id="barra-nav">
       <div>
         <a class="navbar-brand" href="{{ url_for('index') }}"><img
@@ -27,9 +28,10 @@
       </div>
       <div class="nav-right">
         <a href="" class="icon" data-bs-toggle="modal" data-bs-target="#ModalNotifiaciones">
-          <i class="bi bi-bell-fill" style="display: flex; align-items: center;"> {% if num_notificaciones_totales > 0 %}
+          <i class="bi bi-bell-fill" style="display: flex; align-items: center;"> {% if num_notificaciones_totales > 0
+            %}
             <strong id="numero_notificacion">{{ num_notificaciones_totales }}</strong>
-            {% endif %} </i> 
+            {% endif %} </i>
         </a>
         <a href="{{ url_for('cuenta') }}" id="cuenta">
           <b style="font-size: small;"> <i class="bi bi-person-fill"></i> {{ user.nombre_usuario}}</b>
@@ -132,7 +134,8 @@
     <div class="menuAbajo">
       <div class="ajuste_notificacion">
         <div class="notificacion">
-          <a href="" class="icon" data-bs-toggle="modal" data-bs-target="#ModalNotifiaciones" style="text-decoration: none;">
+          <a href="" class="icon" data-bs-toggle="modal" data-bs-target="#ModalNotifiaciones"
+            style="text-decoration: none;">
             <i class="bi bi-bell-fill" style="display: flex; align-items: center;"></i>
             <div>
               {% if num_notificaciones_totales > 0 %}
@@ -146,16 +149,16 @@
           <a href="" class="dropdown-toggle icon" data-bs-toggle="dropdown" aria-expanded="false">
             <i class="bi bi-gear-fill"></i></a>
           <ul class="dropdown-menu dropdown-menu-dark">
-            <li><a class="dropdown-item" href="{{ url_for('cuenta') }}"><b><i class="bi bi-person-fill"></i> Cuenta</b></a></li>
+            <li><a class="dropdown-item" href="{{ url_for('cuenta') }}"><b><i class="bi bi-person-fill"></i>
+                  Cuenta</b></a></li>
             <li><a class="dropdown-item" id="logout" href="{{ url_for('logout') }}"><b><i
                     class="bi bi-box-arrow-left"></i> Cerrar Sesion</b></a></li>
           </ul>
         </div>
-
       </div>
       <div class="bodyCuenta">
         <a href="{{ url_for('cuenta') }}" id="cuenta">
-          <i class="bi bi-person-fill" style="margin-right: 5px;"></i> 
+          <i class="bi bi-person-fill" style="margin-right: 5px;"></i>
           <b style="font-size: small;"> {{ user.nombre_usuario}}</b>
         </a>
       </div>
@@ -166,23 +169,34 @@
   </div>
 
   <!-- NOTIFICACIONES -->
-  <div class="modal fade" id="ModalNotifiaciones" tabindex="-1" aria-labelledby="ModalNotifiaciones"
-    aria-hidden="true">
+  <div class="modal fade" id="ModalNotifiaciones" tabindex="-1" aria-labelledby="ModalNotifiaciones" aria-hidden="true">
     <div class="modal-dialog  modal-dialog-scrollable">
       <div class="modal-content" id="ModalNotifiacionesContent">
         <div class="modal-header">
-          <h5 class="modal-title" id="ModalNotifiaciones">Notificaciones</h5>
+          <h5 class="modal-title" id="ModalNotifiaciones"><i class="bi bi-bell-fill"
+              style="margin-right: 5px;"></i>Notificaciones </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body" id="modal-body-ajustes">
           <ol class="list-group list-group-flush">
             {% for row in info_notificaciones %}
-            <li class="list-group-item">
-              <a href="{{ url_for('ver_reporte', id_reporte=row['id_reporte']) }}" id="registroNotificacion">
-                {{ row.mensaje }}<br>
-                {{ row.fecha_notificacion }}
-              </a>
-            </li>
+              {% if row['leido'] == 1 %}
+              <li class="list-group-item">
+                <a href="{{ url_for('ver_reporte', id_reporte=row['id_reporte']) }}" id="registroNotificacion">
+                  {{ row.mensaje }}<br>
+                  <small style="font-size: small; color: #8a8a8a;"><i class="bi bi-calendar-check-fill"
+                      style="margin-right: 5px;"></i> {{ row.fecha_notificacion }}</small>
+                </a>
+              </li>
+              {% else %}
+              <li class="list-group-item list-group-item-success">
+                <a href="{{ url_for('ver_reporte', id_reporte=row['id_reporte']) }}" id="registroNotificacion">
+                  {{ row.mensaje }}<br>
+                  <small style="font-size: small; color: #333333;"><i class="bi bi-calendar-check-fill"
+                      style="margin-right: 5px;"></i> {{ row.fecha_notificacion }}</small>
+                </a>
+              </li>
+              {% endif %}
             {% else %}
             <li class="list-group-item">No tienes notificaciones.</li>
             {% endfor %}
@@ -193,10 +207,10 @@
   </div>
 
   <div class="content">
-    
+
     {% block content %}
-      {% block breadcrumb %}
-      {% endblock %}
+    {% block breadcrumb %}
+    {% endblock %}
     {% endblock %}
   </div>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

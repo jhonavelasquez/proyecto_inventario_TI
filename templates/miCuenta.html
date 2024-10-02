@@ -37,6 +37,7 @@
         {% for category, message in messages %}
         <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
             {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         {% endfor %}
     </div>
@@ -44,53 +45,43 @@
     {% endwith %}
 
     <div class="collapse editarInfo" id="editarInfo">
-        <h3>Actualiza tus datos</h3>
-        
+        <h3 class="card-title mb-4">Actualiza tus datos</h3>
         <form action="{{ url_for('cuenta') }}" method="POST" id="updateForm">
             {{ form.hidden_tag() }}
-            <button type="button"
-                    class="btn btn-link"
-                    style="display: flex; justify-content: start; width: 30px;"
-                    data-bs-toggle="tooltip" data-bs-placement="right"
-                    data-bs-title="Debe ingresar un correo para cambiar la contraseña">
-                    <i class="bi bi-question-circle"></i>
-                </button>
-            <div class="form-floating mb-3">
-                {{ form.email_user(class="form-control", id="email_user",
-                onkeyup="javascript:this.value=this.value.toUpperCase();", placeholder="name@example.com") }}
+            <div class="mb-3">
                 <label for="email_user" class="form-label">Correo Electrónico</label>
+                <div class="input-group">
+                    {{ form.email_user(class="form-control", id="email_user",
+                    onkeyup="javascript:this.value=this.value.toUpperCase();", placeholder="name@example.com") }}
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="tooltip"
+                        data-bs-placement="right" title="Debe ingresar un correo para cambiar la contraseña">
+                        <i class="bi bi-question-circle"></i>
+                    </button>
+                </div>
             </div>
-            <button type="button"
-                    class="btn btn-link"
-                    style="display: flex; justify-content: start; width: 30px;"
-                    data-bs-toggle="tooltip" data-bs-placement="right"
-                    data-bs-title="Si desea actualizar su contraseña, ingrese una nueva. Si no desea modificar su contraseña, deje estos campos vacíos.">
-                    <i class="bi bi-question-circle"></i>
-                </button>
-            <div class="form-floating mb-3">
-                
-                {{ form.psw(class="form-control", id="psw", placeholder="") }}
+            <div class="mb-3">
                 <label for="psw" class="form-label">Contraseña</label>
-                <button type="button" 
-                    class="btn btn-light position-absolute top-50 end-0 translate-middle-y"
-                    id="togglePassword"
-                    style="background-color:transparent; border: none;">
-                    <i class="bi bi-eye"></i>
-                </button>
+                <div class="input-group">
+                    {{ form.psw(class="form-control", id="psw", placeholder="Nueva contraseña") }}
+                    <button type="button" class="btn btn-outline-secondary" id="togglePassword">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
             </div>
-            <div class="form-floating mb-3">
-                {{ form.psw_confirmar(class="form-control", id="psw_confirm", placeholder="") }}
+            <div class="mb-3">
                 <label for="psw_confirm" class="form-label">Confirmar Contraseña</label>
-                <button type="button"
-                    class="btn btn-light position-absolute top-50 end-0 translate-middle-y"
-                    id="togglePassword2"
-                    style="background-color:transparent; border: none;">
-                    <i class="bi bi-eye"></i>
-                </button>
+                <div class="input-group">
+                    {{ form.psw_confirmar(class="form-control", id="psw_confirm", placeholder="Confirmar nueva contraseña") }}
+                    <button type="button" class="btn btn-outline-secondary" id="togglePassword2">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
             </div>
-            <br>
-            <div id="err" style="color: red; font-weight: bold;"></div>
-            <button type="submit" class="button_slide slide_right">Guardar</button>
+            <div class="mb-3">
+                <small class="text-muted">Si no desea modificar su contraseña, deje estos campos vacíos.</small>
+            </div>
+            <div id="err" class="text-danger mb-3"></div>
+            <button type="submit" class="btn btn-primary w-100">Guardar Cambios</button>
         </form>
     </div>
 
@@ -101,28 +92,31 @@
             const passwordField = document.getElementById('psw');
             const confirmPasswordField = document.getElementById('psw_confirm');
             const err = document.getElementById('err');
-
-            togglePassword.addEventListener('click', function () {
-                const type = passwordField.type === 'password' ? 'text' : 'password';
-                passwordField.type = type;
-                this.querySelector('i').className = type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
-            }); 
-
-            togglePassword2.addEventListener('click', function () {
-                const type = confirmPasswordField.type === 'password' ? 'text' : 'password';
-                confirmPasswordField.type = type;
-                this.querySelector('i').className = type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
-            });
-
+    
+            function togglePasswordVisibility(field, button) {
+                const type = field.type === 'password' ? 'text' : 'password';
+                field.type = type;
+                button.querySelector('i').className = `bi bi-eye${type === 'password' ? '' : '-slash'}`;
+            }
+    
+            togglePassword.addEventListener('click', () => togglePasswordVisibility(passwordField, togglePassword));
+            togglePassword2.addEventListener('click', () => togglePasswordVisibility(confirmPasswordField, togglePassword2));
+    
             document.getElementById('updateForm').addEventListener("submit", (e) => {
                 if (passwordField.value !== confirmPasswordField.value) {
-                    e.preventDefault(); // Prevenir que la página se recargue
-                    err.innerHTML = "Las contraseñas no coinciden"; // Notificar al usuario
+                    e.preventDefault();
+                    err.textContent = "Las contraseñas no coinciden";
                     setTimeout(() => {
-                        err.innerHTML = ""; // Limpiar el mensaje después de 1.2 segundos
-                    }, 1200);
+                        err.textContent = "";
+                    }, 3000);
                 }
             });
+    
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
         });
     </script>
 </section>

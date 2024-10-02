@@ -20,3 +20,6 @@
     margin-top: 1%;
 }
 
+div.content {
+    height: 100vh;
+}

@@ -31,11 +31,11 @@
     justify-content: space-between !important;
 }
 
+div.content {
+    height: 100vh;
+}
+
 @media screen and (max-width: 700px) {  
-    .bodyBack{
-        padding-top: 5%;
-        padding-bottom: 8%;
-    }
 
     .botones{
         width: 100%;

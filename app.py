@@ -198,7 +198,7 @@ def crear_sistema():
             user = current_user
             fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
             fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
-            descripcion_hist= (f" agregó un nuevo sistema.  {nombre_sistema}.  {fecha_actual}")
+            descripcion_hist= (f" agregó un nuevo sistema.  {nombre_sistema}.")
             conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 2)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
 
             conn.commit()
@@ -242,7 +242,7 @@ def eliminar_sistema():
                 user = current_user
                 fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
                 fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
-                descripcion_hist = (f" eliminó el sistema {nombre_sistema}.  {fecha_actual}")
+                descripcion_hist = (f" eliminó el sistema {nombre_sistema}.")
                 conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 2)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
 
                 flash(f"{nombre_sistema} ha sido eliminado.", "warning")
@@ -293,7 +293,7 @@ def editar_sistema(id_sistema, id_usuario, id_pc):
             user = current_user
             fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
             fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
-            descripcion_hist = (f"Actualizó {nombre_sistema} de {nombre_usuario}. {fecha_actual}")
+            descripcion_hist = (f"Actualizó {nombre_sistema} de {nombre_usuario}. ")
             conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 2)', 
                          (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
 
@@ -374,7 +374,7 @@ def crear_computador():
         user = current_user
         fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
         fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
-        descripcion_hist= (f" agregó un nuevo computador.  {nombre_computador}.  {fecha_actual}")
+        descripcion_hist= (f" agregó un nuevo computador.  {nombre_computador}. ")
         conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 3)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
         
         conn.commit()
@@ -437,7 +437,7 @@ def editar_computador_form():
         user = current_user
         fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
         fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
-        descripcion_hist= (f" actualizó la información de un computador.  {nombre_pc}.  {fecha_actual}")
+        descripcion_hist= (f" actualizó la información de un computador.  {nombre_pc}. ")
         conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 3)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
 
         flash("Información del computador actualizada con éxito.", "success")
@@ -450,7 +450,7 @@ def editar_computador_form():
         user = current_user
         fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
         fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
-        descripcion_hist= (f" eliminó un computador.  {nombre_pc}.  {fecha_actual}")
+        descripcion_hist= (f" eliminó un computador.  {nombre_pc}.")
         conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 3)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
         flash("Computador eliminado con éxito.", "danger")
 
@@ -537,7 +537,7 @@ def crear_usuario():
 
             user = current_user
             fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-            descripcion_hist = f" agregó a un nuevo usuario {nombre_user}.  {fecha_actual_seg}"
+            descripcion_hist = f" agregó a un nuevo usuario {nombre_user}. "
             conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 1)', 
                          (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
 
@@ -610,7 +610,7 @@ def editar_usuario_form():
             user = current_user
             fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
             fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
-            descripcion_hist = f"actualizó la información de un usuario {nombre_usuario}. {fecha_actual}"
+            descripcion_hist = f"actualizó la información de un usuario {nombre_usuario}."
             conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 1)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
             flash("Información del usuario actualizada con éxito.", "success")
 
@@ -622,7 +622,7 @@ def editar_usuario_form():
             user = current_user
             fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
             fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
-            descripcion_hist = f"eliminó a un usuario {nombre_usuario}. {fecha_actual}"
+            descripcion_hist = f"eliminó a un usuario {nombre_usuario}."
             conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 1)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
             flash("Usuario eliminado con éxito.", "danger")
 
@@ -711,35 +711,84 @@ def historial():
 
 
 
-#BACKEND REPORTES
+# BACKEND REPORTES
 @app.route('/reportes', methods=['GET', 'POST'])
 @requiere_tipo_usuario(1)
 @login_required
 def reportes():
     conn = get_db_connection()
-    
+
     search = request.args.get('search')
-    
-    if search:
-        query = '''SELECT Reportes.id_reporte, Reportes.asunto, Reportes.fecha, Reportes.fecha_solucion, Reportes.descripcion, Usuario.Nombre_user 
-                           FROM Reportes 
-                           INNER JOIN Usuario ON Usuario.id_usuario = Reportes.usuario_id WHERE asunto LIKE ? OR usuario_id LIKE ? ORDER BY fecha DESC'''
-        reportes = conn.execute(query, ('%' + search + '%', '%' + search + '%')).fetchall()
-    else:
-        reportes = conn.execute('''
-                           SELECT Reportes.id_reporte, Reportes.asunto, Reportes.fecha, Reportes.fecha_solucion, Reportes.descripcion, Usuario.Nombre_user 
-                           FROM Reportes 
-                           INNER JOIN Usuario ON Usuario.id_usuario = Reportes.usuario_id
-                           ORDER BY fecha DESC
-                           ''').fetchall()
-    
-    conn.close()
+    page = request.args.get('page', 1, type=int) 
+    per_page = 10 
 
-    user=current_user
-    num_notificaciones_totales = get_total_notifications(user.id)
-    info_notificaciones = get_info_notifications(user.id)
+    try:
+        total_records_query = '''SELECT COUNT(*) FROM Reportes'''
+        query_params = []
+        
+        # Ajuste para la búsqueda si está presente
+        if search:
+            query = '''
+                SELECT Reportes.id_reporte, Reportes.asunto, Reportes.fecha, Reportes.fecha_solucion, Reportes.descripcion, Usuario.Nombre_user 
+                FROM Reportes 
+                INNER JOIN Usuario ON Usuario.id_usuario = Reportes.usuario_id
+                WHERE asunto LIKE ? OR Usuario.Nombre_user LIKE ?
+                ORDER BY fecha DESC
+                LIMIT ? OFFSET ?
+            '''
+            search_term = '%' + search + '%'
+            query_params = [search_term, search_term, per_page, (page - 1) * per_page]
 
-    return render_template('reportes.html', reportes=reportes,  user=user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
+            # Ajuste para contar los resultados de la búsqueda
+            total_records_query = '''
+                SELECT COUNT(*) FROM Reportes 
+                INNER JOIN Usuario ON Usuario.id_usuario = Reportes.usuario_id
+                WHERE asunto LIKE ? OR Usuario.Nombre_user LIKE ?
+            '''
+            total_records_params = [search_term, search_term]
+            total_records = conn.execute(total_records_query, total_records_params).fetchone()[0]
+        else:
+            query = '''
+                SELECT Reportes.id_reporte, Reportes.asunto, Reportes.fecha, Reportes.fecha_solucion, Reportes.descripcion, Usuario.Nombre_user 
+                FROM Reportes 
+                INNER JOIN Usuario ON Usuario.id_usuario = Reportes.usuario_id
+                ORDER BY fecha DESC
+                LIMIT ? OFFSET ?
+            '''
+            query_params = [per_page, (page - 1) * per_page]
+            total_records = conn.execute(total_records_query).fetchone()[0]
+
+        # Ejecutar la consulta con los parámetros correspondientes
+        reportes = conn.execute(query, query_params).fetchall()
+
+        # Cálculo de las páginas
+        total_pages = (total_records // per_page) + (1 if total_records % per_page > 0 else 0)
+        start_page = max(1, page - 1)
+        end_page = min(total_pages, page + 1)
+
+        user = current_user
+        num_notificaciones_totales = get_total_notifications(user.id)
+        info_notificaciones = get_info_notifications(user.id)
+
+        return render_template('reportes.html', 
+                               reportes=reportes,  
+                               user=user, 
+                               num_notificaciones_totales=num_notificaciones_totales, 
+                               info_notificaciones=info_notificaciones, 
+                               total=total_records, 
+                               per_page=per_page, 
+                               page=page,
+                               start_page=start_page,
+                               end_page=end_page,
+                               total_pages=total_pages)
+    
+    except Exception as e:
+        flash(f"Error: {str(e)}", "danger")
+        return redirect(url_for('reportes'))  # Redirigir en caso de error
+
+    finally:
+        conn.close()
+
 
 
 @app.route('/ver_reporte/<int:id_reporte>', methods=['GET'])
@@ -752,6 +801,7 @@ def ver_reporte(id_reporte):
                            FROM Reportes 
                            INNER JOIN Usuario ON Usuario.id_usuario = Reportes.usuario_id
                            WHERE id_reporte = ?
+                           ORDER BY Reportes.fecha DESC
                            ''', (id_reporte,)).fetchone()
     conn.close()
 
@@ -884,14 +934,14 @@ def reporte_2():
         
         conn.execute(
             'INSERT INTO Reportes (usuario_id, asunto, descripcion, fecha, fecha_solucion, archivo) VALUES (?, ?, ?, ?, ?, ?)',
-            (user.id, nombre_sistema, descripcion ,datetime.datetime.now().strftime('%Y-%m-%d %H:%M'), fecha_solucion, filename)
+            (user.id, nombre_sistema, descripcion ,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), fecha_solucion, filename)
         )
 
         print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M'), " ---- ", fecha_solucion)
 
         fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
         fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
-        descripcion_hist= (f" ha realizado un nuevo reporte. ASUNTO: {nombre_sistema}.  {fecha_actual}")
+        descripcion_hist= (f" ha realizado un nuevo reporte. ASUNTO: {nombre_sistema}.")
         conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 4)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
 
         conn.commit()
@@ -1046,7 +1096,7 @@ def get_total_notifications(user_id):
 def get_info_notifications(user_id):
     conn = get_db_connection()
     info_notifiaciones= conn.execute(
-        'SELECT * FROM Notificaciones WHERE id_usuario = ? ORDER BY id_notificacion DESC LIMIT 6',
+        'SELECT * FROM Notificaciones WHERE id_usuario = ? ORDER BY id_notificacion DESC LIMIT 8',
         (user_id,)
     ).fetchall()
     conn.close()
@@ -1054,16 +1104,16 @@ def get_info_notifications(user_id):
     return info_notifiaciones
 
 @app.route('/marcar_notificaciones_leidas', methods=['POST'])
-#@login_required
+@login_required
 def marcar_notificaciones_leidas():
     print("Datos recibidos:", request.form)
     user_id = current_user.id
     conn = get_db_connection()
 
-    notificaciones = conn.execute('SELECT * FROM Notificaciones WHERE id_usuario = ? AND leido = false', (user_id,)).fetchall()
+    notificaciones = conn.execute('SELECT * FROM Notificaciones WHERE id_usuario = ? AND leido = false AND enviado = true', (user_id,)).fetchall()
     
     if notificaciones:
-        conn.execute('UPDATE Notificaciones SET leido = true WHERE id_usuario = ? AND leido = false', (user_id,))
+        conn.execute('UPDATE Notificaciones SET leido = true WHERE id_usuario = ? AND leido = false AND enviado = true', (user_id,))
         print("NOTIFICACIONES ACTULIZADAS")
     else:
         print("TODAS LAS NOTIFACIONES ESTÁN LEIDAS.")
@@ -1090,31 +1140,33 @@ def enviar_recordatorios():
             conn = get_db_connection()
             print("Revisión---")
 
-        
             today = datetime.datetime.now()
             fecha_15_dias = today + datetime.timedelta(days=15)
 
-            today_str = today.strftime('%Y-%m-%d')
+            today_str = today.strftime('%Y-%m-%d %H:%M:%S')
+            today_sin_seg = today.strftime('%Y-%m-%d')
             fecha_15_dias_str = fecha_15_dias.strftime('%Y-%m-%d')
 
             reportes = conn.execute(
                 'SELECT * FROM Reportes WHERE fecha_solucion BETWEEN ? AND ?',
-                (today, fecha_15_dias)
+                (today_str, fecha_15_dias_str)
             ).fetchall()
 
             print(reportes)
             print(f"Fecha de hoy: {today_str}")
+            print(f"Fecha de hoy sin segundos: {today_sin_seg}")
             print(f"Fecha en 15 días: {fecha_15_dias_str}")
 
             for reporte in reportes:
-                usuario_id = reporte['usuario_id']  
+                usuario_id = reporte['usuario_id'] 
                 nombre_sistema = reporte['asunto']
                 fecha_solucion = reporte['fecha_solucion']
 
-
+########################## Reemplar de strftime por DATE_FORMAT    CUANDO SE CAMBIE LA BASE DE DATOS A MYSQL###########################
+#DATE_FORMAT(fecha_notificacion, '%Y-%m-%d')
                 notificacion_enviada = conn.execute(
-                    'SELECT * FROM Notificaciones WHERE id_reporte = ? AND DATE(fecha_notificacion) = ?',
-                    (reporte['id_reporte'], today_str)
+                    "SELECT * FROM Notificaciones WHERE id_reporte = ? AND strftime('%Y-%m-%d', DATE(fecha_notificacion)) = ? AND enviado = true",
+                    (reporte['id_reporte'], today_sin_seg)
                 ).fetchone()
 
                 usuario_reporte = conn.execute('SELECT Id_usuario, Nombre_user, Email FROM Usuario WHERE Id_usuario = ?', (usuario_id,)).fetchone()
@@ -1130,11 +1182,11 @@ def enviar_recordatorios():
                     enviar_correo(usuario_reporte['Email'], subject, body)
 
                     conn.execute(
-                        'INSERT INTO Notificaciones ( id_usuario, id_reporte, fecha_notificacion, mensaje, leido) VALUES (?, ?, ?, ?, false)',
+                        'INSERT INTO Notificaciones ( id_usuario, id_reporte, fecha_notificacion, mensaje, leido, enviado) VALUES (?, ?, ?, ?, false, true)',
                         (usuario_id, reporte['id_reporte'], today_str, subject) 
                     )
                     conn.commit()
-        
+
     except Exception as e:
         print(f"Error al enviar recordatorios: {e}")
     finally:
@@ -1142,17 +1194,17 @@ def enviar_recordatorios():
         conn.close()
         pass
 
+
 stop_thread = False
 
 def iniciar_revisiones_periodicas():
-    schedule.every(1).minutes.do(enviar_recordatorios)
-    schedule.every().day.at("08:00").do(enviar_recordatorios)  # Cambia "08:00" a tu hora deseada
+    # schedule.every(1).minutes.do(enviar_recordatorios)
+    schedule.every().day.at("08:00").do(enviar_recordatorios)
 
     while not stop_thread:
         schedule.run_pending()
         time.sleep(1)
 
-# detener revisiones periodicas al detener la app
 def signal_handler(sig, frame):
     global stop_thread
     stop_thread = True

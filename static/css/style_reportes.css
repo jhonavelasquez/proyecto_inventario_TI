@@ -29,33 +29,28 @@
     text-decoration: none; 
 }
 
+
 #verReporte:hover {
     text-decoration: underline;
-}
-
-.rich-text {
-    white-space: pre-wrap !important;
-    background-color: #f9f9f9;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-    color: #333;
-    min-height: 150px;
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-.rich-text:focus {
-    outline: none;
-    border-color: #66afe9;
-    box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);
 }
 
 .button_slide{
     text-align: center;
     text-decoration: none;
+}
+
+.page-link{
+    color: #02519a !important;
+}
+
+.active>.page-link, .page-link.active{
+    background-color: #02519a !important;
+    border-color: #02519a !important;
+    color: #ffffff !important;
+}
+
+div.content {
+    height: 100vh;
 }
 
 @media screen and (max-width: 900px) {

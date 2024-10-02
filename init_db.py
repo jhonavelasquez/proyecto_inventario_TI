@@ -10,7 +10,7 @@ with open('schema.sql') as f:
 cur = connection.cursor()
 
 hashed_password = generate_password_hash('admin')
-cur.execute("INSERT INTO Usuario (Nombre_user, Email, Psw, id_tipo_usuario) VALUES (?, ?, ?, ?);", ('ADMIN', 'admin@AAA.cl', hashed_password, 1))
+cur.execute("INSERT INTO Usuario (Nombre_user, Email, Psw, id_tipo_usuario) VALUES (?, ?, ?, ?);", ('ADMIN', 'JONATHAN.VR484@GMAIL.COM', hashed_password, 1))
 cur.execute("INSERT INTO Usuario_Sistema_PC (Id_usuario, Id_sistema, Id_pc, Activo) VALUES (?, ?, ?, FALSE)", (1, 1, 1))
 
 #cur.execute('INSERT INTO Notificaciones ( id_usuario, id_reporte, fecha_notificacion, mensaje) VALUES (?, ?, ?, ?)',(1, 1, '2024-09-23', 'Recordatorio: El reporte está cercano a su fecha de solución'))

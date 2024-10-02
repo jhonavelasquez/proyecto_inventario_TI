@@ -37,6 +37,10 @@
     width: 20px;
 }
 
+div.content {
+    height: 100vh;
+}
+
 @media screen and (max-width: 670px) {
     .responsive {
         display: none;

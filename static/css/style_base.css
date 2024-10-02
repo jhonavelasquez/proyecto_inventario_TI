@@ -1,13 +1,13 @@
 body {
     margin: 0;
     font-family: "Lato", sans-serif;
+    
     height: 100vh;
     /* oscuro #2b3034; */
 }
 
 .content {
     background-color: #f7f7f7;
-    height: 100vh;
 }
 
 *,
@@ -197,7 +197,6 @@ h1 {
 div.content {
     margin-left: 200px;
     padding: 1px 16px;
-    height: 100%;
 }
 
 .menu-icon {
@@ -265,6 +264,7 @@ div.content {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
     width: 100%;
     margin-bottom: 10px;
 }

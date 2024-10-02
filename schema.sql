@@ -81,6 +81,7 @@ CREATE TABLE Notificaciones (
     fecha_notificacion TIMESTAMP, 
     mensaje VARCHAR(200),
     leido BOOLEAN,
+    enviado BOOLEAN,
     FOREIGN KEY (id_usuario) REFERENCES Usuario(Id_usuario),
     FOREIGN KEY (id_reporte) REFERENCES Reportes(id_reporte)
 );

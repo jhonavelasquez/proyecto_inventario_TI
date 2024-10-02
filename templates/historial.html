@@ -10,75 +10,70 @@
     <div class="block-reveal" style="--bc: #2b3034; --d: 0.5s">Historial</div>
 </h1>
 {% block breadcrumb %}
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Historial</li>
-        </ol>
-    </nav>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Historial</li>
+    </ol>
+</nav>
 {% endblock %}
-<div class="head">
-    <form method="get" action="{{ url_for('historial') }}" id="filtro-form">
-        <div class="doble-filtro-sistema">
-            <div>
-                <div class="filtro">
-                    <select class="form-select form-select-bg" name="categoria" aria-label="Selecciona una Categoría">
-                        <option value="">Selecciona una Categoría</option>
-                        {% for categoria in categorias %}
-                        <option value="{{ categoria['id_categoria'] }}" {% if
-                            request.args.get('categoria')==categoria['id_categoria'] %} selected {% endif %}>
-                            {{ categoria['nombre_categoria'] }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" action="{{ url_for('historial') }}" id="filtro-form" class="row g-3 align-items-end">
+            <div class="col-md-8">
+                <label for="categoria" class="form-label">Selecciona una Categoría</label>
+                <select id="categoria" class="form-select" name="categoria" aria-label="Selecciona una Categoría">
+                    <option value="">Todas las Categorías</option>
+                    {% for categoria in categorias %}
+                    <option value="{{ categoria['id_categoria'] }}" {% if
+                        request.args.get('categoria')==categoria['id_categoria'] %} selected {% endif %}>
+                        {{ categoria['nombre_categoria'] }}
+                    </option>
+                    {% endfor %}
+                </select>
             </div>
-            <button class="btn btn-success" type="button" id="filtro-boton">Buscar</button>
-        </div>
-    </form>
+            <div class="col-md-4">
+                <button class="btn btn-primary w-100" type="submit" id="filtro-boton">
+                    <i class="bi bi-search me-2"></i>Buscar
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
-<script>
-    document.getElementById('filtro-boton').addEventListener('click', function () {
-        document.getElementById('filtro-form').submit();
-    });
-</script>
-
-<h3>
-    {% if categoria_nombre %}
-    Categoria {{ categoria_nombre['nombre_categoria'] }}
-    {% endif %}
-</h3>
+{% if categoria_nombre %}
+<h2 class="h4 mb-4">Categoría: {{ categoria_nombre['nombre_categoria'] }}</h2>
+{% endif %}
 
 {% if historial_data %}
-<table class="table table-hover">
-    </thead>
-    <tbody>
-        {% for registro in historial_data %}
-        <tr>
-            <td>{{ registro['usuario_historial'] }}</td>
-            <td>{{ registro['descripcion'] }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="list-group mb-4">
+    {% for registro in historial_data %}
+    <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="mb-1">{{ registro['usuario_historial'] }}</h5>
+            <p class="mb-1">{{ registro['descripcion'] }}</p>
+        </div>
+        <small class="text-muted">{{ registro['fecha'] }}</small>
+    </div>
+    {% endfor %}
+</div>
 
-
-
-<nav aria-label="Page navigation example">
+<nav aria-label="Paginación del historial">
     <ul class="pagination justify-content-center">
         {% if page > 1 %}
         <li class="page-item">
             <a class="page-link" href="{{ url_for('historial', page=page-1, categoria=request.args.get('categoria')) }}"
-                aria-label="Previous">
+                aria-label="Anterior">
                 <span aria-hidden="true">&laquo;</span>
             </a>
         </li>
         {% endif %}
 
         {% if start_page > 1 %}
-        <li class="page-item"><a class="page-link"
-                href="{{ url_for('historial', page=1, categoria=request.args.get('categoria')) }}">1</a></li>
+        <li class="page-item">
+            <a class="page-link"
+                href="{{ url_for('historial', page=1, categoria=request.args.get('categoria')) }}">1</a>
+        </li>
         {% if start_page > 2 %}
         <li class="page-item disabled"><span class="page-link">...</span></li>
         {% endif %}
@@ -94,32 +89,36 @@
         {% if end_page < total_pages %} {% if end_page < total_pages - 1 %} <li class="page-item disabled"><span
                 class="page-link">...</span></li>
             {% endif %}
-            <li class="page-item"><a class="page-link"
+            <li class="page-item">
+                <a class="page-link"
                     href="{{ url_for('historial', page=total_pages, categoria=request.args.get('categoria')) }}">{{
-                    total_pages }}</a></li>
+                    total_pages }}</a>
+            </li>
             {% endif %}
 
             {% if page < total_pages %} <li class="page-item">
                 <a class="page-link"
                     href="{{ url_for('historial', page=page+1, categoria=request.args.get('categoria')) }}"
-                    aria-label="Next">
+                    aria-label="Siguiente">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
                 </li>
                 {% endif %}
     </ul>
-    <br>
 </nav>
-
-
-
 {% else %}
-<tr>
-    <div class="alert alert-danger" role="alert">
-        No existen registros.
-    </div>
-</tr>
+<div class="alert alert-info" role="alert">
+    <i class="bi bi-info-circle me-2"></i>No existen registros en el historial.
+</div>
 {% endif %}
+{% endblock %}
 
-
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('filtro-boton').addEventListener('click', function () {
+            document.getElementById('filtro-form').submit();
+        });
+    });
+</script>
 {% endblock %}
