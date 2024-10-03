@@ -41,6 +41,7 @@ CREATE TABLE Sistema (
 CREATE TABLE Reportes (
     id_reporte INTEGER PRIMARY KEY AUTOINCREMENT,
     usuario_id INTEGER,
+    num_solicitud VARCHAR(100) NOT NULL,
     asunto VARCHAR(100) NOT NULL,
     descripcion VARCHAR(300) NOT NULL,
     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

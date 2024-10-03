@@ -31,7 +31,7 @@
             <div class="row g-2">
                 <div class="col-sm">
                     {{ form.num_solicitud.label(class="form-label") }}
-                    {{ form.num_solicitud(class="form-control") }}
+                    {{ form.num_solicitud(class="form-control", onkeyup="javascript:this.value=this.value.toUpperCase();") }}
                 </div>
                 <div class="col-sm">
                     {{ form.version.label(class="form-label") }}

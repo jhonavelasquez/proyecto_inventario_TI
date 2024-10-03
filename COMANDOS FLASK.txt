@@ -9,6 +9,7 @@ pip install Flask-Migrate Flask-SQLAlchemy
 DEPENDENCIAS:
 pip install pypdf2
 pip install Flask-Mail
+pip install flask_wtf
 pip install schedule
 
 

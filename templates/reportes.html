@@ -21,12 +21,16 @@
         <form method="get" action="{{ url_for('reportes') }}" id="filtro-form">
             <div class="row g-3 align-items-end">
                 <div class="col-md-4">
-                    <label for="search" class="form-label">Buscar por Asunto</label>
+                    <label for="search" class="form-label">Buscar</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-search"></i></span>
                         <input id="search" class="form-control" type="search" name="search"
-                            placeholder="Asunto del Reporte" aria-label="Search"
+                            placeholder="Escribe aqui tu consulta" aria-label="Search"
                             value="{{ request.args.get('search', '') }}">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="tooltip"
+                        data-bs-placement="right" title="Busca por Asunto, nombre del Usuario o Numero de solicitud.">
+                        <i class="bi bi-question-circle"></i>
+                    </button>
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -82,7 +86,7 @@
     <div class="alert alert-light d-flex justify-content-between align-items-center" role="alert">
         <div class="listReport">
             <strong> <a href="{{ url_for('ver_reporte', id_reporte=reporte['id_reporte']) }}" id="verReporte">Asunto: {{
-                    reporte['asunto'] }}</a></strong>
+                    reporte['asunto'] }} - {{ reporte['num_solicitud'] }}</a></strong>
             <h6>{{ reporte['Nombre_user'] }}</h6>
             <p>Fecha: {{ reporte['fecha'] }} </p>
         </div>

@@ -32,8 +32,8 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'    # Servidor SMTP de Gmail
 app.config['MAIL_PORT'] = 587                   # Puerto para TLS
 app.config['MAIL_USE_TLS'] = True               # Usar TLS
 app.config['MAIL_USE_SSL'] = False              # Deshabilitar SSL si usas TLS
-app.config['MAIL_USERNAME'] = 'jonathan.vr484@gmail.com'   # Tu email de Gmail
-app.config['MAIL_PASSWORD'] = 'ycfs vvod evqw emwy'  # Contraseña de aplicación de Gmail
+app.config['MAIL_USERNAME'] = 'jonathan.vr484@gmail.com'   #Gmail
+app.config['MAIL_PASSWORD'] = 'ycfs vvod evqw emwy'  # Contraseña de Gmail
 app.config['MAIL_DEFAULT_SENDER'] = 'jonathan.vr484@gmail.com'  # Email predeterminado de envío
 
 app.config.update(
@@ -60,7 +60,6 @@ def get_db_connection():
     conn = sqlite3.connect('database.db')
     conn.row_factory = sqlite3.Row
     return conn
-
 
 from functools import wraps
 from flask import session, redirect, url_for, flash
@@ -719,6 +718,8 @@ def reportes():
     conn = get_db_connection()
 
     search = request.args.get('search')
+    date_from = request.args.get('date-from')
+    date_to = request.args.get('search')
     page = request.args.get('page', 1, type=int) 
     per_page = 10 
 
@@ -726,30 +727,28 @@ def reportes():
         total_records_query = '''SELECT COUNT(*) FROM Reportes'''
         query_params = []
         
-        # Ajuste para la búsqueda si está presente
         if search:
             query = '''
-                SELECT Reportes.id_reporte, Reportes.asunto, Reportes.fecha, Reportes.fecha_solucion, Reportes.descripcion, Usuario.Nombre_user 
+                SELECT Reportes.id_reporte, Reportes.num_solicitud, Reportes.asunto, Reportes.fecha, Reportes.fecha_solucion, Reportes.descripcion, Usuario.Nombre_user 
                 FROM Reportes 
                 INNER JOIN Usuario ON Usuario.id_usuario = Reportes.usuario_id
-                WHERE asunto LIKE ? OR Usuario.Nombre_user LIKE ?
+                WHERE asunto LIKE ? OR Usuario.Nombre_user LIKE ? OR  Reportes.num_solicitud LIKE ? 
                 ORDER BY fecha DESC
                 LIMIT ? OFFSET ?
             '''
             search_term = '%' + search + '%'
-            query_params = [search_term, search_term, per_page, (page - 1) * per_page]
+            query_params = [search_term, search_term, search_term, per_page, (page - 1) * per_page]
 
-            # Ajuste para contar los resultados de la búsqueda
             total_records_query = '''
                 SELECT COUNT(*) FROM Reportes 
                 INNER JOIN Usuario ON Usuario.id_usuario = Reportes.usuario_id
-                WHERE asunto LIKE ? OR Usuario.Nombre_user LIKE ?
+                WHERE asunto LIKE ? OR Usuario.Nombre_user LIKE ? OR  Reportes.num_solicitud LIKE ?
             '''
-            total_records_params = [search_term, search_term]
+            total_records_params = [search_term, search_term, search_term]
             total_records = conn.execute(total_records_query, total_records_params).fetchone()[0]
         else:
             query = '''
-                SELECT Reportes.id_reporte, Reportes.asunto, Reportes.fecha, Reportes.fecha_solucion, Reportes.descripcion, Usuario.Nombre_user 
+                SELECT Reportes.id_reporte, Reportes.num_solicitud, Reportes.asunto, Reportes.fecha, Reportes.fecha_solucion, Reportes.descripcion, Usuario.Nombre_user 
                 FROM Reportes 
                 INNER JOIN Usuario ON Usuario.id_usuario = Reportes.usuario_id
                 ORDER BY fecha DESC
@@ -758,10 +757,8 @@ def reportes():
             query_params = [per_page, (page - 1) * per_page]
             total_records = conn.execute(total_records_query).fetchone()[0]
 
-        # Ejecutar la consulta con los parámetros correspondientes
         reportes = conn.execute(query, query_params).fetchall()
 
-        # Cálculo de las páginas
         total_pages = (total_records // per_page) + (1 if total_records % per_page > 0 else 0)
         start_page = max(1, page - 1)
         end_page = min(total_pages, page + 1)
@@ -797,7 +794,7 @@ def reportes():
 def ver_reporte(id_reporte):
     conn = get_db_connection()
     reporte = conn.execute('''
-                           SELECT Reportes.id_reporte, Reportes.asunto, Reportes.fecha, Reportes.fecha_solucion, Reportes.descripcion, Reportes.archivo, Usuario.Nombre_user 
+                           SELECT Reportes.id_reporte, Reportes.num_solicitud, Reportes.asunto, Reportes.fecha, Reportes.fecha_solucion, Reportes.descripcion, Reportes.archivo, Usuario.Nombre_user 
                            FROM Reportes 
                            INNER JOIN Usuario ON Usuario.id_usuario = Reportes.usuario_id
                            WHERE id_reporte = ?
@@ -891,6 +888,8 @@ def reporte_2():
 
         pdf_template_path = 'static/pdf_plantillas/reporte_2.pdf'
         
+        num_solicitud_up = num_solicitud.upper()
+
         pdf_reader = PdfReader(pdf_template_path)
         pdf_writer = PdfWriter()
 
@@ -905,7 +904,7 @@ def reporte_2():
                 'Text2': responsable_sistema,
                 'Text3': direccion_unidad,
                 'Text4': nombre_solicitante,
-                'Text5': num_solicitud,
+                'Text5': num_solicitud_up,
                 'Text6': fecha,
                 'Text7': version,
                 'Text8': fecha_solucion_str,
@@ -925,7 +924,7 @@ def reporte_2():
         pdf_writer.write(output_pdf)
         output_pdf.seek(0)
         
-        filename = secure_filename(f'{num_solicitud}.pdf')
+        filename = secure_filename(f'{num_solicitud_up}.pdf')
         file_path = os.path.join('pdf_reportes',filename)
         with open(file_path, 'wb') as f:
             f.write(output_pdf.read())
@@ -933,8 +932,8 @@ def reporte_2():
         conn = get_db_connection()
         
         conn.execute(
-            'INSERT INTO Reportes (usuario_id, asunto, descripcion, fecha, fecha_solucion, archivo) VALUES (?, ?, ?, ?, ?, ?)',
-            (user.id, nombre_sistema, descripcion ,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), fecha_solucion, filename)
+            'INSERT INTO Reportes (usuario_id, num_solicitud, asunto, descripcion, fecha, fecha_solucion, archivo) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            (user.id, num_solicitud_up, nombre_sistema, descripcion ,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), fecha_solucion, filename)
         )
 
         print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M'), " ---- ", fecha_solucion)
@@ -1198,7 +1197,7 @@ def enviar_recordatorios():
 stop_thread = False
 
 def iniciar_revisiones_periodicas():
-    # schedule.every(1).minutes.do(enviar_recordatorios)
+    schedule.every(1).minutes.do(enviar_recordatorios)
     schedule.every().day.at("08:00").do(enviar_recordatorios)
 
     while not stop_thread:
