@@ -10,12 +10,12 @@
     <div class="block-reveal" style="--bc: #2b3034; --d: 0.5s">Computadores</div>
 </h1>
 {% block breadcrumb %}
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Computadores</li>
-        </ol>
-    </nav>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Computadores</li>
+    </ol>
+</nav>
 {% endblock %}
 
 <div class="card mb-4">
@@ -23,14 +23,18 @@
         <form method="get" action="{{ url_for('computadores') }}" id="filtro-form" class="row g-3 align-items-end">
             <div class="col-md-8">
                 <label for="search" class="form-label">Buscar Computador</label>
-                <input id="search" class="form-control" type="search" name="search" 
-                    placeholder="Buscar por nombre del PC" aria-label="Search" 
+                <input id="search" class="form-control" type="search" name="search"
+                    placeholder="Buscar por nombre del PC" aria-label="Search"
                     value="{{ request.args.get('search', '') }}">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-2">
                 <button class="btn btn-primary w-100" type="submit">
                     <i class="bi bi-search me-2"></i>Buscar
                 </button>
+
+                <a class="btn btn-secondary w-100 mt-2" type="button" href="{{ url_for('computadores') }}">
+                    <i class="bi bi-x-circle me-2"></i>Limpiar
+                </a>
             </div>
         </form>
     </div>
@@ -100,7 +104,8 @@
 {% endif %}
 
 <!-- Modal para Agregar Computador -->
-<div class="modal fade" id="ModalAgregarComputador" tabindex="-1" aria-labelledby="ModalAgregarComputadorLabel" aria-hidden="true">
+<div class="modal fade" id="ModalAgregarComputador" tabindex="-1" aria-labelledby="ModalAgregarComputadorLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -112,11 +117,13 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="nombre_computador" class="form-label">Nombre del Computador</label>
-                        {{ form.nombre_computador(class="form-control", onkeyup="javascript:this.value=this.value.toUpperCase();") }}
+                        {{ form.nombre_computador(class="form-control",
+                        onkeyup="javascript:this.value=this.value.toUpperCase();") }}
                     </div>
                     <div class="mb-3">
                         <label for="nombre_placa" class="form-label">Nombre de Placa</label>
-                        {{ form.nombre_placa(class="form-control", onkeyup="javascript:this.value=this.value.toUpperCase();") }}
+                        {{ form.nombre_placa(class="form-control",
+                        onkeyup="javascript:this.value=this.value.toUpperCase();") }}
                     </div>
                     <div class="mb-3">
                         <label for="disco" class="form-label">Total Almacenamiento (GB)</label>
@@ -128,7 +135,8 @@
                     </div>
                     <div class="mb-3">
                         <label for="fuente" class="form-label">Fuente de Poder</label>
-                        {{ form.fuente(class="form-control", onkeyup="javascript:this.value=this.value.toUpperCase();") }}
+                        {{ form.fuente(class="form-control", onkeyup="javascript:this.value=this.value.toUpperCase();")
+                        }}
                     </div>
                 </div>
                 <div class="modal-footer">

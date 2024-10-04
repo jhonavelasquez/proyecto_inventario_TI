@@ -9,36 +9,63 @@
     <div class="block-reveal" style="--bc: #2b3034; --d: 0.5s">Sistemas</div>
 </h1>
 {% block breadcrumb %}
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Editar Sistema</li>
-        </ol>
-    </nav>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Editar Sistema</li>
+    </ol>
+</nav>
 {% endblock %}
-<div class="card text-start mb-3">
-    <div class="bodyBack">
-        <a id="botonBack" href="{{ url_for('index') }}" aria-valuetext="a">
-            <i class="bi bi-arrow-left-circle"  style="font-size: 2rem; color: cornflowerblue;"></i>
-        </a>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="mb-4">
+            <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left-circle me-2"></i>Volver a Sistemas
+            </a>
+        </div>
+
+        <h2 class="card-title mb-4">Editar Sistema: {{ user_pc['Nombre_sistema'] }}</h2>
+
+        <form id="editForm" method="post"
+            action="{{ url_for('editar_sistema', id_sistema=user_pc['Id_sistema'], id_usuario=user_pc['Id_usuario'], id_pc=user_pc['Id_pc']) }}">
+            {{ form.hidden_tag() }}
+
+            <div class="mb-4">
+                <p class="lead">
+                    Asigna un nuevo computador a <strong>{{ user_pc['Nombre_user'] }}</strong> o cambia el estado del
+                    sistema <strong>{{ user_pc['Nombre_sistema'] }}</strong>
+                </p>
+            </div>
+
+            <div class="mb-3">
+                <label for="nuevo_Id_pc" class="form-label">Seleccionar Computador</label>
+                {{ form.nuevo_Id_pc(class="form-select", id="nuevo_Id_pc") }}
+            </div>
+
+            <div class="form-check mb-3">
+                {{ form.activo(class="form-check-input", id="activo") }}
+                {{ form.activo.label(class="form-check-label", for="activo") }}
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save me-2"></i>Guardar cambios
+            </button>
+        </form>
     </div>
-    <form id="editForm" method="post" action="{{ url_for('editar_sistema', id_sistema=user_pc['Id_sistema'], id_usuario=user_pc['Id_usuario'], id_pc=user_pc['Id_pc']) }}">
-        {{ form.hidden_tag() }}
-        <h2>Editar Sistema</h2>
-        <p>Asigna un nuevo computador a <b>{{ user_pc['Nombre_user'] }}</b> o cambia el estado del sistema <b>{{ user_pc['Nombre_sistema'] }}</b></p>
-        
-        <div class="form-floating mb-3">
-            {{ form.nuevo_Id_pc(class="form-select", id="nuevo_Id_pc") }}
-                <label for="nuevo_Id_pc">Seleccionar Computador</label>
-        </div>
-
-        <div class="form-check mb-3" id="checkActivo">
-            {{ form.activo(class="form-check-input") }} 
-            {{ form.activo.label(class="form-check-label ms-2") }} 
-        </div>
-
-        <button type="submit" class="btn btn-primary">Guardar cambios</button>
-    </form>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('editForm');
+        form.addEventListener('submit', function (event) {
+            const selectedComputer = document.getElementById('nuevo_Id_pc').value;
+            const isActive = document.getElementById('activo').checked;
+
+            if (!selectedComputer && !isActive) {
+                event.preventDefault();
+                alert('Por favor, seleccione un nuevo computador o cambie el estado del sistema.');
+            }
+        });
+    });
+</script>
 
 {% endblock %}

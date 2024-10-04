@@ -53,6 +53,10 @@
                     <button class="btn btn-primary w-100" type="submit">
                         <i class="bi bi-search me-2"></i>Buscar
                     </button>
+    
+                    <a class="btn btn-secondary w-100 mt-2" type="button" href="{{ url_for('reportes') }}">
+                        <i class="bi bi-x-circle me-2"></i>Limpiar
+                    </a>
                 </div>
             </div>
         </form>
@@ -141,6 +145,5 @@
     No existen reportes.
 </div>
 {% endif %}
-
 
 {% endblock %}

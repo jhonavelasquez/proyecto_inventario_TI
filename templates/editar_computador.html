@@ -9,52 +9,94 @@
     <div class="block-reveal" style="--bc: #2b3034; --d: 0.5s">Computadores</div>
 </h1>
 {% block breadcrumb %}
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('computadores') }}">Computadores</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Editar Computador</li>
-        </ol>
-    </nav>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('computadores') }}">Computadores</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Editar Computador</li>
+    </ol>
+</nav>
 {% endblock %}
-<div class="card text-start mb-3">
-    <div class="bodyBack">
-        <a id="botonBack" href="{{ url_for('computadores') }}" aria-valuetext="a">
-            <i class="bi bi-arrow-left-circle"  style="font-size: 2rem; color: cornflowerblue;"></i>
-        </a>
-    </div>
-    <form id="editForm" method="post" action="{{ url_for('editar_computador_form') }}">
-        {{ form.hidden_tag() }}  <!-- Para CSRF -->
-        <div class="modal-body">
-            <h2>Editar Computador</h2>
-            <p>Actualiza la información del computador <b>{{ pc['Nombre_pc'] }} (#{{ pc['Id_pc'] }}) </b></p>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="mb-4">
+            <a href="{{ url_for('computadores') }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left-circle me-2"></i>Volver a Computadores
+            </a>
+        </div>
 
-            <div class="form-floating mb-3">
-                {{ form.nombre_computador(class="form-control") }}
-                <label for="nombre_computador">Nombre</label>
+        <h2 class="card-title mb-4">Editar Computador: {{ pc['Nombre_pc'] }} (#{{ pc['Id_pc'] }})</h2>
+
+        <form id="editForm" method="post" action="{{ url_for('editar_computador_form') }}">
+            {{ form.hidden_tag() }}
+            <input type="hidden" name="action" id="action" value="">
+
+            <div class="mb-3">
+                <label for="nombre_computador" class="form-label">Nombre</label>
+                {{ form.nombre_computador(class="form-control", id="nombre_computador") }}
             </div>
-            <div class="form-floating mb-3">
-                {{ form.nombre_placa(class="form-control") }}
-                <label for="nombre_placa">Placa Base</label>
+
+            <div class="mb-3">
+                <label for="nombre_placa" class="form-label">Placa Base</label>
+                {{ form.nombre_placa(class="form-control", id="nombre_placa") }}
             </div>
-            <div class="form-floating mb-3">
-                {{ form.almacenamiento(class="form-control") }}
-                <label for="almacenamiento">Almacenamiento Total (GB)</label>
+
+            <div class="mb-3">
+                <label for="almacenamiento" class="form-label">Almacenamiento Total (GB)</label>
+                {{ form.almacenamiento(class="form-control", id="almacenamiento", type="number") }}
             </div>
-            <div class="form-floating mb-3">
-                {{ form.ram(class="form-control") }}
-                <label for="ram">Ram Total (GB)</label>
+
+            <div class="mb-3">
+                <label for="ram" class="form-label">RAM Total (GB)</label>
+                {{ form.ram(class="form-control", id="ram", type="number") }}
             </div>
-            <div class="form-floating mb-3">
-                {{ form.fuente(class="form-control") }}
-                <label for="fuente">Fuente de Poder</label>
+
+            <div class="mb-3">
+                <label for="fuente" class="form-label">Fuente de Poder</label>
+                {{ form.fuente(class="form-control", id="fuente") }}
             </div>
-        </div>
-        <div class="modal-footer">
-            <button type="submit" class="btn btn-primary" onclick="document.getElementById('action').value='save';">Guardar cambios</button>
-            <button type="submit" class="btn btn-danger" onclick="document.getElementById('action').value='delete';"><i class="bi bi-trash-fill" style="margin-right: 5px;"></i>Eliminar</button>
-        </div>
-    </form>
+
+            <div class="d-flex justify-content-between mt-4">
+                <button type="submit" class="btn btn-primary" onclick="setAction('save')">
+                    <i class="bi bi-save me-2"></i>Guardar cambios
+                </button>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="bi bi-trash-fill me-2"></i>Eliminar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 </div>
 
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de que desea eliminar este computador?</p>
+                <p class="text-danger"><strong>Esta acción no se puede deshacer.</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" onclick="confirmDelete()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function setAction(action) {
+        document.getElementById('action').value = action;
+    }
+
+    function confirmDelete() {
+        setAction('delete');
+        document.getElementById('editForm').submit();
+    }
+</script>
 {% endblock %}

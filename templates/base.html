@@ -27,14 +27,19 @@
         </a>
       </div>
       <div class="nav-right">
-        <a href="" class="icon" data-bs-toggle="modal" data-bs-target="#ModalNotifiaciones">
-          <i class="bi bi-bell-fill" style="display: flex; align-items: center;"> {% if num_notificaciones_totales > 0
-            %}
-            <strong id="numero_notificacion">{{ num_notificaciones_totales }}</strong>
-            {% endif %} </i>
+        <a href="#" class="icon me-3" data-bs-toggle="modal" data-bs-target="#ModalNotifiaciones">
+          <i class="bi bi-bell-fill position-relative">
+            {% if num_notificaciones_totales > 0 %}
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+              {{ num_notificaciones_totales }}
+              <span class="visually-hidden">notificaciones no leídas</span>
+            </span>
+            {% endif %}
+          </i>
         </a>
-        <a href="{{ url_for('cuenta') }}" id="cuenta">
-          <b style="font-size: small;"> <i class="bi bi-person-fill"></i> {{ user.nombre_usuario}}</b>
+        <a href="{{ url_for('cuenta') }}" id="cuenta" class="me-3">
+          <i class="bi bi-person-fill" style="margin-right: 5px;"></i>
+          <span class="d-none d-sm-inline">{{ user.nombre_usuario }} </span>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
           aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -134,14 +139,15 @@
     <div class="menuAbajo">
       <div class="ajuste_notificacion">
         <div class="notificacion">
-          <a href="" class="icon" data-bs-toggle="modal" data-bs-target="#ModalNotifiaciones"
-            style="text-decoration: none;">
-            <i class="bi bi-bell-fill" style="display: flex; align-items: center;"></i>
-            <div>
+          <a href="#" class="icon me-3" data-bs-toggle="modal" data-bs-target="#ModalNotifiaciones">
+            <i class="bi bi-bell-fill position-relative">
               {% if num_notificaciones_totales > 0 %}
-              <strong id="numero_notificacion">{{ num_notificaciones_totales }}</strong>
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                {{ num_notificaciones_totales }}
+                <span class="visually-hidden">notificaciones no leídas</span>
+              </span>
               {% endif %}
-            </div>
+            </i>
           </a>
         </div>
 
@@ -180,23 +186,23 @@
         <div class="modal-body" id="modal-body-ajustes">
           <ol class="list-group list-group-flush">
             {% for row in info_notificaciones %}
-              {% if row['leido'] == 1 %}
-              <li class="list-group-item">
-                <a href="{{ url_for('ver_reporte', id_reporte=row['id_reporte']) }}" id="registroNotificacion">
-                  {{ row.mensaje }}<br>
-                  <small style="font-size: small; color: #8a8a8a;"><i class="bi bi-calendar-check-fill"
-                      style="margin-right: 5px;"></i> {{ row.fecha_notificacion }}</small>
-                </a>
-              </li>
-              {% else %}
-              <li class="list-group-item list-group-item-success">
-                <a href="{{ url_for('ver_reporte', id_reporte=row['id_reporte']) }}" id="registroNotificacion">
-                  {{ row.mensaje }}<br>
-                  <small style="font-size: small; color: #333333;"><i class="bi bi-calendar-check-fill"
-                      style="margin-right: 5px;"></i> {{ row.fecha_notificacion }}</small>
-                </a>
-              </li>
-              {% endif %}
+            {% if row['leido'] == 1 %}
+            <li class="list-group-item">
+              <a href="{{ url_for('ver_reporte', id_reporte=row['id_reporte']) }}" id="registroNotificacion">
+                {{ row.mensaje }}<br>
+                <small style="font-size: small; color: #8a8a8a;"><i class="bi bi-calendar-check-fill"
+                    style="margin-right: 5px;"></i> {{ row.fecha_notificacion }}</small>
+              </a>
+            </li>
+            {% else %}
+            <li class="list-group-item list-group-item-success">
+              <a href="{{ url_for('ver_reporte', id_reporte=row['id_reporte']) }}" id="registroNotificacion">
+                {{ row.mensaje }}<br>
+                <small style="font-size: small; color: #333333;"><i class="bi bi-calendar-check-fill"
+                    style="margin-right: 5px;"></i> {{ row.fecha_notificacion }}</small>
+              </a>
+            </li>
+            {% endif %}
             {% else %}
             <li class="list-group-item">No tienes notificaciones.</li>
             {% endfor %}

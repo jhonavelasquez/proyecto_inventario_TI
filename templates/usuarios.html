@@ -27,10 +27,14 @@
                     placeholder="Buscar por nombre o ID de usuario" aria-label="Search"
                     value="{{ request.args.get('search', '') }}">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-2">
                 <button class="btn btn-primary w-100" type="submit">
                     <i class="bi bi-search me-2"></i>Buscar
                 </button>
+
+                <a class="btn btn-secondary w-100 mt-2" type="button" href="{{ url_for('usuarios') }}">
+                    <i class="bi bi-x-circle me-2"></i>Limpiar
+                </a>
             </div>
         </form>
     </div>

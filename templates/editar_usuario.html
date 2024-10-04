@@ -10,72 +10,107 @@
     <div class="block-reveal" style="--bc: #2b3034; --d: 0.5s">Usuarios</div>
 </h1>
 {% block breadcrumb %}
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('usuarios') }}">Usuarios</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Editar Usuario</li>
-        </ol>
-    </nav>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('usuarios') }}">Usuarios</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Editar Usuario</li>
+    </ol>
+</nav>
 {% endblock %}
-<div class="card text-start mb-3">
-    <div class="bodyBack">
-        <a id="botonBack" href="{{url_for('usuarios')}}" aria-valuetext="a">
-            <i class="bi bi-arrow-left-circle" style="font-size: 2rem; color: cornflowerblue;"></i>
-        </a>
-    </div>
-    <form id="editForm" method="post" action="{{ url_for('editar_usuario_form') }}">
-        {{ form.hidden_tag() }}
-        <div class="modal-body">
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="mb-4">
+            <a href="{{ url_for('usuarios') }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left-circle me-2"></i>Volver a Usuarios
+            </a>
+        </div>
+
+        <h2 class="card-title mb-4">Editar Usuario: {{ user_edit['Nombre_user'] }} (#{{ user_edit['Id_usuario'] }})</h2>
+
+        <form id="editForm" method="post" action="{{ url_for('editar_usuario_form') }}">
+            {{ form.hidden_tag() }}
             <input type="hidden" name="id_usuario" id="id_usuario" value="{{ user_edit['Id_usuario'] }}">
             <input type="hidden" name="action" id="action" value="">
-            <h2>Editar Usuario</h2>
-            <p>Actualiza la informacion del usuario <b>{{ user_edit['Nombre_user'] }} (#{{ user_edit['Id_usuario'] }})
-                </b></p>
 
-            <div class="form-floating mb-4">
+            <div class="mb-3">
+                <label for="nombre_usuario" class="form-label">Nombre</label>
                 {{ form.nombre_user(class="form-control", id="nombre_usuario",
-                onkeyup="javascript:this.value=this.value.toUpperCase();", placeholder="") }}
-                <label for="nombre_usuario">Nombre</label>
+                onkeyup="javascript:this.value=this.value.toUpperCase();") }}
             </div>
 
-            <div class="form-floating mb-4">
+            <div class="mb-3">
+                <label for="email_user" class="form-label">Correo Electrónico</label>
                 {{ form.email_user(class="form-control", id="email_user",
-                onkeyup="javascript:this.value=this.value.toUpperCase();", placeholder="") }}
-                <label for="email">Correo Electrónico</label>
+                onkeyup="javascript:this.value=this.value.toUpperCase();") }}
             </div>
-            <div class="form-floating mb-4 position-relative">
-                {{ form.psw(class="form-control", id="psw", placeholder="") }}
-                <label for="psw">Actualizar contraseña</label>
-                <button type="button"
-                    class="btn btn-link p-0 m-0 position-absolute top-50 end-0 translate-middle-y me-3"
-                    data-bs-toggle="tooltip" data-bs-placement="right"
-                    data-bs-title="Si desea actualizar la contraseña del usuario, ingrese una nueva. Si no desea modificar la contraseña, deje este campo vacío.">
-                    <i class="bi bi-question-circle"></i>
+
+            <div class="mb-3">
+                <label for="psw" class="form-label">Actualizar contraseña</label>
+                <div class="input-group">
+                    {{ form.psw(class="form-control", id="psw") }}
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="tooltip"
+                        data-bs-placement="right"
+                        title="Si desea actualizar la contraseña del usuario, ingrese una nueva. Si no desea modificar la contraseña, deje este campo vacío.">
+                        <i class="bi bi-question-circle"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="tipo_usuario" class="form-label">Tipo de usuario</label>
+                {{ form.tipo_usuario(class="form-select", id="tipo_usuario") }}
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <button type="submit" class="btn btn-primary" onclick="setAction('save')">
+                    <i class="bi bi-save me-2"></i>Guardar cambios
+                </button>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="bi bi-trash-fill me-2"></i>Eliminar
                 </button>
             </div>
-
-
-
-            <div class="form-floating mb-4">
-                {{ form.tipo_usuario(class="form-select", id="tipo_usuario") }}
-                <label for="tipo_usuario">Tipo de usuario</label>
-            </div>
-
-        </div>
-        <div class="Botones_editarUsuario">
-            <div class="botones">
-                <button id="guardar" type="submit" class="btn btn-primary"
-                    onclick="document.getElementById('action').value='save';">Guardar cambios</button>
-            </div>
-            <div class="BotonEliminar">
-                <button type="submit" class="btn btn-danger"
-                    onclick="document.getElementById('action').value='delete';">Eliminar</button>
-            </div>
-        </div>
-    </form>
+        </form>
+    </div>
+</div>
 </div>
 
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de que desea eliminar este usuario?</p>
+                <p class="text-danger"><strong>Esta acción no se puede deshacer.</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" onclick="confirmDelete()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function setAction(action) {
+        document.getElementById('action').value = action;
+    }
 
+    function confirmDelete() {
+        setAction('delete');
+        document.getElementById('editForm').submit();
+    }
 
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
+</script>
 {% endblock %}

@@ -708,9 +708,6 @@ def historial():
     finally:
         conn.close()
 
-
-
-# BACKEND REPORTES
 @app.route('/reportes', methods=['GET', 'POST'])
 @requiere_tipo_usuario(1)
 @login_required
@@ -719,45 +716,57 @@ def reportes():
 
     search = request.args.get('search')
     date_from = request.args.get('date-from')
-    date_to = request.args.get('search')
+    date_to = request.args.get('date-to')
     page = request.args.get('page', 1, type=int) 
     per_page = 10 
 
     try:
-        total_records_query = '''SELECT COUNT(*) FROM Reportes'''
         query_params = []
-        
+        total_records_params = []
+
+        base_query = '''
+            SELECT Reportes.id_reporte, Reportes.num_solicitud, Reportes.asunto, Reportes.fecha, Reportes.fecha_solucion, 
+                   Reportes.descripcion, Usuario.Nombre_user 
+            FROM Reportes 
+            INNER JOIN Usuario ON Usuario.id_usuario = Reportes.usuario_id
+            WHERE 1=1
+        '''
+        total_records_query = '''
+            SELECT COUNT(*) 
+            FROM Reportes 
+            INNER JOIN Usuario ON Usuario.id_usuario = Reportes.usuario_id
+            WHERE 1=1
+        '''
+
         if search:
-            query = '''
-                SELECT Reportes.id_reporte, Reportes.num_solicitud, Reportes.asunto, Reportes.fecha, Reportes.fecha_solucion, Reportes.descripcion, Usuario.Nombre_user 
-                FROM Reportes 
-                INNER JOIN Usuario ON Usuario.id_usuario = Reportes.usuario_id
-                WHERE asunto LIKE ? OR Usuario.Nombre_user LIKE ? OR  Reportes.num_solicitud LIKE ? 
-                ORDER BY fecha DESC
-                LIMIT ? OFFSET ?
+            base_query += '''
+                AND (asunto LIKE ? OR Usuario.Nombre_user LIKE ? OR Reportes.num_solicitud LIKE ?)
+            '''
+            total_records_query += '''
+                AND (asunto LIKE ? OR Usuario.Nombre_user LIKE ? OR Reportes.num_solicitud LIKE ?)
             '''
             search_term = '%' + search + '%'
-            query_params = [search_term, search_term, search_term, per_page, (page - 1) * per_page]
+            query_params.extend([search_term, search_term, search_term])
+            total_records_params.extend([search_term, search_term, search_term])
 
-            total_records_query = '''
-                SELECT COUNT(*) FROM Reportes 
-                INNER JOIN Usuario ON Usuario.id_usuario = Reportes.usuario_id
-                WHERE asunto LIKE ? OR Usuario.Nombre_user LIKE ? OR  Reportes.num_solicitud LIKE ?
-            '''
-            total_records_params = [search_term, search_term, search_term]
-            total_records = conn.execute(total_records_query, total_records_params).fetchone()[0]
-        else:
-            query = '''
-                SELECT Reportes.id_reporte, Reportes.num_solicitud, Reportes.asunto, Reportes.fecha, Reportes.fecha_solucion, Reportes.descripcion, Usuario.Nombre_user 
-                FROM Reportes 
-                INNER JOIN Usuario ON Usuario.id_usuario = Reportes.usuario_id
-                ORDER BY fecha DESC
-                LIMIT ? OFFSET ?
-            '''
-            query_params = [per_page, (page - 1) * per_page]
-            total_records = conn.execute(total_records_query).fetchone()[0]
+        if date_from:
+            base_query += " AND Reportes.fecha >= ?"
+            total_records_query += " AND Reportes.fecha >= ?"
+            query_params.append(date_from)
+            total_records_params.append(date_from)
 
-        reportes = conn.execute(query, query_params).fetchall()
+        if date_to:
+            base_query += " AND Reportes.fecha <= ?"
+            total_records_query += " AND Reportes.fecha <= ?"
+            query_params.append(date_to)
+            total_records_params.append(date_to)
+        
+        
+        base_query += " ORDER BY fecha DESC LIMIT ? OFFSET ?"
+        query_params.extend([per_page, (page - 1) * per_page])
+
+        reportes = conn.execute(base_query, query_params).fetchall()
+        total_records = conn.execute(total_records_query, total_records_params).fetchone()[0]
 
         total_pages = (total_records // per_page) + (1 if total_records % per_page > 0 else 0)
         start_page = max(1, page - 1)
@@ -785,7 +794,6 @@ def reportes():
 
     finally:
         conn.close()
-
 
 
 @app.route('/ver_reporte/<int:id_reporte>', methods=['GET'])

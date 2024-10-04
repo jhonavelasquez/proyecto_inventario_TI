@@ -32,10 +32,14 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-4">
-                <button class="btn btn-primary w-100" type="submit" id="filtro-boton">
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100" type="submit">
                     <i class="bi bi-search me-2"></i>Buscar
                 </button>
+
+                <a class="btn btn-secondary w-100 mt-2" type="button" href="{{ url_for('historial') }}">
+                    <i class="bi bi-x-circle me-2"></i>Limpiar
+                </a>
             </div>
         </form>
     </div>

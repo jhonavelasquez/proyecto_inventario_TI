@@ -38,15 +38,22 @@
                         placeholder="Buscar por nombre de usuario o nombre del PC" aria-label="Search"
                         value="{{ request.args.get('search', '') }}">
                 </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button class="btn btn-primary w-100" type="submit" id="filtro-boton">
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100" type="submit">
                         <i class="bi bi-search me-2"></i>Buscar
                     </button>
+    
+                    <a class="btn btn-secondary w-100 mt-2" type="button" href="{{ url_for('index') }}">
+                        <i class="bi bi-x-circle me-2"></i>Limpiar
+                    </a>
                 </div>
             </div>
         </form>
     </div>
 </div>
+
+
+
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="h4 mb-0">Listado de Sistemas</h2>
@@ -152,8 +159,6 @@
 </div>
 
 
-
-
 <!-- Modal para Eliminar Sistema -->
 <div class="modal fade" id="ModelEliminarSistema" tabindex="-1" aria-labelledby="ModelEliminarSistemaLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -162,7 +167,7 @@
                 <h5 class="modal-title" id="ModelEliminarSistemaLabel">Eliminar Sistema</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="post" action="{{ url_for('eliminar_sistema') }}">
+            <form id="deleteForm" method="post" action="{{ url_for('eliminar_sistema') }}">
                 {{ formEliminar.hidden_tag() }}
                 <div class="modal-body">
                     <div class="mb-3">
@@ -172,35 +177,55 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                    <button type="button" class="btn btn-danger" onclick="showDeleteConfirmation()">
+                        <i class="bi bi-trash-fill me-2"></i>Eliminar
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+<!-- CONFIRMAR Eliminar Sistema -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de que desea eliminar este sistema?</p>
+                <p class="text-danger"><strong>Esta acción no se puede deshacer.</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" onclick="confirmDelete()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    $(document).ready(function() {
-        $('#sistema, #sistema-eliminar').select2({
-            theme: 'bootstrap-5'
-        });
-
-        var id_tipo_usuario = {{ session['id_tipo_usuario'] | tojson }};
-        
-        function handleRowClick() {
-            if ($(window).width() <= 768 && (id_tipo_usuario == 1 || id_tipo_usuario == 3)) {
-                $(".clickable-row").click(function() {
-                    window.location = $(this).data("href");
-                });
-            } else {
-                $(".clickable-row").off("click");
-            }   
+    function showDeleteConfirmation() {
+        var selectedSystem = document.getElementById('sistema-eliminar').value;
+        if (selectedSystem) {
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+        } else {
+            alert('Por favor, seleccione un sistema para eliminar.');
         }
+    }
 
-        handleRowClick();
+    function confirmDelete() {
+        document.getElementById('deleteForm').submit();
+    }
 
-        $(window).resize(function() {
-            handleRowClick();
+    document.addEventListener('DOMContentLoaded', function() {
+        var deleteModal = document.getElementById('deleteModal');
+        deleteModal.addEventListener('hidden.bs.modal', function () {
+            var eliminarSistemaModal = bootstrap.Modal.getInstance(document.getElementById('ModelEliminarSistema'));
+            eliminarSistemaModal.show();
         });
     });
 </script>
