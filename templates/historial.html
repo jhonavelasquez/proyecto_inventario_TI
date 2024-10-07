@@ -20,7 +20,7 @@
 <div class="card mb-4">
     <div class="card-body">
         <form method="get" action="{{ url_for('historial') }}" id="filtro-form" class="row g-3 align-items-end">
-            <div class="col-md-8">
+            <div class="col-md-4">
                 <label for="categoria" class="form-label">Selecciona una Categoría</label>
                 <select id="categoria" class="form-select" name="categoria" aria-label="Selecciona una Categoría">
                     <option value="">Todas las Categorías</option>
@@ -31,6 +31,22 @@
                     </option>
                     {% endfor %}
                 </select>
+            </div>
+            <div class="col-md-3">
+                <label for="date-from" class="form-label">Desde</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                    <input id="date-from" class="form-control" type="date" name="date-from" aria-label="date-from"
+                        value="{{ request.args.get('date-from', '') }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label for="date-to" class="form-label">Hasta</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                    <input id="date-to" class="form-control" type="date" name="date-to" aria-label="date-to"
+                        value="{{ request.args.get('date-to', '') }}">
+                </div>
             </div>
             <div class="col-md-2">
                 <button class="btn btn-primary w-100" type="submit">

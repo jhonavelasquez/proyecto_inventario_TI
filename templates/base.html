@@ -183,30 +183,31 @@
               style="margin-right: 5px;"></i>Notificaciones </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body" id="modal-body-ajustes">
-          <ol class="list-group list-group-flush">
+        <div class="modal-body p-0">
+          {% if info_notificaciones %}
+          <ul class="list-group list-group-flush">
             {% for row in info_notificaciones %}
-            {% if row['leido'] == 1 %}
-            <li class="list-group-item">
-              <a href="{{ url_for('ver_reporte', id_reporte=row['id_reporte']) }}" id="registroNotificacion">
-                {{ row.mensaje }}<br>
-                <small style="font-size: small; color: #8a8a8a;"><i class="bi bi-calendar-check-fill"
-                    style="margin-right: 5px;"></i> {{ row.fecha_notificacion }}</small>
+            <li class="list-group-item {% if not row['leido'] %}list-group-item-success{% endif %} p-3">
+              <div class="d-flex w-100 justify-content-between align-items-center">
+                <h6 class="mb-1">{{ row.mensaje }}</h6>
+                <small class="text-muted">{{ row.fecha_notificacion }}</small>
+              </div>
+              <p class="mb-1">{{ row.descripcion_corta }}</p>
+              <a href="{{ url_for('ver_reporte', id_reporte=row['id_reporte']) }}"
+                class="btn btn-sm btn-outline-primary mt-2">
+                Ver detalles
               </a>
             </li>
-            {% else %}
-            <li class="list-group-item list-group-item-success">
-              <a href="{{ url_for('ver_reporte', id_reporte=row['id_reporte']) }}" id="registroNotificacion">
-                {{ row.mensaje }}<br>
-                <small style="font-size: small; color: #333333;"><i class="bi bi-calendar-check-fill"
-                    style="margin-right: 5px;"></i> {{ row.fecha_notificacion }}</small>
-              </a>
-            </li>
-            {% endif %}
-            {% else %}
-            <li class="list-group-item">No tienes notificaciones.</li>
             {% endfor %}
-          </ol>
+          </ul>
+          {% else %}
+          <div class="alert alert-info m-3" role="alert">
+            <i class="bi bi-info-circle-fill me-2"></i>No tienes notificaciones en este momento.
+          </div>
+          {% endif %}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
         </div>
       </div>
     </div>

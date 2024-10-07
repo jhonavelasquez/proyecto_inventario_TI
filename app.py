@@ -634,7 +634,6 @@ def editar_usuario_form():
     return redirect(url_for('usuarios'))
 
 
-
 #BACKEND HISTORIAL
 @app.route('/historial', methods=['GET'])
 @login_required
@@ -650,42 +649,76 @@ def historial():
 
     try:
         categoria_id = request.args.get('categoria')
+        date_from = request.args.get('date-from')
+        date_to = request.args.get('date-to')
         categorias = conn.execute("SELECT * FROM Categoria_historial").fetchall()
 
-        historial_data = []
-        total_records = 0
+        query_params = []
+        total_records_params = []
 
-        if categoria_id:
-            params = []
-
-            query = '''
+        base_query = '''
             SELECT Historial.*, Categoria_historial.nombre_categoria 
             FROM Historial 
             INNER JOIN Categoria_historial ON Categoria_historial.id_categoria = Historial.id_categoria
             WHERE 1=1
-            '''
-            query += ' AND Historial.id_categoria = ? ORDER BY fecha DESC'
-            params.append(categoria_id)
+        '''
+        total_records_query = '''
+            SELECT COUNT(*) 
+            FROM Historial 
+            INNER JOIN Categoria_historial ON Categoria_historial.id_categoria = Historial.id_categoria
+            WHERE 1=1
+        '''
 
-            total_records = conn.execute(query, params).fetchall()
-            total_records = len(total_records)
+        # Filtro por categoría
+        if categoria_id:
+            base_query += " AND Historial.id_categoria = ?"
+            total_records_query += " AND Historial.id_categoria = ?"
+            print(f"Categoria seleccionada: {categoria_id}")
+            query_params.append(categoria_id)
+            total_records_params.append(categoria_id)
 
-            offset = (page - 1) * per_page
-            query += " LIMIT ? OFFSET ?"
-            params += [per_page, offset]
+        # Filtro por fecha desde
+        if date_from:
+            date_from_str = datetime.datetime.strptime(date_from, '%d/%m/%Y').strftime('%d/%m/%Y 00:00:00')
+            base_query += " AND DATE(Historial.fecha) >= DATE(?)"
+            total_records_query += " AND DATE(Historial.fecha) >= DATE(?)"
+            print(f"Fecha desde: {date_from_str}")
+            query_params.append(date_from_str)
+            total_records_params.append(date_from_str)
 
-            historial_data = conn.execute(query, params).fetchall()
+        # Filtro por fecha hasta
+        if date_to:
+            date_to_str = datetime.datetime.strptime(date_to, '%d/%m/%Y').strftime('%d/%m/%Y 00:00:00')
+            base_query += " AND DATE(Historial.fecha) <= DATE(?)"
+            total_records_query += " AND DATE(Historial.fecha) <= DATE(?)"
+            print(f"Fecha hasta: {date_to_str}")
+            query_params.append(date_to)
+            total_records_params.append(date_to)
 
-            categoria_nombre = conn.execute('SELECT nombre_categoria FROM Categoria_historial WHERE id_categoria = ?', (categoria_id,)).fetchone()
+        # Ordenar por fecha descendente y agregar paginación
+        base_query += " ORDER BY Historial.fecha DESC LIMIT ? OFFSET ?"
+        query_params.extend([per_page, (page - 1) * per_page])
+
+        # Obtener datos del historial y el número total de registros
+        historial_data = conn.execute(base_query, query_params).fetchall()
+        print("Datos obtenidos del historial:", historial_data)
         
-        else:
-            historial_data = conn.execute("SELECT * FROM Historial ORDER BY fecha DESC LIMIT ? OFFSET ?", (per_page, (page - 1) * per_page)).fetchall()
-            total_records = conn.execute("SELECT COUNT(*) FROM Historial").fetchone()[0]
+        if historial_data:
+            for record in historial_data:
+                print(f"Fecha de registro: {record['fecha']}")  # Aquí imprimes la fecha de cada registro
 
+        total_records = conn.execute(total_records_query, total_records_params).fetchone()[0]
+
+        # Calcular el total de páginas
         total_pages = (total_records // per_page) + (1 if total_records % per_page > 0 else 0)
 
         start_page = max(1, page - 1)
         end_page = min(total_pages, page + 1)
+
+        # Obtener el nombre de la categoría seleccionada (si aplica)
+        categoria_nombre = None
+        if categoria_id:
+            categoria_nombre = conn.execute('SELECT nombre_categoria FROM Categoria_historial WHERE id_categoria = ?', (categoria_id,)).fetchone()
 
         return render_template('historial.html', 
                                 historial_data=historial_data, 
@@ -707,6 +740,7 @@ def historial():
 
     finally:
         conn.close()
+
 
 @app.route('/reportes', methods=['GET', 'POST'])
 @requiere_tipo_usuario(1)
@@ -872,9 +906,11 @@ def reporte_1():
 @requiere_tipo_usuario(1)
 @login_required
 def reporte_2():
-    user=current_user
+    user = current_user
     num_notificaciones_totales = get_total_notifications(user.id)
     info_notificaciones = get_info_notifications(user.id)
+
+    conn = get_db_connection()
 
     form = ReporteForm()
 
@@ -889,74 +925,73 @@ def reporte_2():
         responsable_ddi = request.form['responsable_ddi']
         responsable_solicitud = request.form['responsable_solicitud']
         fecha_solucion = request.form['fecha_solucion']
-        num_solicitud = request.form['num_solicitud']
+        num_solicitud = request.form['num_solicitud'].upper()
         fecha = datetime.datetime.now().strftime('%d-%m-%Y')
-        
-        fecha_solucion_str = datetime.datetime.strptime(fecha_solucion, '%Y-%m-%d').strftime('%d-%m-%Y')
 
-        pdf_template_path = 'static/pdf_plantillas/reporte_2.pdf'
-        
-        num_solicitud_up = num_solicitud.upper()
+        existing_report = conn.execute(
+            'SELECT COUNT(*) FROM Reportes WHERE num_solicitud = ?',
+            (num_solicitud,)
+        ).fetchone()[0]
 
-        pdf_reader = PdfReader(pdf_template_path)
-        pdf_writer = PdfWriter()
+        if existing_report > 0:
+            flash("El número de solicitud ya existe.", "warning")
+        else:
+            fecha_solucion_str = datetime.datetime.strptime(fecha_solucion, '%Y-%m-%d').strftime('%d-%m-%Y')
+            pdf_template_path = 'static/pdf_plantillas/reporte_2.pdf'
 
-        for page_num in range(len(pdf_reader.pages)):
-            page = pdf_reader.pages[page_num]
-            pdf_writer.add_page(page)
+            pdf_reader = PdfReader(pdf_template_path)
+            pdf_writer = PdfWriter()
 
-        pdf_writer.update_page_form_field_values(
-            pdf_writer.pages[0],
-            {
-                'Text1': nombre_sistema,
-                'Text2': responsable_sistema,
-                'Text3': direccion_unidad,
-                'Text4': nombre_solicitante,
-                'Text5': num_solicitud_up,
-                'Text6': fecha,
-                'Text7': version,
-                'Text8': fecha_solucion_str,
-                'Text9': descripcion
-            },
-        )
-        
-        pdf_writer.update_page_form_field_values(
-            pdf_writer.pages[1],
-            {
-                'Text10': responsable_ddi,
-                'Text11': responsable_solicitud
-            }
-        )
+            for page_num in range(len(pdf_reader.pages)):
+                page = pdf_reader.pages[page_num]
+                pdf_writer.add_page(page)
 
-        output_pdf = BytesIO()
-        pdf_writer.write(output_pdf)
-        output_pdf.seek(0)
-        
-        filename = secure_filename(f'{num_solicitud_up}.pdf')
-        file_path = os.path.join('pdf_reportes',filename)
-        with open(file_path, 'wb') as f:
-            f.write(output_pdf.read())
-        
-        conn = get_db_connection()
-        
-        conn.execute(
-            'INSERT INTO Reportes (usuario_id, num_solicitud, asunto, descripcion, fecha, fecha_solucion, archivo) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            (user.id, num_solicitud_up, nombre_sistema, descripcion ,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), fecha_solucion, filename)
-        )
+            pdf_writer.update_page_form_field_values(
+                pdf_writer.pages[0],
+                {
+                    'Text1': nombre_sistema,
+                    'Text2': responsable_sistema,
+                    'Text3': direccion_unidad,
+                    'Text4': nombre_solicitante,
+                    'Text5': num_solicitud,
+                    'Text6': fecha,
+                    'Text7': version,
+                    'Text8': fecha_solucion_str,
+                    'Text9': descripcion
+                },
+            )
+            pdf_writer.update_page_form_field_values(
+                pdf_writer.pages[1],
+                {
+                    'Text10': responsable_ddi,
+                    'Text11': responsable_solicitud
+                }
+            )
 
-        print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M'), " ---- ", fecha_solucion)
+            output_pdf = BytesIO()
+            pdf_writer.write(output_pdf)
+            output_pdf.seek(0)
+            
+            filename = secure_filename(f'{num_solicitud}.pdf')
+            file_path = os.path.join('pdf_reportes', filename)
+            with open(file_path, 'wb') as f:
+                f.write(output_pdf.read())
+            
+            conn.execute(
+                'INSERT INTO Reportes (usuario_id, num_solicitud, asunto, descripcion, fecha, fecha_solucion, archivo) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                (user.id, num_solicitud, nombre_sistema, descripcion, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), fecha_solucion, filename)
+            )
 
-        fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-        fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
-        descripcion_hist= (f" ha realizado un nuevo reporte. ASUNTO: {nombre_sistema}.")
-        conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 4)', (user.nombre_usuario,descripcion_hist,fecha_actual_seg))
+            fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+            descripcion_hist = f" ha realizado un nuevo reporte. ASUNTO: {nombre_sistema}."
+            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 4)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
 
-        conn.commit()
-        conn.close()
-        
-        flash("Reporte creado exitosamente.", "success")
+            conn.commit()
+            conn.close()
+            
+            flash("Reporte creado exitosamente.", "success")
+            return redirect(url_for('reportes'))
 
-        return redirect(url_for('reportes'))
     else:
         print("Errores de validación:", form.errors)
         
