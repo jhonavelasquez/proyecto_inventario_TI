@@ -649,76 +649,42 @@ def historial():
 
     try:
         categoria_id = request.args.get('categoria')
-        date_from = request.args.get('date-from')
-        date_to = request.args.get('date-to')
         categorias = conn.execute("SELECT * FROM Categoria_historial").fetchall()
 
-        query_params = []
-        total_records_params = []
+        historial_data = []
+        total_records = 0
 
-        base_query = '''
+        if categoria_id:
+            params = []
+
+            query = '''
             SELECT Historial.*, Categoria_historial.nombre_categoria 
             FROM Historial 
             INNER JOIN Categoria_historial ON Categoria_historial.id_categoria = Historial.id_categoria
             WHERE 1=1
-        '''
-        total_records_query = '''
-            SELECT COUNT(*) 
-            FROM Historial 
-            INNER JOIN Categoria_historial ON Categoria_historial.id_categoria = Historial.id_categoria
-            WHERE 1=1
-        '''
+            '''
+            query += ' AND Historial.id_categoria = ? ORDER BY fecha DESC'
+            params.append(categoria_id)
 
-        # Filtro por categoría
-        if categoria_id:
-            base_query += " AND Historial.id_categoria = ?"
-            total_records_query += " AND Historial.id_categoria = ?"
-            print(f"Categoria seleccionada: {categoria_id}")
-            query_params.append(categoria_id)
-            total_records_params.append(categoria_id)
+            total_records = conn.execute(query, params).fetchall()
+            total_records = len(total_records)
 
-        # Filtro por fecha desde
-        if date_from:
-            date_from_str = datetime.datetime.strptime(date_from, '%d/%m/%Y').strftime('%d/%m/%Y 00:00:00')
-            base_query += " AND DATE(Historial.fecha) >= DATE(?)"
-            total_records_query += " AND DATE(Historial.fecha) >= DATE(?)"
-            print(f"Fecha desde: {date_from_str}")
-            query_params.append(date_from_str)
-            total_records_params.append(date_from_str)
+            offset = (page - 1) * per_page
+            query += " LIMIT ? OFFSET ?"
+            params += [per_page, offset]
 
-        # Filtro por fecha hasta
-        if date_to:
-            date_to_str = datetime.datetime.strptime(date_to, '%d/%m/%Y').strftime('%d/%m/%Y 00:00:00')
-            base_query += " AND DATE(Historial.fecha) <= DATE(?)"
-            total_records_query += " AND DATE(Historial.fecha) <= DATE(?)"
-            print(f"Fecha hasta: {date_to_str}")
-            query_params.append(date_to)
-            total_records_params.append(date_to)
+            historial_data = conn.execute(query, params).fetchall()
 
-        # Ordenar por fecha descendente y agregar paginación
-        base_query += " ORDER BY Historial.fecha DESC LIMIT ? OFFSET ?"
-        query_params.extend([per_page, (page - 1) * per_page])
+            categoria_nombre = conn.execute('SELECT nombre_categoria FROM Categoria_historial WHERE id_categoria = ?', (categoria_id,)).fetchone()
 
-        # Obtener datos del historial y el número total de registros
-        historial_data = conn.execute(base_query, query_params).fetchall()
-        print("Datos obtenidos del historial:", historial_data)
-        
-        if historial_data:
-            for record in historial_data:
-                print(f"Fecha de registro: {record['fecha']}")  # Aquí imprimes la fecha de cada registro
+        else:
+            historial_data = conn.execute("SELECT * FROM Historial ORDER BY fecha DESC LIMIT ? OFFSET ?", (per_page, (page - 1) * per_page)).fetchall()
+            total_records = conn.execute("SELECT COUNT(*) FROM Historial").fetchone()[0]
 
-        total_records = conn.execute(total_records_query, total_records_params).fetchone()[0]
-
-        # Calcular el total de páginas
         total_pages = (total_records // per_page) + (1 if total_records % per_page > 0 else 0)
 
         start_page = max(1, page - 1)
         end_page = min(total_pages, page + 1)
-
-        # Obtener el nombre de la categoría seleccionada (si aplica)
-        categoria_nombre = None
-        if categoria_id:
-            categoria_nombre = conn.execute('SELECT nombre_categoria FROM Categoria_historial WHERE id_categoria = ?', (categoria_id,)).fetchone()
 
         return render_template('historial.html', 
                                 historial_data=historial_data, 
@@ -740,7 +706,6 @@ def historial():
 
     finally:
         conn.close()
-
 
 @app.route('/reportes', methods=['GET', 'POST'])
 @requiere_tipo_usuario(1)
@@ -927,6 +892,8 @@ def reporte_2():
         fecha_solucion = request.form['fecha_solucion']
         num_solicitud = request.form['num_solicitud'].upper()
         fecha = datetime.datetime.now().strftime('%d-%m-%Y')
+
+        
 
         existing_report = conn.execute(
             'SELECT COUNT(*) FROM Reportes WHERE num_solicitud = ?',

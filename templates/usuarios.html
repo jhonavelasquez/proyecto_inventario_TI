@@ -61,37 +61,43 @@
 {% endwith %}
 
 {% if users %}
-<div class="table-responsive">
-    <table class="table table-hover">
-        <thead class="table-light">
-            <tr>
-                <th>Usuario</th>
-                <th>Email</th>
-                <th>Rol</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in users %}
-            <tr>
-                <td>{{ row['Nombre_user'] }}</td>
-                <td>{{ row['email'] }}</td>
-                <td>{{ row['nombre_tipo_usuario'] }}</td>
-                <td>
-                    <a href="{{ url_for('editar_usuario', id=row['Id_usuario']) }}" class="btn btn-sm btn-warning">
-                        <i class="bi bi-pencil-square me-1"></i>Editar
-                    </a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-5 g-4">
+    {% for row in users %}
+    <div class="col">
+        <div class="card h-100 shadow-sm hover-card">
+            <div class="card-body">
+                <h5 class="card-title">{{ row['Nombre_user'] }}</h5>
+                <p class="card-text">
+                    <i class="bi bi-envelope me-2"></i>{{ row['email'] }}
+                </p>
+                <p class="card-text">
+                    <i class="bi bi-person-badge me-2"></i>{{ row['nombre_tipo_usuario'] }}
+                </p>
+            </div>
+            <div class="card-footer bg-transparent border-top-0">
+                <a href="{{ url_for('editar_usuario', id=row['Id_usuario']) }}" class="btn btn-warning btn-sm w-100">
+                    <i class="bi bi-pencil-square me-1"></i>Editar
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
 </div>
 {% else %}
 <div class="alert alert-info" role="alert">
     <i class="bi bi-info-circle me-2"></i>No se encontraron registros de usuarios.
 </div>
 {% endif %}
+
+<style>
+    .hover-card {
+        transition: all 0.3s ease;
+    }
+    .hover-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+    }
+</style>
 
 <!-- Modal para Agregar Usuario -->
 <div class="modal fade" id="ModalAgregarUsuario" tabindex="-1" aria-labelledby="ModalAgregarUsuarioLabel" aria-hidden="true">

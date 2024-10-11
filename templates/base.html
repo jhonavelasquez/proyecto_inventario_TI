@@ -51,15 +51,15 @@
           <li class="nav-item">
             <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">
               {% if request.endpoint == 'index' %}
-              <img id="icon-menu" src="{{ url_for('static', filename='img/icon-sistemas.png') }}" alt="icon-Sistema">
-              {% endif %} <b>Sistema</b></a>
+              <i class="bi bi-database"></i>              
+              {% endif %} <b>Sistemas</b></a>
           </li>
           {% if session['id_tipo_usuario'] == 1 %}
           <li class="nav-item">
             <a href="{{ url_for('usuarios') }}"
               class="nav-link {% if request.endpoint == 'usuarios' %}active{% endif %}">
               {% if request.endpoint == 'usuarios' %}
-              <img id="icon-menu" src="{{ url_for('static', filename='img/icon-usuarios.png') }}" alt="icon-Usuarios">
+              <i class="bi bi-people"></i>              
               {% endif %} <b>Usuarios</b></a>
           </li>
           {% endif %}
@@ -67,7 +67,7 @@
             <a href="{{ url_for('computadores') }}"
               class="nav-link {% if request.endpoint == 'computadores' %}active{% endif %}">
               {% if request.endpoint == 'computadores' %}
-              <img id="icon-menu" src="{{ url_for('static', filename='img/icon-computador.png') }}" alt="icon.Pc">
+              <i class="bi bi-pc-display"></i>
               {% endif %} <b>Computadores</b></a>
           </li>
           {% if session['id_tipo_usuario'] == 1 %}
@@ -75,8 +75,7 @@
             <a href="{{ url_for('reportes') }}"
               class="nav-link {% if request.endpoint == 'reportes' %}active{% endif %}">
               {% if request.endpoint == 'reportes' %}
-              <img id="icon-menu" src="{{ url_for('static', filename='img/icon-documento.png') }}"
-                alt="icon-documentos">
+              <i class="bi bi-file-earmark-text"></i>
               {% endif %} <b>Reportes</b></a>
           </li>
           {% endif %}
@@ -84,8 +83,7 @@
             <a href="{{ url_for('historial') }}"
               class="nav-link {% if request.endpoint == 'historial' %}active{% endif %}">
               {% if request.endpoint == 'historial' %}
-              <img id="icon-menu" src="{{ url_for('static', filename='img/icon-historial.png') }}"
-                alt="icon-documentos">
+              <i class="bi bi-clock-history"></i>
               {% endif %} <b>Historial</b></a>
           </li>
 
@@ -107,33 +105,28 @@
     </div>
     <hr>
     <a href="{{ url_for('index') }}" class="slide_right {% if request.endpoint == 'index' %}active{% endif %}">
-      <img id="icon-index" class="menu-icon {% if request.endpoint == 'index' %}show{% endif %}"
-        src="{{ url_for('static', filename='img/icon-sistemas.png') }}" alt="icon-Sistema">
-      <b id="menu-link">Sistema</b>
+      <i class="bi bi-database" style="font-size: large !important;"></i>
+      <b id="menu-link">Sistemas</b>
     </a>
     {% if session['id_tipo_usuario'] == 1 %}
     <a href="{{ url_for('usuarios') }}" class="slide_right {% if request.endpoint == 'usuarios' %}active{% endif %}">
-      <img id="icon-usuarios" class="menu-icon {% if request.endpoint == 'usuarios' %}show{% endif %}"
-        src="{{ url_for('static', filename='img/icon-usuarios.png') }}" alt="icon-Usuarios">
+      <i class="bi bi-people" style="font-size: large !important;"></i>
       <b id="menu-link">Usuarios</b>
     </a>
     {% endif %}
     <a href="{{ url_for('computadores') }}"
       class="slide_right {% if request.endpoint == 'computadores' %}active{% endif %}">
-      <img id="icon-computadores" class="menu-icon {% if request.endpoint == 'computadores' %}show{% endif %}"
-        src="{{ url_for('static', filename='img/icon-computador.png') }}" alt="icon-Pc">
+      <i class="bi bi-pc-display" style="font-size: large !important;"></i>
       <b id="menu-link">Computadores</b>
     </a>
     {% if session['id_tipo_usuario'] == 1 %}
     <a href="{{ url_for('reportes') }}" class="slide_right {% if request.endpoint == 'reportes' %}active{% endif %}">
-      <img id="icon-reportes" class="menu-icon {% if request.endpoint == 'reportes' %}show{% endif %}"
-        src="{{ url_for('static', filename='img/icon-documento.png') }}" alt="icon-documentos">
+      <i class="bi bi-file-earmark-text" style="font-size: large !important;"></i>
       <b id="menu-link">Reportes</b>
       {% endif %}
     </a>
     <a href="{{ url_for('historial') }}" class="slide_right {% if request.endpoint == 'historial' %}active{% endif %}">
-      <img id="icon-historial" class="menu-icon {% if request.endpoint == 'historial' %}show{% endif %}"
-        src="{{ url_for('static', filename='img/icon-historial.png') }}" alt="icon-documentos">
+      <i class="bi bi-clock-history" style="font-size: large !important;"></i>
       <b id="menu-link">Historial</b>
     </a>
     <div class="menuAbajo">
