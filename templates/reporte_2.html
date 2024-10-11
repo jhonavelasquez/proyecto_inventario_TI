@@ -84,6 +84,10 @@
                 <div id="editor"></div>
             </div>
             <input type="hidden" name="descripcion" id="descripcion-hidden">
+            <div class="mb-3">
+                {{ form.file.label(class="form-label") }}
+                {{ form.file(class="form-control") }}
+            </div>
             <br>
             <button type="submit" class="btn btn-primary"><i class="bi bi-filetype-pdf" style="margin-right: 5px;"></i> Generar PDF</button>
         </div>

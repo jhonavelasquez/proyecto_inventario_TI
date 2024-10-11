@@ -11,6 +11,7 @@ pip install pypdf2
 pip install Flask-Mail
 pip install flask_wtf
 pip install schedule
+pip install pillow
 
 
 MIGRAR BASE DE DATOS SQLITE3 A MYSQL:

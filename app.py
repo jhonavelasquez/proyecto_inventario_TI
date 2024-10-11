@@ -10,6 +10,7 @@ import datetime
 import os
 
 from PyPDF2 import PdfReader, PdfWriter
+from PIL import Image
 from io import BytesIO
 
 from flask_mail import Mail, Message
@@ -893,8 +894,6 @@ def reporte_2():
         num_solicitud = request.form['num_solicitud'].upper()
         fecha = datetime.datetime.now().strftime('%d-%m-%Y')
 
-        
-
         existing_report = conn.execute(
             'SELECT COUNT(*) FROM Reportes WHERE num_solicitud = ?',
             (num_solicitud,)
@@ -934,6 +933,21 @@ def reporte_2():
                     'Text11': responsable_solicitud
                 }
             )
+
+            image_file = form.file.data
+            if image_file:
+
+                image_path = os.path.join('uploads', secure_filename(image_file.filename))
+                image_file.save(image_path)
+
+                img = Image.open(image_path)
+
+                img_pdf = BytesIO()
+                img.convert('RGB').save(img_pdf, format='PDF')
+                img_pdf.seek(0)
+
+                image_reader = PdfReader(img_pdf)
+                pdf_writer.add_page(image_reader.pages[0])
 
             output_pdf = BytesIO()
             pdf_writer.write(output_pdf)

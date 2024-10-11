@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, DateField, TextAreaField, StringField, PasswordField, SubmitField, SelectField, IntegerField, HiddenField
+from wtforms import MultipleFileField, FileField, BooleanField, DateField, TextAreaField, StringField, PasswordField, SubmitField, SelectField, IntegerField, HiddenField
 from wtforms.validators import DataRequired, Email, EqualTo
+from flask_wtf.file import FileAllowed
 
 class LoginForm(FlaskForm):
     nombre_usuario = StringField('Nombre Usuario', validators=[DataRequired()])
@@ -64,6 +65,9 @@ class ReporteForm(FlaskForm):
     responsable_ddi = StringField('Responsable DDI', validators=[DataRequired()])
     responsable_solicitud = StringField('Responsable Solicitud', validators=[DataRequired()])
     descripcion = TextAreaField('Descripción', validators=[DataRequired()])
+    file = FileField('Descripción', validators=[
+        FileAllowed(['jpg', 'png'], 'Solo se permiten imágenes JPG y PNG')
+    ])
     submit = SubmitField('Generar PDF')
 
 class EditarMiCuenta(FlaskForm):
