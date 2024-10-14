@@ -12,7 +12,7 @@
 {% block breadcrumb %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('sistema.index') }}">Inicio</a></li>
         <li class="breadcrumb-item active" aria-current="page">Computadores</li>
     </ol>
 </nav>
@@ -20,7 +20,7 @@
 
 <div class="card mb-4">
     <div class="card-body">
-        <form method="get" action="{{ url_for('computadores') }}" id="filtro-form" class="row g-3 align-items-end">
+        <form method="get" action="{{ url_for('computadores.computadores') }}" id="filtro-form" class="row g-3 align-items-end">
             <div class="col-md-8">
                 <label for="search" class="form-label">Buscar Computador</label>
                 <input id="search" class="form-control" type="search" name="search"
@@ -32,7 +32,7 @@
                     <i class="bi bi-search me-2"></i>Buscar
                 </button>
 
-                <a class="btn btn-secondary w-100 mt-2" type="button" href="{{ url_for('computadores') }}">
+                <a class="btn btn-secondary w-100 mt-2" type="button" href="{{ url_for('computadores.computadores') }}">
                     <i class="bi bi-x-circle me-2"></i>Limpiar
                 </a>
             </div>
@@ -87,7 +87,7 @@
                 <td>{{ row['Fuente'] }}</td>
                 {% if session['id_tipo_usuario'] == 1 or session['id_tipo_usuario'] == 3 %}
                 <td>
-                    <a href="{{ url_for('editar_computador', id_pc=row['Id_pc']) }}" class="btn btn-sm btn-warning">
+                    <a href="{{ url_for('computadores.editar_computador', id_pc=row['Id_pc']) }}" class="btn btn-sm btn-warning">
                         <i class="bi bi-pencil-square me-1"></i>Editar
                     </a>
                 </td>
@@ -112,7 +112,7 @@
                 <h5 class="modal-title" id="ModalAgregarComputadorLabel">Agregar Nuevo Computador</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="post" action="{{ url_for('crear_computador') }}">
+            <form method="post" action="{{ url_for('computadores.crear_computador') }}">
                 {{ form.hidden_tag() }}
                 <div class="modal-body">
                     <div class="mb-3">

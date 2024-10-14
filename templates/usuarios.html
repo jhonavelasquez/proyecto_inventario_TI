@@ -12,7 +12,7 @@
 {% block breadcrumb %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('sistema.index') }}">Inicio</a></li>
             <li class="breadcrumb-item active" aria-current="page">Usuarios</li>
         </ol>
     </nav>
@@ -20,7 +20,7 @@
 
 <div class="card mb-4">
     <div class="card-body">
-        <form method="get" action="{{ url_for('usuarios') }}" id="filtro-form" class="row g-3 align-items-end">
+        <form method="get" action="{{ url_for('usuarios.usuarios') }}" id="filtro-form" class="row g-3 align-items-end">
             <div class="col-md-8">
                 <label for="search" class="form-label">Buscar Usuario</label>
                 <input id="search" class="form-control" type="search" name="search"
@@ -32,7 +32,7 @@
                     <i class="bi bi-search me-2"></i>Buscar
                 </button>
 
-                <a class="btn btn-secondary w-100 mt-2" type="button" href="{{ url_for('usuarios') }}">
+                <a class="btn btn-secondary w-100 mt-2" type="button" href="{{ url_for('usuarios.usuarios') }}">
                     <i class="bi bi-x-circle me-2"></i>Limpiar
                 </a>
             </div>
@@ -75,7 +75,7 @@
                 </p>
             </div>
             <div class="card-footer bg-transparent border-top-0">
-                <a href="{{ url_for('editar_usuario', id=row['Id_usuario']) }}" class="btn btn-warning btn-sm w-100">
+                <a href="{{ url_for('usuarios.editar_usuario', id=row['Id_usuario']) }}" class="btn btn-warning btn-sm w-100">
                     <i class="bi bi-pencil-square me-1"></i>Editar
                 </a>
             </div>
@@ -107,7 +107,7 @@
                 <h5 class="modal-title" id="ModalAgregarUsuarioLabel">Agregar Nuevo Usuario</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="post" action="{{ url_for('crear_usuario') }}">
+            <form method="post" action="{{ url_for('usuarios.crear_usuario') }}">
                 {{ form.hidden_tag() }}
                 <div class="modal-body">
                     <div class="mb-3">

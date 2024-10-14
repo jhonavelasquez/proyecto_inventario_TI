@@ -22,7 +22,7 @@
     data-bs-theme="dark">
     <div class="container-fluid" id="barra-nav">
       <div>
-        <a class="navbar-brand" href="{{ url_for('index') }}"><img
+        <a class="navbar-brand" href="{{ url_for('sistema.index') }}"><img
             src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo-IMSA" width="40px">
         </a>
       </div>
@@ -49,14 +49,14 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">
+            <a href="{{ url_for('sistema.index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">
               {% if request.endpoint == 'index' %}
               <i class="bi bi-database"></i>              
               {% endif %} <b>Sistemas</b></a>
           </li>
           {% if session['id_tipo_usuario'] == 1 %}
           <li class="nav-item">
-            <a href="{{ url_for('usuarios') }}"
+            <a href="{{ url_for('usuarios.usuarios') }}"
               class="nav-link {% if request.endpoint == 'usuarios' %}active{% endif %}">
               {% if request.endpoint == 'usuarios' %}
               <i class="bi bi-people"></i>              
@@ -64,7 +64,7 @@
           </li>
           {% endif %}
           <li class="nav-item">
-            <a href="{{ url_for('computadores') }}"
+            <a href="{{ url_for('computadores.computadores') }}"
               class="nav-link {% if request.endpoint == 'computadores' %}active{% endif %}">
               {% if request.endpoint == 'computadores' %}
               <i class="bi bi-pc-display"></i>
@@ -72,7 +72,7 @@
           </li>
           {% if session['id_tipo_usuario'] == 1 %}
           <li class="nav-item">
-            <a href="{{ url_for('reportes') }}"
+            <a href="{{ url_for('reportes.reportes') }}"
               class="nav-link {% if request.endpoint == 'reportes' %}active{% endif %}">
               {% if request.endpoint == 'reportes' %}
               <i class="bi bi-file-earmark-text"></i>
@@ -80,7 +80,7 @@
           </li>
           {% endif %}
           <li class="nav-item">
-            <a href="{{ url_for('historial') }}"
+            <a href="{{ url_for('historial.historial') }}"
               class="nav-link {% if request.endpoint == 'historial' %}active{% endif %}">
               {% if request.endpoint == 'historial' %}
               <i class="bi bi-clock-history"></i>
@@ -88,7 +88,7 @@
           </li>
 
           <li class="nav-item">
-            <a href="{{ url_for('logout') }}" id="logout"
+            <a href="{{ url_for('login.logout') }}" id="logout"
               class="nav-link {% if request.endpoint == 'logout' %}active{% endif %}">
               {% if request.endpoint == 'logout' %}
               <img id="icon-menu" src="{{ url_for('static', filename='img/icon-logout.png') }}" alt="icon-documentos">{%
@@ -104,28 +104,28 @@
       <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo-IMSA" width="100px">
     </div>
     <hr>
-    <a href="{{ url_for('index') }}" class="slide_right {% if request.endpoint == 'index' %}active{% endif %}">
+    <a href="{{ url_for('sistema.index') }}" class="slide_right {% if request.endpoint == 'index' %}active{% endif %}">
       <i class="bi bi-database" style="font-size: large !important;"></i>
       <b id="menu-link">Sistemas</b>
     </a>
     {% if session['id_tipo_usuario'] == 1 %}
-    <a href="{{ url_for('usuarios') }}" class="slide_right {% if request.endpoint == 'usuarios' %}active{% endif %}">
+    <a href="{{ url_for('usuarios.usuarios') }}" class="slide_right {% if request.endpoint == 'usuarios' %}active{% endif %}">
       <i class="bi bi-people" style="font-size: large !important;"></i>
       <b id="menu-link">Usuarios</b>
     </a>
     {% endif %}
-    <a href="{{ url_for('computadores') }}"
+    <a href="{{ url_for('computadores.computadores') }}"
       class="slide_right {% if request.endpoint == 'computadores' %}active{% endif %}">
       <i class="bi bi-pc-display" style="font-size: large !important;"></i>
       <b id="menu-link">Computadores</b>
     </a>
     {% if session['id_tipo_usuario'] == 1 %}
-    <a href="{{ url_for('reportes') }}" class="slide_right {% if request.endpoint == 'reportes' %}active{% endif %}">
+    <a href="{{ url_for('reportes.reportes') }}" class="slide_right {% if request.endpoint == 'reportes' %}active{% endif %}">
       <i class="bi bi-file-earmark-text" style="font-size: large !important;"></i>
       <b id="menu-link">Reportes</b>
       {% endif %}
     </a>
-    <a href="{{ url_for('historial') }}" class="slide_right {% if request.endpoint == 'historial' %}active{% endif %}">
+    <a href="{{ url_for('historial.historial') }}" class="slide_right {% if request.endpoint == 'historial' %}active{% endif %}">
       <i class="bi bi-clock-history" style="font-size: large !important;"></i>
       <b id="menu-link">Historial</b>
     </a>
@@ -150,7 +150,7 @@
           <ul class="dropdown-menu dropdown-menu-dark">
             <li><a class="dropdown-item" href="{{ url_for('cuenta') }}"><b><i class="bi bi-person-fill"></i>
                   Cuenta</b></a></li>
-            <li><a class="dropdown-item" id="logout" href="{{ url_for('logout') }}"><b><i
+            <li><a class="dropdown-item" id="logout" href="{{ url_for('login.logout') }}"><b><i
                     class="bi bi-box-arrow-left"></i> Cerrar Sesion</b></a></li>
           </ul>
         </div>
@@ -186,7 +186,7 @@
                 <small class="text-muted">{{ row.fecha_notificacion }}</small>
               </div>
               <p class="mb-1">{{ row.descripcion_corta }}</p>
-              <a href="{{ url_for('ver_reporte', id_reporte=row['id_reporte']) }}"
+              <a href="{{ url_for('reportes.ver_reporte', id_reporte=row['id_reporte']) }}"
                 class="btn btn-sm btn-outline-primary mt-2">
                 Ver detalles
               </a>

@@ -19,7 +19,7 @@
 {% endblock %}
 <div class="card mb-4">
     <div class="card-body">
-        <form method="get" action="{{ url_for('index') }}" id="filtro-form">
+        <form method="get" action="{{ url_for('sistema.index') }}" id="filtro-form">
             <div class="row g-3">
                 <div class="col-md-4">
                     <label for="sistema" class="form-label">Selecciona un Sistema</label>
@@ -43,7 +43,7 @@
                         <i class="bi bi-search me-2"></i>Buscar
                     </button>
     
-                    <a class="btn btn-secondary w-100 mt-2" type="button" href="{{ url_for('index') }}">
+                    <a class="btn btn-secondary w-100 mt-2" type="button" href="{{ url_for('sistema.index') }}">
                         <i class="bi bi-x-circle me-2"></i>Limpiar
                     </a>
                 </div>
@@ -99,7 +99,7 @@
         </thead>
         <tbody>
             {% for row in user_pc_data %}
-            <tr class="clickable-row" data-href="{{ url_for('editar_sistema', id_sistema=row['Id_sistema'], id_usuario=row['Id_usuario'], id_pc=row['Id_pc']) }}">
+            <tr class="clickable-row" data-href="{{ url_for('sistema.editar_sistema', id_sistema=row['Id_sistema'], id_usuario=row['Id_usuario'], id_pc=row['Id_pc']) }}">
                 <td>{{ row['Nombre_user'] }}</td>
                 <td>{{ row['Nombre_pc'] }}</td>
                 <td>{{ row['Nombre_sistema'] }}</td>
@@ -110,7 +110,7 @@
                 </td>
                 {% if session['id_tipo_usuario'] == 1 or session['id_tipo_usuario'] == 3 %}
                 <td>
-                    <a href="{{ url_for('editar_sistema', id_sistema=row['Id_sistema'], id_usuario=row['Id_usuario'], id_pc=row['Id_pc']) }}"
+                    <a href="{{ url_for('sistema.editar_sistema', id_sistema=row['Id_sistema'], id_usuario=row['Id_usuario'], id_pc=row['Id_pc']) }}"
                         class="btn btn-sm btn-warning">
                         <i class="bi bi-pencil-square me-1"></i>Editar
                     </a>
@@ -141,7 +141,7 @@
                 <h5 class="modal-title" id="agregarSistemaLabel">Agregar Nuevo Sistema</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="POST" action="{{ url_for('crear_sistema') }}">
+            <form method="POST" action="{{ url_for('sistema.crear_sistema') }}">
                 {{ formCrear.hidden_tag() }}
                 <div class="modal-body">
                     <div class="mb-3">
@@ -167,7 +167,7 @@
                 <h5 class="modal-title" id="ModelEliminarSistemaLabel">Eliminar Sistema</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="deleteForm" method="post" action="{{ url_for('eliminar_sistema') }}">
+            <form id="deleteForm" method="post" action="{{ url_for('sistema.eliminar_sistema') }}">
                 {{ formEliminar.hidden_tag() }}
                 <div class="modal-body">
                     <div class="mb-3">

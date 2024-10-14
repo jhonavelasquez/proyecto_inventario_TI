@@ -12,14 +12,14 @@
 {% block breadcrumb %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('reportes') }}">Reportes</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('sistema.index') }}">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('reportes.reportes') }}">Reportes</a></li>
             <li class="breadcrumb-item active" aria-current="page"> Crear Rerporte</li>
         </ol>
     </nav>
 {% endblock %}
 <div class="bodyBack" style="margin-left: 3%;">
-    <a id="botonBack" href="{{ url_for('reportes') }}" aria-valuetext="a">
+    <a id="botonBack" href="{{ url_for('reportes.reportes') }}" aria-valuetext="a">
         <i class="bi bi-arrow-left-circle"  style="font-size: 2rem; color: cornflowerblue;"></i>
     </a>
 </div>
@@ -37,7 +37,7 @@
     {% endwith %}
 
     
-    <form method="POST" action="{{ url_for('reporte_2') }}" enctype="multipart/form-data">
+    <form method="POST" action="{{ url_for('reportes.reporte_2') }}" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
         <div class="columna-left">
             <div class="row g-2">

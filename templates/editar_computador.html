@@ -11,8 +11,8 @@
 {% block breadcrumb %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('computadores') }}">Computadores</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('sistema.index') }}">Inicio</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('computadores.computadores') }}">Computadores</a></li>
         <li class="breadcrumb-item active" aria-current="page">Editar Computador</li>
     </ol>
 </nav>
@@ -20,14 +20,14 @@
 <div class="card shadow-sm">
     <div class="card-body">
         <div class="mb-4">
-            <a href="{{ url_for('computadores') }}" class="btn btn-outline-primary">
+            <a href="{{ url_for('computadores.computadores') }}" class="btn btn-outline-primary">
                 <i class="bi bi-arrow-left-circle me-2"></i>Volver a Computadores
             </a>
         </div>
 
         <h2 class="card-title mb-4">Editar Computador: {{ pc['Nombre_pc'] }} (#{{ pc['Id_pc'] }})</h2>
 
-        <form id="editForm" method="post" action="{{ url_for('editar_computador_form') }}">
+        <form id="editForm" method="post" action="{{ url_for('computadores.editar_computador_form') }}">
             {{ form.hidden_tag() }}
             <input type="hidden" name="action" id="action" value="">
 
