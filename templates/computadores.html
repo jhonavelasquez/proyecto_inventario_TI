@@ -1,9 +1,25 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style_computadores.css') }}">
 
+<style>
+    .hover-card {
+        transition: all 0.3s ease;
+    }
+    .hover-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0, 61, 194, 0.356) !important;
+    }
+    .card-body ul li {
+        margin-bottom: 0.5rem;
+    }
+    .card-body ul li:last-child {
+        margin-bottom: 0;
+    }
+</style>
 {% endblock %}
+
+{% block title %}Computadores DDI{% endblock %}
 
 {% block content %}
 <h1 class="block-effect" style="--td:0.3s">
@@ -63,39 +79,30 @@
 {% endwith %}
 
 {% if filtro_pcs %}
-<div class="table-responsive">
-    <table class="table table-hover">
-        <thead class="table-light">
-            <tr>
-                <th>Nombre del PC</th>
-                <th>Placa Base</th>
-                <th>Almacenamiento</th>
-                <th>RAM</th>
-                <th>Fuente</th>
-                {% if session['id_tipo_usuario'] == 1 or session['id_tipo_usuario'] == 3 %}
-                <th>Acciones</th>
-                {% endif %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in filtro_pcs %}
-            <tr>
-                <td>{{ row['Nombre_pc'] }}</td>
-                <td>{{ row['Placa'] }}</td>
-                <td>{{ row['Almacenamiento'] }} GB</td>
-                <td>{{ row['Ram'] }} GB</td>
-                <td>{{ row['Fuente'] }}</td>
-                {% if session['id_tipo_usuario'] == 1 or session['id_tipo_usuario'] == 3 %}
-                <td>
-                    <a href="{{ url_for('computadores.editar_computador', id_pc=row['Id_pc']) }}" class="btn btn-sm btn-warning">
-                        <i class="bi bi-pencil-square me-1"></i>Editar
-                    </a>
-                </td>
-                {% endif %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+    {% for row in filtro_pcs %}
+    <div class="col">
+        <div class="card h-100 shadow-sm hover-card">
+            <div class="card-body">
+                <h5 class="card-title">{{ row['Nombre_pc'] }}</h5>
+                <ul class="list-unstyled mb-0">
+                    <li><i class="bi bi-cpu me-2"></i>Procesador: {{ row['Procesador'] }}</li>
+                    <li><i class="bi bi-motherboard me-2"></i>Placa Base: {{ row['Placa'] }}</li>
+                    <li><i class="bi bi-hdd me-2"></i>Almacenamiento: {{ row['Almacenamiento'] }} GB</li>
+                    <li><i class="bi bi-memory me-2"></i>RAM: {{ row['Ram'] }} GB</li>
+                    <li><i class="bi bi-lightning-charge me-2"></i>Fuente: {{ row['Fuente'] }}</li>
+                </ul>
+            </div>
+            {% if session['id_tipo_usuario'] == 1 or session['id_tipo_usuario'] == 3 %}
+            <div class="card-footer bg-transparent border-top-0">
+                <a href="{{ url_for('computadores.editar_computador', id_pc=row['Id_pc']) }}" class="btn btn-warning btn-sm w-100">
+                    <i class="bi bi-pencil-square me-1"></i>Editar
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
 </div>
 {% else %}
 <div class="alert alert-info" role="alert">
@@ -103,45 +110,67 @@
 </div>
 {% endif %}
 
+
 <!-- Modal para Agregar Computador -->
 <div class="modal fade" id="ModalAgregarComputador" tabindex="-1" aria-labelledby="ModalAgregarComputadorLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="ModalAgregarComputadorLabel">Agregar Nuevo Computador</h5>
+                <h5 class="modal-title" id="ModalAgregarComputadorLabel"><i class="bi bi-pc-display me-2"></i>Agregar Nuevo Computador</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="post" action="{{ url_for('computadores.crear_computador') }}">
                 {{ form.hidden_tag() }}
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="nombre_computador" class="form-label">Nombre del Computador</label>
-                        {{ form.nombre_computador(class="form-control",
-                        onkeyup="javascript:this.value=this.value.toUpperCase();") }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="nombre_placa" class="form-label">Nombre de Placa</label>
-                        {{ form.nombre_placa(class="form-control",
-                        onkeyup="javascript:this.value=this.value.toUpperCase();") }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="disco" class="form-label">Total Almacenamiento (GB)</label>
-                        {{ form.disco(class="form-control", type="number") }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="ram" class="form-label">Total de RAM (GB)</label>
-                        {{ form.ram(class="form-control", type="number") }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="fuente" class="form-label">Fuente de Poder</label>
-                        {{ form.fuente(class="form-control", onkeyup="javascript:this.value=this.value.toUpperCase();")
-                        }}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="nombre_computador" class="form-label">
+                                    <i class="bi bi-pc me-2"></i>Nombre del Computador
+                                </label>
+                                {{ form.nombre_computador(class="form-control", onkeyup="javascript:this.value=this.value.toUpperCase();") }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="procesador" class="form-label">
+                                    <i class="bi bi-cpu me-2"></i>Procesador
+                                </label>
+                                {{ form.procesador(class="form-control", onkeyup="javascript:this.value=this.value.toUpperCase();") }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="nombre_placa" class="form-label">
+                                    <i class="bi bi-motherboard me-2"></i>Placa Base
+                                </label>
+                                {{ form.nombre_placa(class="form-control", onkeyup="javascript:this.value=this.value.toUpperCase();") }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="almacenamiento" class="form-label">
+                                    <i class="bi bi-hdd me-2"></i>Total Almacenamiento (GB)
+                                </label>
+                                {{ form.almacenamiento(class="form-control", type="number") }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="ram" class="form-label">
+                                    <i class="bi bi-memory me-2"></i>Total de RAM (GB)
+                                </label>
+                                {{ form.ram(class="form-control", type="number") }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="fuente" class="form-label">
+                                    <i class="bi bi-lightning-charge me-2"></i>Fuente de Poder
+                                </label>
+                                {{ form.fuente(class="form-control", onkeyup="javascript:this.value=this.value.toUpperCase();") }}
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-2"></i>Guardar
+                    </button>
                 </div>
             </form>
         </div>

@@ -4,6 +4,8 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style_editar_sistema.css') }}">
 {% endblock %}
 
+{% block title %}Editar Sistema - {{ user_pc['Nombre_sistema'] }}{% endblock %}
+
 {% block content %}
 <h1 class="block-effect" style="--td:0.3s">
     <div class="block-reveal" style="--bc: #2b3034; --d: 0.5s">Sistemas</div>

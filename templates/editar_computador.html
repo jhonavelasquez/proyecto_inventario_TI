@@ -4,6 +4,8 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style_editar_computador.css')}}">
 {% endblock %}
 
+{% block title %}Editar Computador {{ pc['Nombre_pc'] }}{% endblock %}
+
 {% block content %}
 <h1 class="block-effect" style="--td:0.3s">
     <div class="block-reveal" style="--bc: #2b3034; --d: 0.5s">Computadores</div>
@@ -29,33 +31,47 @@
 
         <form id="editForm" method="post" action="{{ url_for('computadores.editar_computador_form') }}">
             {{ form.hidden_tag() }}
-            <input type="hidden" name="action" id="action" value="">
-
-            <div class="mb-3">
-                <label for="nombre_computador" class="form-label">Nombre</label>
-                {{ form.nombre_computador(class="form-control", id="nombre_computador") }}
+            <div class="row">
+                <div class="col-md-6">
+                    <input type="hidden" name="action" id="action" value="">
+    
+                    <div class="mb-3">
+                        <label for="nombre_computador" class="form-label"><i class="bi bi-pc-display me-2"></i>Nombre del
+                            Computador</label>
+                        {{ form.nombre_computador(class="form-control", id="nombre_computador") }}
+                    </div>
+    
+                    <div class="mb-3">
+                        <label for="procesador" class="form-label"><i class="bi bi-cpu me-2"></i>Procesador</label>
+                        {{ form.procesador(class="form-control", id="procesador") }}
+                    </div>
+    
+                    <div class="mb-3">
+                        <label for="nombre_placa" class="form-label"><i class="bi bi-motherboard me-2"></i>Placa
+                            Base</label>
+                        {{ form.nombre_placa(class="form-control", id="nombre_placa") }}
+                    </div>
+    
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="almacenamiento" class="form-label"><i class="bi bi-hdd me-2"></i>Almacenamiento Total
+                            (GB)</label>
+                        {{ form.almacenamiento(class="form-control", id="almacenamiento", type="number") }}
+                    </div>
+    
+                    <div class="mb-3">
+                        <label for="ram" class="form-label"><i class="bi bi-memory me-2"></i>RAM Total (GB)</label>
+                        {{ form.ram(class="form-control", id="ram", type="number") }}
+                    </div>
+    
+                    <div class="mb-3">
+                        <label for="fuente" class="form-label"><i class="bi bi-lightning-charge me-2"></i>Fuente de
+                            Poder</label>
+                        {{ form.fuente(class="form-control", id="fuente") }}
+                    </div>
+                </div>
             </div>
-
-            <div class="mb-3">
-                <label for="nombre_placa" class="form-label">Placa Base</label>
-                {{ form.nombre_placa(class="form-control", id="nombre_placa") }}
-            </div>
-
-            <div class="mb-3">
-                <label for="almacenamiento" class="form-label">Almacenamiento Total (GB)</label>
-                {{ form.almacenamiento(class="form-control", id="almacenamiento", type="number") }}
-            </div>
-
-            <div class="mb-3">
-                <label for="ram" class="form-label">RAM Total (GB)</label>
-                {{ form.ram(class="form-control", id="ram", type="number") }}
-            </div>
-
-            <div class="mb-3">
-                <label for="fuente" class="form-label">Fuente de Poder</label>
-                {{ form.fuente(class="form-control", id="fuente") }}
-            </div>
-
             <div class="d-flex justify-content-between mt-4">
                 <button type="submit" class="btn btn-primary" onclick="setAction('save')">
                     <i class="bi bi-save me-2"></i>Guardar cambios

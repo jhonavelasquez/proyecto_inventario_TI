@@ -1,37 +1,55 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style_usuarios.css') }}">
+<style>
+    .hover-card {
+        transition: all 0.3s ease;
+    }
 
+    .hover-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0, 61, 194, 0.356) !important;
+    }
+</style>
 {% endblock %}
+
+{% block title %}Usuarios DDI{% endblock %}
 
 {% block content %}
 <h1 class="block-effect" style="--td:0.3s">
     <div class="block-reveal" style="--bc: #2b3034; --d: 0.5s">Usuarios</div>
 </h1>
 {% block breadcrumb %}
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('sistema.index') }}">Inicio</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Usuarios</li>
-        </ol>
-    </nav>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('sistema.index') }}">Inicio</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Usuarios</li>
+    </ol>
+</nav>
 {% endblock %}
 
 <div class="card mb-4">
     <div class="card-body">
         <form method="get" action="{{ url_for('usuarios.usuarios') }}" id="filtro-form" class="row g-3 align-items-end">
-            <div class="col-md-8">
+            <div class="col-md-5">
                 <label for="search" class="form-label">Buscar Usuario</label>
                 <input id="search" class="form-control" type="search" name="search"
                     placeholder="Buscar por nombre o ID de usuario" aria-label="Search"
                     value="{{ request.args.get('search', '') }}">
             </div>
+            <div class="col-md-5">
+                <label for="rol" class="form-label">Selecciona un Rol</label>
+                <select class="form-select" id="rol" name="rol" aria-label="Selecciona un Sistema">
+                    <option value="">Rol de Usuario</option>
+                    <option value="1">Administrador</option>
+                    <option value="2">Lector</option>
+                    <option value="3">Editor</option>
+                </select>
+            </div>
             <div class="col-md-2">
                 <button class="btn btn-primary w-100" type="submit">
                     <i class="bi bi-search me-2"></i>Buscar
                 </button>
-
                 <a class="btn btn-secondary w-100 mt-2" type="button" href="{{ url_for('usuarios.usuarios') }}">
                     <i class="bi bi-x-circle me-2"></i>Limpiar
                 </a>
@@ -75,7 +93,8 @@
                 </p>
             </div>
             <div class="card-footer bg-transparent border-top-0">
-                <a href="{{ url_for('usuarios.editar_usuario', id=row['Id_usuario']) }}" class="btn btn-warning btn-sm w-100">
+                <a href="{{ url_for('usuarios.editar_usuario', id=row['Id_usuario']) }}"
+                    class="btn btn-warning btn-sm w-100">
                     <i class="bi bi-pencil-square me-1"></i>Editar
                 </a>
             </div>
@@ -89,18 +108,11 @@
 </div>
 {% endif %}
 
-<style>
-    .hover-card {
-        transition: all 0.3s ease;
-    }
-    .hover-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
-    }
-</style>
+
 
 <!-- Modal para Agregar Usuario -->
-<div class="modal fade" id="ModalAgregarUsuario" tabindex="-1" aria-labelledby="ModalAgregarUsuarioLabel" aria-hidden="true">
+<div class="modal fade" id="ModalAgregarUsuario" tabindex="-1" aria-labelledby="ModalAgregarUsuarioLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -110,40 +122,52 @@
             <form method="post" action="{{ url_for('usuarios.crear_usuario') }}">
                 {{ form.hidden_tag() }}
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="userName" class="form-label">Nombre del Usuario</label>
-                        {{ form.nombre_user(class="form-control", id="userName", onkeyup="javascript:this.value=this.value.toUpperCase();") }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="email_user" class="form-label">Correo Electrónico</label>
-                        {{ form.email_user(class="form-control", id="email_user", onkeyup="javascript:this.value=this.value.toUpperCase();") }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="psw" class="form-label">Contraseña</label>
-                        <div class="input-group">
-                            {{ form.psw(class="form-control", id="psw") }}
-                            <button type="button" class="btn btn-outline-secondary" id="togglePassword">
-                                <i class="bi bi-eye"></i>
-                            </button>
+                    <div id="modalErrorContainer" class="alert alert-danger d-none" role="alert"></div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="userName" class="form-label">Nombre del Usuario</label>
+                                {{ form.nombre_user(class="form-control", id="userName",
+                                onkeyup="javascript:this.value=this.value.toUpperCase();") }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="psw" class="form-label">Contraseña</label>
+                                <div class="input-group">
+                                    {{ form.psw(class="form-control", id="psw") }}
+                                    <button type="button" class="btn btn-outline-secondary" id="togglePassword">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="psw_confirm" class="form-label">Confirmar Contraseña</label>
+                                <div class="input-group">
+                                    {{ form.psw_confirmar(class="form-control", id="psw_confirm") }}
+                                    <button type="button" class="btn btn-outline-secondary" id="togglePassword2">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="email_user" class="form-label">Correo Electrónico</label>
+                                {{ form.email_user(class="form-control", id="email_user",
+                                onkeyup="javascript:this.value=this.value.toUpperCase();") }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="computador" class="form-label">Computador</label>
+                                {{ form.computador(class="form-select", id="computador") }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="tipo_usuario" class="form-label">Tipo de usuario</label>
+                                {{ form.tipo_usuario(class="form-select", id="tipo_usuario") }}
+                            </div>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="psw_confirm" class="form-label">Confirmar Contraseña</label>
-                        <div class="input-group">
-                            {{ form.psw_confirmar(class="form-control", id="psw_confirm") }}
-                            <button type="button" class="btn btn-outline-secondary" id="togglePassword2">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="computador" class="form-label">Computador</label>
-                        {{ form.computador(class="form-select", id="computador") }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="tipo_usuario" class="form-label">Tipo de usuario</label>
-                        {{ form.tipo_usuario(class="form-select", id="tipo_usuario") }}
-                    </div>
+
+
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -153,28 +177,8 @@
         </div>
     </div>
 </div>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const togglePassword = document.getElementById('togglePassword');
-        const togglePassword2 = document.getElementById('togglePassword2');
-        const passwordField = document.getElementById('psw');
-        const confirmPasswordField = document.getElementById('psw_confirm');
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{{ url_for('static', filename='js/validacion-usuarios.js') }}"></script>
 
-        function togglePasswordVisibility(field, button) {
-            const type = field.type === 'password' ? 'text' : 'password';
-            field.type = type;
-            button.querySelector('i').className = type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
-        }
 
-        togglePassword.addEventListener('click', () => togglePasswordVisibility(passwordField, togglePassword));
-        togglePassword2.addEventListener('click', () => togglePasswordVisibility(confirmPasswordField, togglePassword2));
-
-        document.querySelector('form').addEventListener('submit', (e) => {
-            if (passwordField.value !== confirmPasswordField.value) {
-                e.preventDefault();
-                alert('Las contraseñas no coinciden');
-            }
-        });
-    });
-</script>
 {% endblock %}

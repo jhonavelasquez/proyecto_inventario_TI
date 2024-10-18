@@ -26,7 +26,8 @@ CREATE TABLE Tipo_usuario (
 
 CREATE TABLE Pc (
     Id_pc INTEGER PRIMARY KEY AUTOINCREMENT,
-    Nombre_pc VARCHAR(100),
+    Nombre_pc VARCHAR(30),
+    Procesador VARCHAR(50),
     Placa VARCHAR(50),
     Almacenamiento INTEGER,  -- en GB
     Ram INTEGER,    -- en GB

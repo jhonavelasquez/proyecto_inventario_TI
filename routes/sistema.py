@@ -1,5 +1,5 @@
 # routes/sistema.py
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import abort, Blueprint, render_template, request, redirect, url_for, flash, session
 from flask_login import login_required, current_user
 from werkzeug.security import check_password_hash
 from forms import CrearSistemaForm, EliminarSistemaForm, EditarSistemaForm
@@ -57,9 +57,10 @@ def crear_sistema():
     try:
         formCrear = CrearSistemaForm()
         conn = get_db_connection()
-
+        print("El formulario ha sido enviado.")
         if formCrear.validate_on_submit():
             nombre_sistema = formCrear.nombre_sistema.data
+            print(f"Nombre del sistema: {nombre_sistema}") 
 
             sistemas = conn.execute("SELECT Nombre_sistema FROM Sistema").fetchall()
             for sistema in sistemas:
@@ -103,6 +104,9 @@ def crear_sistema():
             conn.close()
 
             flash("Sistema creado exitosamente.", "success")
+        else:
+            print("Error de validación del formulario")
+            flash("Por favor, corrige los errores en el formulario.", "danger")
     except sqlite3.Error as db_error:
         print(f"Database error: {db_error}")
         flash("Error al crear el sistema. Por favor, inténtalo de nuevo.", "danger")
@@ -164,6 +168,18 @@ def eliminar_sistema():
 def editar_sistema(id_sistema, id_usuario, id_pc):
     conn = get_db_connection()
     form = EditarSistemaForm()
+    
+    if not id_sistema:
+        conn.close()
+        abort(404)
+
+    if not id_usuario:
+        conn.close()
+        abort(404)
+
+    if not id_pc:
+        conn.close()
+        abort(404)
 
     pcs = conn.execute("SELECT * FROM Pc").fetchall()
     form.nuevo_Id_pc.choices = [(pc['Id_pc'], pc['Nombre_pc']) for pc in pcs]
@@ -215,10 +231,12 @@ def editar_sistema(id_sistema, id_usuario, id_pc):
             form.activo.default = user_pc['Activo']
             form.process()
         else:
-            flash("No se encontró el registro del sistema para editar.", "warning")
+            conn.close()
+            abort(404)
 
     except Exception as e:
-        flash(f"Error: {str(e)}", "danger")
+        print(f"Error: {str(e)}", "danger")
+        flash("Ocurrió un error al procesar la solicitud.", "danger")
 
     finally:
         conn.close()

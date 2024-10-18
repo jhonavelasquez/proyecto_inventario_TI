@@ -14,9 +14,14 @@ body{
 .card{
     width: 30%;
     margin: 7%;
-    padding: 3% 5% 5% 5%;
-    background-color: #00000073;
+    padding: 1% 5% 5% 5%;
+    background-color: rgba(25, 52, 83, 0.164);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.322);
+    border: 1px solid rgba(56, 125, 255, 0.18);
 }
+
 
 #loginForm{
     display: flex;
@@ -28,18 +33,19 @@ body{
 .logo{
     display: flex;
     justify-content: center;
-    margin-bottom: 6%;
 }
 
 .titulo{
+    padding-top: 6%;
     display: flex;
     justify-content: center;
     color: #FFF;
 }
 
-.titulo h2 {
-    color: #ffffff !important; /* Cambia a tu color deseado, por ejemplo, negro */
-  }
+h6{
+    padding-bottom: 6%;
+}
+
 
 .modal-body{
     width: 100%;

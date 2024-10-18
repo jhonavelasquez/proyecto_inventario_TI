@@ -4,6 +4,8 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style_editar_usuario.css')}}">
 {% endblock %}
 
+{% block title %}Editar Usuario - {{ user_edit['Nombre_user']}}{% endblock %}
+
 {% block content %}
 
 <h1 class="block-effect" style="--td:0.3s">
@@ -32,35 +34,52 @@
             {{ form.hidden_tag() }}
             <input type="hidden" name="id_usuario" id="id_usuario" value="{{ user_edit['Id_usuario'] }}">
             <input type="hidden" name="action" id="action" value="">
-
-            <div class="mb-3">
-                <label for="nombre_usuario" class="form-label">Nombre</label>
-                {{ form.nombre_user(class="form-control", id="nombre_usuario",
-                onkeyup="javascript:this.value=this.value.toUpperCase();") }}
-            </div>
-
-            <div class="mb-3">
-                <label for="email_user" class="form-label">Correo Electrónico</label>
-                {{ form.email_user(class="form-control", id="email_user",
-                onkeyup="javascript:this.value=this.value.toUpperCase();") }}
-            </div>
-
-            <div class="mb-3">
-                <label for="psw" class="form-label">Actualizar contraseña</label>
-                <div class="input-group">
-                    {{ form.psw(class="form-control", id="psw") }}
-                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="tooltip"
-                        data-bs-placement="right"
-                        title="Si desea actualizar la contraseña del usuario, ingrese una nueva. Si no desea modificar la contraseña, deje este campo vacío.">
-                        <i class="bi bi-question-circle"></i>
-                    </button>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="nombre_usuario" class="form-label">Nombre:</label>
+                        {{ form.nombre_user(class="form-control", id="nombre_usuario",
+                        onkeyup="javascript:this.value=this.value.toUpperCase();") }}
+                    </div>
+        
+                    <div class="mb-3">
+                        <label for="email_user" class="form-label">Correo Electrónico:</label>
+                        {{ form.email_user(class="form-control", id="email_user",
+                        onkeyup="javascript:this.value=this.value.toUpperCase();") }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="psw" class="form-label">Actualizar contraseña:</label>
+                        <div class="input-group">
+                            {{ form.psw(class="form-control", id="psw", placeholder="Contraseña Nueva") }}
+                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="tooltip"
+                                data-bs-placement="right"
+                                title="Si desea actualizar la contraseña del usuario, ingrese una nueva. Si no desea modificar la contraseña, deje este campo vacío.">
+                                <i class="bi bi-question-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div class="mb-3">
+                        <label for="tipo_usuario" class="form-label">Tipo de usuario:</label>
+                        {{ form.tipo_usuario(class="form-select", id="tipo_usuario") }}
+                    </div>
+        
+                    <div class="mb-3">
+                        <label for="tipo_usuario" class="form-label">Cambiar su computador:</label><br>
+                        <ul>
+                            <li>No es obligatorio asignar un computador.</li>
+                            <li>Al asignar un computador se le cambiará en todos los sistemas.</li>  
+                        </ul>
+                        {{ form.computador(class="form-select", id="tipo_usuario") }}
+                    </div>
                 </div>
             </div>
+            
 
-            <div class="mb-3">
-                <label for="tipo_usuario" class="form-label">Tipo de usuario</label>
-                {{ form.tipo_usuario(class="form-select", id="tipo_usuario") }}
-            </div>
+            
+
+            
 
             <div class="d-flex justify-content-between mt-4">
                 <button type="submit" class="btn btn-primary" onclick="setAction('save')">

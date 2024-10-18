@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, request, flash, send_from_directory, url_for
+from flask import current_app, abort, Blueprint, render_template, redirect, request, flash, send_from_directory, url_for
 from flask_login import login_required, current_user
 import datetime
 import os
@@ -108,6 +108,11 @@ def ver_reporte(id_reporte):
                            WHERE id_reporte = ? 
                            ORDER BY Reportes.fecha DESC 
                            ''', (id_reporte,)).fetchone()
+    
+    if reporte is None:
+        conn.close()
+        abort(404)
+
     conn.close()
 
     user = current_user
@@ -228,4 +233,11 @@ def reporte_2():
 @reportes_bp.route('/ver_reporte/<filename>', methods=['GET'])
 @login_required
 def uploaded_file(filename):
-    return send_from_directory('pdf_reportes', filename)
+    directory = os.path.join(current_app.root_path, 'pdf_reportes')
+
+    file_path = os.path.join(directory, filename)
+    if not os.path.exists(file_path):
+        abort(404)
+
+    return send_from_directory(directory, filename)
+

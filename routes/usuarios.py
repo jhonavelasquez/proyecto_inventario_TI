@@ -16,6 +16,7 @@ usuarios_bp = Blueprint('usuarios', __name__)
 def usuarios():
     conn = get_db_connection()
     search_query = request.args.get('search', '')
+    rol_query = request.args.get('rol', '')
 
     pcs = conn.execute("SELECT Id_pc, Nombre_pc FROM Pc").fetchall()
     tipo_usuario = conn.execute("SELECT id_tipo_usuario, nombre_tipo_usuario FROM Tipo_usuario").fetchall()
@@ -34,6 +35,10 @@ def usuarios():
     if search_query:
         query += ' AND (Usuario.Nombre_user LIKE ?  OR Usuario.Id_usuario LIKE ?)'
         params.extend(['%' + search_query + '%', '%' + search_query + '%'])
+    
+    if rol_query:
+        query += ' AND Usuario.id_tipo_usuario LIKE ?'
+        params.extend(['%' + rol_query + '%'])
     
     users = conn.execute(query, params).fetchall()
     conn.close()
@@ -62,6 +67,15 @@ def crear_usuario():
 
     if form.validate_on_submit():
         nombre_user = form.nombre_user.data
+
+        usuarios = conn.execute("SELECT Nombre_user FROM Usuario").fetchall()
+
+        for usuario in usuarios:
+                if nombre_user == usuario['Nombre_user']:
+                    flash("El nombre de usuario ya existe.", "warning")
+                    conn.close()
+                    return redirect(url_for('usuarios.usuarios'))
+
         email_user = form.email_user.data
         psw = form.psw.data
         id_pc = form.computador.data
@@ -139,10 +153,11 @@ def editar_usuario_form():
         nombre_usuario = request.form['nombre_user'] 
         email = request.form['email_user']
         tipo_usuario = request.form['tipo_usuario']
+        computador = request.form['computador']
         psw = request.form['psw'].strip()
         action = request.form['action']
 
-        hashed_password = generate_password_hash(psw)
+        hashed_password = generate_password_hash(psw) if psw else None
 
         conn = get_db_connection()
 
@@ -157,27 +172,48 @@ def editar_usuario_form():
                     'UPDATE Usuario SET Nombre_user = ?, Email = ?, id_tipo_usuario = ? WHERE Id_usuario = ?',
                     (nombre_usuario, email, tipo_usuario, id_usuario)
                 )
+
+            if computador:
+                computadores = conn.execute('SELECT Id_pc, Nombre_pc FROM Pc').fetchall()
+
+                pc_existe = False
+                for compu in computadores:
+                    if compu['Id_pc'] == int(computador):
+                        pc_existe = True
+                        break
+
+                if not pc_existe:
+                    conn.close()
+                    return redirect(url_for('usuarios.editar_usuario'))
+
+                conn.execute(
+                    'UPDATE Usuario_Sistema_PC SET Id_pc = ? WHERE Id_usuario = ?',
+                    (computador, id_usuario)
+                )
+                conn.commit()
+
             user = current_user
             fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-            fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
             descripcion_hist = f"actualizó la información de un usuario {nombre_usuario}."
-            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 1)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
+            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 1)', 
+                         (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
+
             flash("Información del usuario actualizada con éxito.", "success")
 
         elif action == 'delete':
-            conn.execute(
-                'DELETE FROM Usuario WHERE Id_usuario = ?',
-                (id_usuario,)
-            )
+            conn.execute('DELETE FROM Usuario WHERE Id_usuario = ?', (id_usuario,))
+            
             user = current_user
             fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-            fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
             descripcion_hist = f"eliminó a un usuario {nombre_usuario}."
-            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 1)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
-            flash("Usuario eliminado con éxito.", "danger")
+            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 1)', 
+                         (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
+            
+            flash("Usuario eliminado con éxito.", "warning")
 
         conn.commit()
         conn.close()
+
     except Exception as e:
         print(f"Error: {e}")
         flash("Ocurrió un error al procesar la solicitud.", "danger")

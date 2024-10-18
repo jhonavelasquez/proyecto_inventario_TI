@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
-from wtforms import MultipleFileField, FileField, BooleanField, DateField, TextAreaField, StringField, PasswordField, SubmitField, SelectField, IntegerField, HiddenField
+from wtforms import FileField, BooleanField, DateField, TextAreaField, StringField, PasswordField, SubmitField, SelectField, IntegerField, HiddenField
 from wtforms.validators import DataRequired, Email, EqualTo
 from flask_wtf.file import FileAllowed
+from utils.decorators import obtener_opciones_computador
 
 class LoginForm(FlaskForm):
     nombre_usuario = StringField('Nombre Usuario', validators=[DataRequired()])
@@ -10,7 +11,6 @@ class LoginForm(FlaskForm):
 
 class CrearSistemaForm(FlaskForm):
     nombre_sistema = StringField('Nombre del Sistema', validators=[DataRequired()])
-    submit = SubmitField('Guardar')
 
 class EditarSistemaForm(FlaskForm):
     nuevo_Id_pc = SelectField('Seleccionar Computador', coerce=int, validators=[DataRequired()])
@@ -31,14 +31,15 @@ class CrearUsuarioForm(FlaskForm):
 class EditarUsuarioForm(FlaskForm):
     nombre_user = StringField('Nombre de usuario', validators=[DataRequired()])
     email_user = StringField('Correo electrónico', validators=[DataRequired(), Email()])
+    computador = SelectField('Computador', choices=[("", "--- No asignar ---")] + obtener_opciones_computador())
     psw = StringField('Contraseña')
     tipo_usuario = SelectField('Tipo de usuario', coerce=int, validators=[DataRequired()])
-    
 
 class CrearComputadorForm(FlaskForm):
     nombre_computador = StringField('Nombre del Computador', validators=[DataRequired()])
-    nombre_placa = StringField('Nombre de Placa', validators=[DataRequired()])
-    disco = IntegerField('Total Almacenamiento (GB)', validators=[DataRequired()])
+    procesador = StringField('Procesador', validators=[DataRequired()])
+    nombre_placa = StringField('Nombre de Placa Base', validators=[DataRequired()])
+    almacenamiento = IntegerField('Total Almacenamiento (GB)', validators=[DataRequired()])
     ram = IntegerField('Total de Ram (GB)', validators=[DataRequired()])
     fuente = StringField('Fuente de Poder', validators=[DataRequired()])
     submit = SubmitField('Guardar')
@@ -46,7 +47,8 @@ class CrearComputadorForm(FlaskForm):
 class EditarComputadorForm(FlaskForm):
     id_pc = HiddenField('ID PC')
     nombre_computador = StringField('Nombre', validators=[DataRequired()])
-    nombre_placa = StringField('Placa Base', validators=[DataRequired()])
+    procesador = StringField('Procesador', validators=[DataRequired()])
+    nombre_placa = StringField('Nombre de Placa Base', validators=[DataRequired()])
     almacenamiento = IntegerField('Almacenamiento Total (GB)', validators=[DataRequired()])
     ram = IntegerField('Ram Total (GB)', validators=[DataRequired()])
     fuente = StringField('Fuente de Poder', validators=[DataRequired()])

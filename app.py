@@ -21,12 +21,11 @@ import threading
 import sys
 
 app = Flask(__name__)
-app.config.from_object(Config)  # Carga de configuración
+app.config.from_object(Config)
 
 csrf = CSRFProtect(app)
 mail = Mail(app)
 
-# Inicialización de Flask-Login
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login.login'
@@ -37,13 +36,21 @@ def load_user(user_id):
     user = Usuario.get_by_id(user_id)
     return user
 
-# Registra los blueprints
 app.register_blueprint(login_bp, url_prefix='/login')
 app.register_blueprint(reportes_bp, url_prefix='/reportes') 
 app.register_blueprint(computadores_bp, url_prefix='/computadores') 
 app.register_blueprint(sistema_bp, url_prefix='/')
 app.register_blueprint(usuarios_bp, url_prefix='/usuarios')  
 app.register_blueprint(historial_bp, url_prefix='/historial') 
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('500.html'), 500
+
 
 #BACKEND MI CUENTA
 @app.route('/cuenta', methods=['GET', 'POST'])

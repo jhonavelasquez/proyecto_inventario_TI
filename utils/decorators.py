@@ -3,6 +3,13 @@ from functools import wraps
 from flask import session, redirect, url_for
 from model import get_db_connection
 
+def obtener_opciones_computador():
+    conn = get_db_connection()
+    computadores = conn.execute('SELECT Id_pc, Nombre_pc FROM Pc').fetchall()
+    conn.close()
+    opciones = [(computador['Id_pc'], computador['Nombre_pc']) for computador in computadores]
+    return opciones
+
 def requiere_tipo_usuario(*roles_permitidos):
     def decorator(f):
         @wraps(f)

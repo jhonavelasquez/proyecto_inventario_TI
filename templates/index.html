@@ -1,9 +1,19 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style_sistemas.css') }}">
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    .hover-card {
+        transition: all 0.3s ease;
+    }
+    .hover-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0, 61, 194, 0.356) !important;
+    }
+</style>
 {% endblock %}
+
+{% block title %}Inicio - Sistemas DDI{% endblock %}
 
 {% block content %}
 
@@ -83,55 +93,47 @@
 {% endwith %}
 
 {% if request.args.get('sistema') or request.args.get('search') %}
-<div id="tabla_contenido" class="table-responsive">
     {% if user_pc_data %}
-    <table class="table table-hover">
-        <thead class="table-light">
-            <tr>
-                <th>Usuario</th>
-                <th>Computador</th>
-                <th>Sistema</th>
-                <th>Activo</th>
-                {% if session['id_tipo_usuario'] == 1 or session['id_tipo_usuario'] == 3 %}
-                <th>Acciones</th>
-                {% endif %}
-            </tr>
-        </thead>
-        <tbody>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-4">
             {% for row in user_pc_data %}
-            <tr class="clickable-row" data-href="{{ url_for('sistema.editar_sistema', id_sistema=row['Id_sistema'], id_usuario=row['Id_usuario'], id_pc=row['Id_pc']) }}">
-                <td>{{ row['Nombre_user'] }}</td>
-                <td>{{ row['Nombre_pc'] }}</td>
-                <td>{{ row['Nombre_sistema'] }}</td>
-                <td>
-                    <span class="badge bg-{{ 'success' if row['Activo'] else 'danger' }}">
-                        {{ 'Activo' if row['Activo'] else 'Inactivo' }}
-                    </span>
-                </td>
-                {% if session['id_tipo_usuario'] == 1 or session['id_tipo_usuario'] == 3 %}
-                <td>
-                    <a href="{{ url_for('sistema.editar_sistema', id_sistema=row['Id_sistema'], id_usuario=row['Id_usuario'], id_pc=row['Id_pc']) }}"
-                        class="btn btn-sm btn-warning">
-                        <i class="bi bi-pencil-square me-1"></i>Editar
-                    </a>
-                </td>
-                {% endif %}
-            </tr>
+                <div class="col">
+                    <div class="card h-100 shadow-sm hover-card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ row['Nombre_user'] }}</h5>
+                            <p class="card-text">
+                                <i class="bi bi-pc-display me-2"></i>{{ row['Nombre_pc'] }}
+                            </p>
+                            <p class="card-text">
+                                <i class="bi bi-hdd-network me-2"></i>{{ row['Nombre_sistema'] }}
+                            </p>
+                            <p class="card-text">
+                                <span class="badge bg-{{ 'success' if row['Activo'] else 'danger' }}">
+                                    {{ 'Activo' if row['Activo'] else 'Inactivo' }}
+                                </span>
+                            </p>
+                        </div>
+                        {% if session['id_tipo_usuario'] == 1 or session['id_tipo_usuario'] == 3 %}
+                            <div class="card-footer bg-transparent border-top-0">
+                                <a href="{{ url_for('sistema.editar_sistema', id_sistema=row['Id_sistema'], id_usuario=row['Id_usuario'], id_pc=row['Id_pc']) }}"
+                                   class="btn btn-warning btn-sm w-100">
+                                    <i class="bi bi-pencil-square me-1"></i>Editar
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
             {% endfor %}
-        </tbody>
-    </table>
+        </div>
     {% else %}
-    <div class="alert alert-info" role="alert">
-        <i class="bi bi-info-circle me-2"></i>No se encontraron registros que coincidan con los criterios de búsqueda.
-    </div>
+        <div class="alert alert-info" role="alert">
+            <i class="bi bi-info-circle me-2"></i>No se encontraron registros que coincidan con los criterios de búsqueda.
+        </div>
     {% endif %}
-</div>
 {% else %}
-<div class="alert alert-primary" role="alert">
-    <i class="bi bi-info-circle me-2"></i>Por favor, selecciona un sistema o realiza una búsqueda para ver los datos.
-</div>
+    <div class="alert alert-primary" role="alert">
+        <i class="bi bi-info-circle me-2"></i>Por favor, selecciona un sistema o realiza una búsqueda para ver los datos.
+    </div>
 {% endif %}
-
 
 <!-- Modal para Agregar Sistema -->
 <div class="modal fade" id="agregarSistema" tabindex="-1" aria-labelledby="agregarSistemaLabel" aria-hidden="true">
@@ -141,23 +143,24 @@
                 <h5 class="modal-title" id="agregarSistemaLabel">Agregar Nuevo Sistema</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="POST" action="{{ url_for('sistema.crear_sistema') }}">
+            <form id="formAgregarSistema" method="POST" action="{{ url_for('sistema.crear_sistema') }}">
                 {{ formCrear.hidden_tag() }}
                 <div class="modal-body">
+                    <div id="modalErrorContainer" class="alert alert-danger d-none" role="alert"></div>
                     <div class="mb-3">
                         {{ formCrear.nombre_sistema.label(class="form-label") }}
-                        {{ formCrear.nombre_sistema(class="form-control") }}
+                        {{ formCrear.nombre_sistema(class="form-control", id="nombre_sistema", maxlength="90") }}
+                        <small id="charCount" class="form-text text-muted"></small>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    {{ formCrear.submit(class="btn btn-primary") }}
+                    <button type="submit" class="btn btn-primary" id="submitButton">Guardar</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
 
 <!-- Modal para Eliminar Sistema -->
 <div class="modal fade" id="ModelEliminarSistema" tabindex="-1" aria-labelledby="ModelEliminarSistemaLabel" aria-hidden="true">
@@ -171,7 +174,7 @@
                 {{ formEliminar.hidden_tag() }}
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="sistema" class="form-label">Seleccionar Sistema</label>
+                        {{ formEliminar.sistema.label(class="form-label") }}
                         {{ formEliminar.sistema(class="form-select", id="sistema-eliminar") }}
                     </div>
                 </div>
@@ -205,29 +208,7 @@
         </div>
     </div>
 </div>
-
-<script>
-    function showDeleteConfirmation() {
-        var selectedSystem = document.getElementById('sistema-eliminar').value;
-        if (selectedSystem) {
-            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-            deleteModal.show();
-        } else {
-            alert('Por favor, seleccione un sistema para eliminar.');
-        }
-    }
-
-    function confirmDelete() {
-        document.getElementById('deleteForm').submit();
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        var deleteModal = document.getElementById('deleteModal');
-        deleteModal.addEventListener('hidden.bs.modal', function () {
-            var eliminarSistemaModal = bootstrap.Modal.getInstance(document.getElementById('ModelEliminarSistema'));
-            eliminarSistemaModal.show();
-        });
-    });
-</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{{ url_for('static', filename='js/validacion-sistema.js') }}"></script>
 
 {% endblock %}

@@ -1,8 +1,83 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style_historial.css') }}">
+<style>
+    .timeline {
+        position: relative;
+        padding: 20px 0;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 20px;
+        width: 2px;
+        background-color: #e9ecef;
+    }
+    
+    .timeline-item {
+        margin-bottom: 10px;
+        position: relative;
+    }
+    
+    .timeline-badge {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        text-align: center;
+        position: absolute;
+        left: 20px;
+        margin-left: 0;
+        top: 14px;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .timeline-badge i {
+        color: rgb(0, 0, 0);
+    }
+    
+    .timeline-card {
+        width: calc(100% - 80px);
+        margin-left: 80px;
+        margin-right: 0;
+    }
+    
+    .timeline-item:nth-child(even) .timeline-card {
+        margin-left: 80px;
+            margin-right: 0;
+    }
+    
+    @media (max-width: 767px) {
+        .timeline::before {
+            left: 0px;
+        }
+    
+    
+    
+        .timeline-card {
+            width: calc(100% - 80px);
+            margin-left: 40px;
+            margin-right: 0;
+        }
+    
+        .timeline-badge{
+            left: 1px;
+        }
+    
+        .timeline-item:nth-child(even) .timeline-card {
+            margin-left: 40px;
+            margin-right: 0;
+        }
+    }
+    </style>
 {% endblock %}
+
+{% block title %}Historial{% endblock %}
 
 {% block content %}
 
@@ -50,14 +125,21 @@
 {% endif %}
 
 {% if historial_data %}
-<div class="list-group mb-4">
+<p>Selecciona un usuario si quieres ver su informacion</p>
+<div class="timeline mb-4">
     {% for registro in historial_data %}
-    <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-        <div>
-            <h5 class="mb-1">{{ registro['usuario_historial'] }}</h5>
-            <p class="mb-1">{{ registro['descripcion'] }}</p>
+    <div class="timeline-item">
+        <div class="timeline-badge">
+            <i class="bi bi-clock-history" style="font-size: 1.5rem;"></i>
         </div>
-        <small class="text-muted">{{ registro['fecha'] }}</small>
+        <div class="card timeline-card">
+            <div class="card-body">
+                <h6 class="card-title" ><a class="card-title" href="/usuarios/usuarios?search={{ registro['usuario_historial'] }}">{{ registro['usuario_historial'] }}</a></h6>
+                
+                {{ registro['descripcion'] }} <br>
+                <small class="text-muted">{{ registro['fecha'] }}</small>
+            </div>
+        </div>
     </div>
     {% endfor %}
 </div>
@@ -66,8 +148,7 @@
     <ul class="pagination justify-content-center">
         {% if page > 1 %}
         <li class="page-item">
-            <a class="page-link" href="{{ url_for('historial.historial', page=page-1, categoria=request.args.get('categoria')) }}"
-                aria-label="Anterior">
+            <a class="page-link" href="{{ url_for('historial.historial', page=page-1, categoria=request.args.get('categoria')) }}" aria-label="Anterior">
                 <span aria-hidden="true">&laquo;</span>
             </a>
         </li>
@@ -75,8 +156,7 @@
 
         {% if start_page > 1 %}
         <li class="page-item">
-            <a class="page-link"
-                href="{{ url_for('historial.historial', page=1, categoria=request.args.get('categoria')) }}">1</a>
+            <a class="page-link" href="{{ url_for('historial.historial', page=1, categoria=request.args.get('categoria')) }}">1</a>
         </li>
         {% if start_page > 2 %}
         <li class="page-item disabled"><span class="page-link">...</span></li>
@@ -85,36 +165,35 @@
 
         {% for p in range(start_page, end_page + 1) %}
         <li class="page-item {% if p == page %}active{% endif %}">
-            <a class="page-link" href="{{ url_for('historial.historial', page=p, categoria=request.args.get('categoria')) }}">{{ p
-                }}</a>
+            <a class="page-link" href="{{ url_for('historial.historial', page=p, categoria=request.args.get('categoria')) }}">{{ p }}</a>
         </li>
         {% endfor %}
 
-        {% if end_page < total_pages %} {% if end_page < total_pages - 1 %} <li class="page-item disabled"><span
-                class="page-link">...</span></li>
-            {% endif %}
-            <li class="page-item">
-                <a class="page-link"
-                    href="{{ url_for('historial.historial', page=total_pages, categoria=request.args.get('categoria')) }}">{{
-                    total_pages }}</a>
-            </li>
-            {% endif %}
+        {% if end_page < total_pages %}
+        {% if end_page < total_pages - 1 %}
+        <li class="page-item disabled"><span class="page-link">...</span></li>
+        {% endif %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('historial.historial', page=total_pages, categoria=request.args.get('categoria')) }}">{{ total_pages }}</a>
+        </li>
+        {% endif %}
 
-            {% if page < total_pages %} <li class="page-item">
-                <a class="page-link"
-                    href="{{ url_for('historial.historial', page=page+1, categoria=request.args.get('categoria')) }}"
-                    aria-label="Siguiente">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-                </li>
-                {% endif %}
+        {% if page < total_pages %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('historial.historial', page=page+1, categoria=request.args.get('categoria')) }}" aria-label="Siguiente">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+        {% endif %}
     </ul>
 </nav>
+
 {% else %}
 <div class="alert alert-info" role="alert">
-    <i class="bi bi-info-circle me-2"></i>No existen registros en el historial.
+    <i class="bi bi-info-circle me-2"></i>No se encontraron registros en el historial.
 </div>
 {% endif %}
+
 {% endblock %}
 
 {% block scripts %}
