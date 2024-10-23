@@ -100,9 +100,9 @@
                 <select id="categoria" class="form-select" name="categoria" aria-label="Selecciona una Categoría">
                     <option value="">Todas las Categorías</option>
                     {% for categoria in categorias %}
-                    <option value="{{ categoria['id_categoria'] }}" {% if
-                        request.args.get('categoria')==categoria['id_categoria'] %} selected {% endif %}>
-                        {{ categoria['nombre_categoria'] }}
+                    <option value="{{ categoria[0] }}" {% if
+                        request.args.get('categoria')==categoria[0] %} selected {% endif %}>
+                        {{ categoria[1] }}
                     </option>
                     {% endfor %}
                 </select>
@@ -121,11 +121,13 @@
 </div>
 
 {% if categoria_nombre %}
-<h2 class="h4 mb-4">Categoría: {{ categoria_nombre['nombre_categoria'] }}</h2>
+<h2 class="h4 mb-4">Categoría: {{ categoria_nombre[0] }}</h2>
 {% endif %}
 
 {% if historial_data %}
+{% if session['id_tipo_usuario'] == 1 %}
 <p>Selecciona un usuario si quieres ver su informacion</p>
+{% endif %}
 <div class="timeline mb-4">
     {% for registro in historial_data %}
     <div class="timeline-item">
@@ -134,10 +136,10 @@
         </div>
         <div class="card timeline-card">
             <div class="card-body">
-                <h6 class="card-title" ><a class="card-title" href="/usuarios/usuarios?search={{ registro['usuario_historial'] }}">{{ registro['usuario_historial'] }}</a></h6>
+                <h6 class="card-title" ><a class="card-title" {% if session['id_tipo_usuario'] == 1 %} href="/usuarios/usuarios?search={{ registro[1] }}" {% else %} style="text-decoration: none;" {% endif %} >{{ registro[1] }}</a></h6>
                 
-                {{ registro['descripcion'] }} <br>
-                <small class="text-muted">{{ registro['fecha'] }}</small>
+                {{ registro[2] }} <br>
+                <small class="text-muted">{{ registro[3] }}</small>
             </div>
         </div>
     </div>

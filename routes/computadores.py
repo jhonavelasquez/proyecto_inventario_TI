@@ -12,16 +12,19 @@ computadores_bp = Blueprint('computadores', __name__)
 @login_required
 def computadores():
     conn = get_db_connection()
+    cursor = conn.cursor()
     form = CrearComputadorForm()
     search_query = request.args.get('search', '')
 
     query = "SELECT * FROM Pc Where 1 = 1"
     params = []
     if search_query:
-        query += ' AND Pc.Nombre_pc LIKE ?'
+        query += ' AND Pc.Nombre_pc LIKE %s'
         params.extend(['%' + search_query + '%'])
 
-    filtro_pcs = conn.execute(query, params).fetchall()
+    cursor.execute(query, params)
+    filtro_pcs = cursor.fetchall()
+    conn.commit()
     conn.close()
 
     user = current_user
@@ -36,13 +39,16 @@ def computadores():
 @login_required
 def crear_computador():
     conn = get_db_connection()
+    cursor = conn.cursor()
     form = CrearComputadorForm()
     if form.validate_on_submit():
         nombre_computador = form.nombre_computador.data
 
-        pcs = conn.execute("SELECT Nombre_pc FROM Pc").fetchall()
+        cursor.execute("SELECT Nombre_pc FROM Pc")
+        pcs = cursor.fetchall()
+
         for pc in pcs:
-            if nombre_computador == pc['Nombre_pc']:
+            if nombre_computador == pc[0]:
                 flash("Ya existe un computador con el mismo nombre.", "warning")
                 conn.close()
                 return redirect(url_for('computadores.computadores'))
@@ -54,15 +60,15 @@ def crear_computador():
         fuente = form.fuente.data
 
         try:
-            conn.execute('''
+            cursor.execute('''
                 INSERT INTO Pc (Nombre_pc, procesador, Placa, Almacenamiento, Ram, Fuente)
-                VALUES (?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s)
             ''', (nombre_computador, procesador, nombre_placa, almacenamiento, ram, fuente))
 
             user = current_user
             fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
             descripcion_hist = f"agregó un nuevo computador. {nombre_computador}."
-            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 3)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
+            cursor.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 3)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
             
             conn.commit()
             conn.close()
@@ -84,26 +90,28 @@ def crear_computador():
 @login_required
 def editar_computador(id_pc):
     conn = get_db_connection()
-    
+    cursor = conn.cursor()
     form = EditarComputadorForm()
-    pc = conn.execute('''
+    cursor.execute('''
         SELECT *
         FROM Pc
-        WHERE Pc.Id_pc = ?
-    ''', (id_pc,)).fetchone()
+        WHERE Pc.Id_pc = %s
+    ''', (id_pc,))
+    pc = cursor.fetchone()
 
     if pc is None:
+        conn.commit()
         conn.close()
         abort(404)
 
     if request.method == 'GET':
-        form.id_pc.data = pc['Id_pc']
-        form.procesador.data = pc['Procesador']
-        form.nombre_computador.data = pc['Nombre_pc']
-        form.nombre_placa.data = pc['Placa']
-        form.almacenamiento.data = pc['Almacenamiento']
-        form.ram.data = pc['Ram']
-        form.fuente.data = pc['Fuente']
+        form.id_pc.data = pc[0]
+        form.procesador.data = pc[2]
+        form.nombre_computador.data = pc[1]
+        form.nombre_placa.data = pc[3]
+        form.almacenamiento.data = pc[4]
+        form.ram.data = pc[5]
+        form.fuente.data = pc[6]
 
     conn.close()
 
@@ -129,29 +137,30 @@ def editar_computador_form():
         action = request.form['action']
 
         conn = get_db_connection()
+        cursor = conn.cursor()
 
         if action == 'save':
-            conn.execute(
-                'UPDATE Pc SET Nombre_pc = ?, Procesador = ?, Placa = ?, Almacenamiento = ?, Ram = ?, Fuente = ? WHERE Id_pc = ?',
+            cursor.execute(
+                'UPDATE Pc SET Nombre_pc = %s, Procesador = %s, Placa = %s, Almacenamiento = %s, Ram = %s, Fuente = %s WHERE Id_pc = %s',
                 (nombre_pc, procesador, placa_pc, almacenamiento, ram, nombre_fuente, id_pc)
             )
 
             user = current_user
             fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
             descripcion_hist = f"actualizó la información de un computador. {nombre_pc}."
-            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 3)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
+            cursor.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 3)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
 
             flash("Información del computador actualizada con éxito.", "success")
         elif action == 'delete':
-            conn.execute(
-                'DELETE FROM Pc WHERE Id_pc = ?',
+            cursor.execute(
+                'DELETE FROM Pc WHERE Id_pc = %s',
                 (id_pc,)
             )
 
             user = current_user
             fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
             descripcion_hist = f"eliminó un computador. {nombre_pc}."
-            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 3)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
+            cursor.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 3)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
             flash("Computador eliminado con éxito.", "danger")
 
         conn.commit()

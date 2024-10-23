@@ -36,8 +36,8 @@
                     <select class="form-select" id="sistema" name="sistema" aria-label="Selecciona un Sistema">
                         <option value="">Todos los Sistemas</option>
                         {% for sistema in sistemas %}
-                        <option value="{{ sistema['Id_sistema'] }}" {% if request.args.get('sistema')==sistema['Id_sistema'] %} selected {% endif %}>
-                            {{ sistema['Nombre_sistema'] }}
+                        <option value="{{ sistema[0] }}" {% if request.args.get('sistema')==sistema[0] %} selected {% endif %}>
+                            {{ sistema[1] }}
                         </option>
                         {% endfor %}
                     </select>
@@ -99,22 +99,22 @@
                 <div class="col">
                     <div class="card h-100 shadow-sm hover-card">
                         <div class="card-body">
-                            <h5 class="card-title">{{ row['Nombre_user'] }}</h5>
+                            <h5 class="card-title">{{ row[1] }}</h5>
                             <p class="card-text">
-                                <i class="bi bi-pc-display me-2"></i>{{ row['Nombre_pc'] }}
+                                <i class="bi bi-pc-display me-2"></i>{{ row[4] }}
                             </p>
                             <p class="card-text">
-                                <i class="bi bi-hdd-network me-2"></i>{{ row['Nombre_sistema'] }}
+                                <i class="bi bi-hdd-network me-2"></i>{{ row[6] }}
                             </p>
                             <p class="card-text">
-                                <span class="badge bg-{{ 'success' if row['Activo'] else 'danger' }}">
-                                    {{ 'Activo' if row['Activo'] else 'Inactivo' }}
+                                <span class="badge bg-{{ 'success' if row[7] else 'danger' }}">
+                                    {{ 'Activo' if row[7] else 'Inactivo' }}
                                 </span>
                             </p>
                         </div>
                         {% if session['id_tipo_usuario'] == 1 or session['id_tipo_usuario'] == 3 %}
                             <div class="card-footer bg-transparent border-top-0">
-                                <a href="{{ url_for('sistema.editar_sistema', id_sistema=row['Id_sistema'], id_usuario=row['Id_usuario'], id_pc=row['Id_pc']) }}"
+                                <a href="{{ url_for('sistema.editar_sistema', id_sistema=row[5], id_usuario=row[0], id_pc=row[3]) }}"
                                    class="btn btn-warning btn-sm w-100">
                                     <i class="bi bi-pencil-square me-1"></i>Editar
                                 </a>

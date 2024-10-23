@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style_editar_sistema.css') }}">
 {% endblock %}
 
-{% block title %}Editar Sistema - {{ user_pc['Nombre_sistema'] }}{% endblock %}
+{% block title %}Editar Sistema - {{ user_pc[4] }}{% endblock %}
 
 {% block content %}
 <h1 class="block-effect" style="--td:0.3s">
@@ -26,16 +26,16 @@
             </a>
         </div>
 
-        <h2 class="card-title mb-4">Editar Sistema: {{ user_pc['Nombre_sistema'] }}</h2>
+        <h2 class="card-title mb-4">Editar Sistema: {{ user_pc[4] }}</h2>
 
         <form id="editForm" method="post"
-            action="{{ url_for('sistema.editar_sistema', id_sistema=user_pc['Id_sistema'], id_usuario=user_pc['Id_usuario'], id_pc=user_pc['Id_pc']) }}">
+            action="{{ url_for('sistema.editar_sistema', id_sistema=user_pc[6], id_usuario=user_pc[0], id_pc=user_pc[2]) }}">
             {{ form.hidden_tag() }}
 
             <div class="mb-4">
                 <p class="lead">
-                    Asigna un nuevo computador a <strong>{{ user_pc['Nombre_user'] }}</strong> o cambia el estado del
-                    sistema <strong>{{ user_pc['Nombre_sistema'] }}</strong>
+                    Asigna un nuevo computador a <strong>{{ user_pc[1] }}</strong> o cambia el estado del
+                    sistema <strong>{{ user_pc[4] }}</strong>
                 </p>
             </div>
 

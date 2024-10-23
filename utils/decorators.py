@@ -1,13 +1,15 @@
 # app/utils/decorators.py
 from functools import wraps
-from flask import session, redirect, url_for
+from flask import session, redirect, url_for, render_template
 from model import get_db_connection
 
 def obtener_opciones_computador():
     conn = get_db_connection()
-    computadores = conn.execute('SELECT Id_pc, Nombre_pc FROM Pc').fetchall()
+    cursor = conn.cursor()
+    cursor.execute('SELECT Id_pc, Nombre_pc FROM Pc')
+    computadores = cursor.fetchall()
     conn.close()
-    opciones = [(computador['Id_pc'], computador['Nombre_pc']) for computador in computadores]
+    opciones = [(computador[0], computador[1]) for computador in computadores]
     return opciones
 
 def requiere_tipo_usuario(*roles_permitidos):
@@ -17,7 +19,7 @@ def requiere_tipo_usuario(*roles_permitidos):
             if 'id_tipo_usuario' not in session:
                 return redirect(url_for('auth.login'))
             if session['id_tipo_usuario'] not in roles_permitidos:
-                return redirect(url_for('index'))
+                return render_template('acceso-denegado.html')
             return f(*args, **kwargs)
         return decorated_function
     return decorator
@@ -25,20 +27,23 @@ def requiere_tipo_usuario(*roles_permitidos):
 #NOTIFICACIONES EN EL SISTEMA
 def get_total_notifications(user_id):
     conn = get_db_connection()
-    total_notifications = conn.execute(
-        'SELECT COUNT(*) FROM Notificaciones WHERE id_usuario = ?  AND leido = false',
-        (user_id,)
-    ).fetchone()[0]
+    cursor = conn.cursor()
+    cursor.execute(
+        'SELECT COUNT(*) FROM Notificaciones WHERE id_usuario = %s AND leido = false',
+        (user_id,))
+    total_notifications = cursor.fetchone()[0]
     conn.close()
 
     return total_notifications
 
 def get_info_notifications(user_id):
     conn = get_db_connection()
-    info_notifiaciones= conn.execute(
-        'SELECT * FROM Notificaciones WHERE id_usuario = ? ORDER BY id_notificacion DESC LIMIT 8',
+    cursor = conn.cursor()
+    cursor.execute(
+        'SELECT * FROM Notificaciones WHERE id_usuario = %s ORDER BY id_notificacion DESC LIMIT 8',
         (user_id,)
-    ).fetchall()
+    )
+    info_notificaciones = cursor.fetchall()
     conn.close()
 
-    return info_notifiaciones
+    return info_notificaciones

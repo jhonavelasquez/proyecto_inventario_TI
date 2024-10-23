@@ -7,15 +7,16 @@ from io import BytesIO
 from PyPDF2 import PdfReader, PdfWriter
 from PIL import Image
 from forms import ReporteForm 
-from utils.decorators import get_db_connection, get_total_notifications, get_info_notifications 
+from utils.decorators import requiere_tipo_usuario, get_db_connection, get_total_notifications, get_info_notifications 
 
 reportes_bp = Blueprint('reportes', __name__)
 
 @reportes_bp.route('/reportes', methods=['GET', 'POST'])
+@requiere_tipo_usuario(1)
 @login_required
 def reportes():
     conn = get_db_connection()
-
+    cursor = conn.cursor()
     search = request.args.get('search')
     date_from = request.args.get('date-from')
     date_to = request.args.get('date-to')
@@ -42,32 +43,35 @@ def reportes():
 
         if search:
             base_query += '''
-                AND (asunto LIKE ? OR Usuario.Nombre_user LIKE ? OR Reportes.num_solicitud LIKE ?)
+                AND (asunto LIKE %s OR Usuario.Nombre_user LIKE %s OR Reportes.num_solicitud LIKE %s)
             '''
             total_records_query += '''
-                AND (asunto LIKE ? OR Usuario.Nombre_user LIKE ? OR Reportes.num_solicitud LIKE ?)
+                AND (asunto LIKE %s OR Usuario.Nombre_user LIKE %s OR Reportes.num_solicitud LIKE %s)
             '''
             search_term = '%' + search + '%'
             query_params.extend([search_term, search_term, search_term])
             total_records_params.extend([search_term, search_term, search_term])
 
         if date_from:
-            base_query += " AND Reportes.fecha >= ?"
-            total_records_query += " AND Reportes.fecha >= ?"
+            base_query += " AND Reportes.fecha >= %s"
+            total_records_query += " AND Reportes.fecha >= %s"
             query_params.append(date_from)
             total_records_params.append(date_from)
 
         if date_to:
-            base_query += " AND Reportes.fecha <= ?"
-            total_records_query += " AND Reportes.fecha <= ?"
+            base_query += " AND Reportes.fecha <= %s"
+            total_records_query += " AND Reportes.fecha <= %s"
             query_params.append(date_to)
             total_records_params.append(date_to)
 
-        base_query += " ORDER BY fecha DESC LIMIT ? OFFSET ?"
+        base_query += " ORDER BY fecha DESC LIMIT %s OFFSET %s"
         query_params.extend([per_page, (page - 1) * per_page])
 
-        reportes = conn.execute(base_query, query_params).fetchall()
-        total_records = conn.execute(total_records_query, total_records_params).fetchone()[0]
+        cursor.execute(base_query, query_params)
+        reportes = cursor.fetchall()
+        
+        cursor.execute(total_records_query, total_records_params)
+        total_records = cursor.fetchone()[0]
 
         total_pages = (total_records // per_page) + (1 if total_records % per_page > 0 else 0)
         start_page = max(1, page - 1)
@@ -98,17 +102,20 @@ def reportes():
 
 
 @reportes_bp.route('/ver_reporte/<int:id_reporte>', methods=['GET'])
+@requiere_tipo_usuario(1)
 @login_required
 def ver_reporte(id_reporte):
     conn = get_db_connection()
-    reporte = conn.execute(''' 
+    cursor = conn.cursor()
+    cursor.execute(''' 
                            SELECT Reportes.id_reporte, Reportes.num_solicitud, Reportes.asunto, Reportes.fecha, Reportes.fecha_solucion, Reportes.descripcion, Reportes.archivo, Usuario.Nombre_user 
                            FROM Reportes 
                            INNER JOIN Usuario ON Usuario.id_usuario = Reportes.usuario_id
-                           WHERE id_reporte = ? 
+                           WHERE id_reporte = %s 
                            ORDER BY Reportes.fecha DESC 
-                           ''', (id_reporte,)).fetchone()
-    
+                           ''', (id_reporte,))
+    reporte = cursor.fetchone()
+    print(reporte)
     if reporte is None:
         conn.close()
         abort(404)
@@ -123,6 +130,7 @@ def ver_reporte(id_reporte):
 
 
 @reportes_bp.route('/reporte_2', methods=['GET', 'POST'])
+@requiere_tipo_usuario(1)
 @login_required
 def reporte_2():
     user = current_user
@@ -130,7 +138,7 @@ def reporte_2():
     info_notificaciones = get_info_notifications(user.id)
 
     conn = get_db_connection()
-
+    cursor = conn.cursor()
     form = ReporteForm()
 
     if form.validate_on_submit():
@@ -147,10 +155,11 @@ def reporte_2():
         num_solicitud = request.form['num_solicitud'].upper()
         fecha = datetime.datetime.now().strftime('%d-%m-%Y')
 
-        existing_report = conn.execute(
-            'SELECT COUNT(*) FROM Reportes WHERE num_solicitud = ?',
+        cursor.execute(
+            'SELECT COUNT(*) FROM Reportes WHERE num_solicitud = %s',
             (num_solicitud,)
-        ).fetchone()[0]
+        )
+        existing_report = cursor.fetchone()[0]
 
         if existing_report > 0:
             flash("El número de solicitud ya existe.", "warning")
@@ -209,14 +218,14 @@ def reporte_2():
             with open(file_path, 'wb') as f:
                 f.write(output_pdf.read())
 
-            conn.execute(
-                'INSERT INTO Reportes (usuario_id, num_solicitud, asunto, descripcion, fecha, fecha_solucion, archivo) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            cursor.execute(
+                'INSERT INTO Reportes (usuario_id, num_solicitud, asunto, descripcion, fecha, fecha_solucion, archivo) VALUES (%s, %s, %s, %s, %s, %s, %s)',
                 (user.id, num_solicitud, nombre_sistema, descripcion, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), fecha_solucion, filename)
             )
 
             fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
             descripcion_hist = f" ha realizado un nuevo reporte. ASUNTO: {nombre_sistema}."
-            conn.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 4)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
+            cursor.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 4)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
 
             conn.commit()
             conn.close()
@@ -231,6 +240,7 @@ def reporte_2():
 
 
 @reportes_bp.route('/ver_reporte/<filename>', methods=['GET'])
+@requiere_tipo_usuario(1)
 @login_required
 def uploaded_file(filename):
     directory = os.path.join(current_app.root_path, 'pdf_reportes')

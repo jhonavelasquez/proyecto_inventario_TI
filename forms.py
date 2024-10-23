@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import FileField, BooleanField, DateField, TextAreaField, StringField, PasswordField, SubmitField, SelectField, IntegerField, HiddenField
 from wtforms.validators import DataRequired, Email, EqualTo
 from flask_wtf.file import FileAllowed
+from flask import current_app
 from utils.decorators import obtener_opciones_computador
 
 class LoginForm(FlaskForm):
@@ -31,9 +32,14 @@ class CrearUsuarioForm(FlaskForm):
 class EditarUsuarioForm(FlaskForm):
     nombre_user = StringField('Nombre de usuario', validators=[DataRequired()])
     email_user = StringField('Correo electrónico', validators=[DataRequired(), Email()])
-    computador = SelectField('Computador', choices=[("", "--- No asignar ---")] + obtener_opciones_computador())
+    computador = SelectField('Computador', choices=[])
     psw = StringField('Contraseña')
     tipo_usuario = SelectField('Tipo de usuario', coerce=int, validators=[DataRequired()])
+
+    def __init__(self, *args, **kwargs):
+        super(EditarUsuarioForm, self).__init__(*args, **kwargs)
+        with current_app.app_context():
+            self.computador.choices = [("", "--- No asignar ---")] + obtener_opciones_computador()
 
 class CrearComputadorForm(FlaskForm):
     nombre_computador = StringField('Nombre del Computador', validators=[DataRequired()])
@@ -63,7 +69,7 @@ class ReporteForm(FlaskForm):
     responsable_sistema = StringField('Responsable del sistema', validators=[DataRequired()])
     direccion_unidad = StringField('Dirección/Unidad', validators=[DataRequired()])
     nombre_solicitante = StringField('Nombre Solicitante', validators=[DataRequired()])
-    fecha_solucion = DateField('Fecha de Solución',validators=[DataRequired()])
+    fecha_solucion = DateField('Fecha de Solución', validators=[DataRequired()])
     responsable_ddi = StringField('Responsable DDI', validators=[DataRequired()])
     responsable_solicitud = StringField('Responsable Solicitud', validators=[DataRequired()])
     descripcion = TextAreaField('Descripción', validators=[DataRequired()])
@@ -75,6 +81,4 @@ class ReporteForm(FlaskForm):
 class EditarMiCuenta(FlaskForm):
     email_user = StringField('Correo electrónico', validators=[DataRequired(), Email()])
     psw = StringField('Contraseña')
-    psw_confirmar = PasswordField('Confirmar contraseña', validators=[ EqualTo('psw', message='Las contraseñas deben coincidir')])
-
-    
+    psw_confirmar = PasswordField('Confirmar contraseña', validators=[EqualTo('psw', message='Las contraseñas deben coincidir')])

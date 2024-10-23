@@ -9,7 +9,6 @@ login_bp = Blueprint('login', __name__)
 @login_bp.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
-    
     if current_user.is_authenticated:
         return redirect(url_for('sistema.index'))
 
@@ -18,13 +17,16 @@ def login():
         password = form.contrasena.data
         user = Usuario.get_by_nombre_usuario(nombre_usuario)
 
-        if user and check_password_hash(user.password, password):
-            login_user(user)
-            session['id_tipo_usuario'] = user.id_tipo_usuario
-            flash('Inicio de sesión exitoso.', 'success')
-            return redirect(url_for('sistema.index'))
+        if user:
+            if check_password_hash(user.password, password):
+                login_user(user)
+                session['id_tipo_usuario'] = user.id_tipo_usuario
+                flash('Inicio de sesión exitoso.', 'success')
+                return redirect(url_for('sistema.index'))
+            else:
+                flash('Credenciales inválidas. Por favor, inténtalo de nuevo.', 'danger')
         else:
-            flash('Credenciales inválidas. Por favor, inténtalo de nuevo.', 'danger')
+            flash('Usuario no encontrado.', 'danger')
 
     return render_template('login.html', form=form)
 

@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style_editar_usuario.css')}}">
 {% endblock %}
 
-{% block title %}Editar Usuario - {{ user_edit['Nombre_user']}}{% endblock %}
+{% block title %}Editar Usuario - {{ user_edit[1]}}{% endblock %}
 
 {% block content %}
 
@@ -28,11 +28,11 @@
             </a>
         </div>
 
-        <h2 class="card-title mb-4">Editar Usuario: {{ user_edit['Nombre_user'] }} (#{{ user_edit['Id_usuario'] }})</h2>
+        <h2 class="card-title mb-4">Editar Usuario: {{ user_edit[1] }} (#{{ user_edit[0] }})</h2>
 
         <form id="editForm" method="post" action="{{ url_for('usuarios.editar_usuario_form') }}">
             {{ form.hidden_tag() }}
-            <input type="hidden" name="id_usuario" id="id_usuario" value="{{ user_edit['Id_usuario'] }}">
+            <input type="hidden" name="id_usuario" id="id_usuario" value="{{ user_edit[0] }}">
             <input type="hidden" name="action" id="action" value="">
             <div class="row">
                 <div class="col-md-6">

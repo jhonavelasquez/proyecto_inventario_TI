@@ -84,18 +84,18 @@
     <div class="col">
         <div class="card h-100 shadow-sm hover-card">
             <div class="card-body">
-                <h5 class="card-title">{{ row['Nombre_pc'] }}</h5>
+                <h5 class="card-title">{{ row[1] }}</h5>
                 <ul class="list-unstyled mb-0">
-                    <li><i class="bi bi-cpu me-2"></i>Procesador: {{ row['Procesador'] }}</li>
-                    <li><i class="bi bi-motherboard me-2"></i>Placa Base: {{ row['Placa'] }}</li>
-                    <li><i class="bi bi-hdd me-2"></i>Almacenamiento: {{ row['Almacenamiento'] }} GB</li>
-                    <li><i class="bi bi-memory me-2"></i>RAM: {{ row['Ram'] }} GB</li>
-                    <li><i class="bi bi-lightning-charge me-2"></i>Fuente: {{ row['Fuente'] }}</li>
+                    <li><i class="bi bi-cpu me-2"></i>Procesador: {{ row[2] }}</li>
+                    <li><i class="bi bi-motherboard me-2"></i>Placa Base: {{ row[3] }}</li>
+                    <li><i class="bi bi-hdd me-2"></i>Almacenamiento: {{ row[4] }} GB</li>
+                    <li><i class="bi bi-memory me-2"></i>RAM: {{ row[5] }} GB</li>
+                    <li><i class="bi bi-lightning-charge me-2"></i>Fuente: {{ row[6] }}</li>
                 </ul>
             </div>
             {% if session['id_tipo_usuario'] == 1 or session['id_tipo_usuario'] == 3 %}
             <div class="card-footer bg-transparent border-top-0">
-                <a href="{{ url_for('computadores.editar_computador', id_pc=row['Id_pc']) }}" class="btn btn-warning btn-sm w-100">
+                <a href="{{ url_for('computadores.editar_computador', id_pc=row[0]) }}" class="btn btn-warning btn-sm w-100">
                     <i class="bi bi-pencil-square me-1"></i>Editar
                 </a>
             </div>

@@ -9,7 +9,7 @@ historial_bp = Blueprint('historial', __name__)
 @login_required
 def historial():
     conn = get_db_connection()
-
+    cursor = conn.cursor()
     user = current_user
     num_notificaciones_totales = get_total_notifications(user.id)
     info_notificaciones = get_info_notifications(user.id)
@@ -19,7 +19,8 @@ def historial():
 
     try:
         categoria_id = request.args.get('categoria')
-        categorias = conn.execute("SELECT * FROM Categoria_historial").fetchall()
+        cursor.execute("SELECT * FROM Categoria_historial")
+        categorias = cursor.fetchall()
 
         historial_data = []
         total_records = 0
@@ -33,23 +34,31 @@ def historial():
             INNER JOIN Categoria_historial ON Categoria_historial.id_categoria = Historial.id_categoria
             WHERE 1=1
             '''
-            query += ' AND Historial.id_categoria = ? ORDER BY fecha DESC'
+            query += ' AND Historial.id_categoria = %s ORDER BY fecha DESC'
             params.append(categoria_id)
+            
+            cursor.execute(query, params)
+            total_records = cursor.fetchall()
 
-            total_records = conn.execute(query, params).fetchall()
             total_records = len(total_records)
 
             offset = (page - 1) * per_page
-            query += " LIMIT ? OFFSET ?"
+            query += " LIMIT %s OFFSET %s"
             params += [per_page, offset]
 
-            historial_data = conn.execute(query, params).fetchall()
+            
+            cursor.execute(query, params)
+            historial_data = cursor.fetchall()
 
-            categoria_nombre = conn.execute('SELECT nombre_categoria FROM Categoria_historial WHERE id_categoria = ?', (categoria_id,)).fetchone()
+            cursor.execute('SELECT nombre_categoria FROM Categoria_historial WHERE id_categoria = %s', (categoria_id,))
+            categoria_nombre = cursor.fetchone()
 
         else:
-            historial_data = conn.execute("SELECT * FROM Historial ORDER BY fecha DESC LIMIT ? OFFSET ?", (per_page, (page - 1) * per_page)).fetchall()
-            total_records = conn.execute("SELECT COUNT(*) FROM Historial").fetchone()[0]
+            cursor.execute("SELECT * FROM Historial ORDER BY fecha DESC LIMIT %s OFFSET %s", (per_page, (page - 1) * per_page))
+            historial_data = cursor.fetchall()
+
+            cursor.execute("SELECT COUNT(*) FROM Historial")
+            total_records = cursor.fetchone()[0]
 
         total_pages = (total_records // per_page) + (1 if total_records % per_page > 0 else 0)
 

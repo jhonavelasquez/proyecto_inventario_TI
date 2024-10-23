@@ -84,16 +84,16 @@
     <div class="col">
         <div class="card h-100 shadow-sm hover-card">
             <div class="card-body">
-                <h5 class="card-title">{{ row['Nombre_user'] }}</h5>
+                <h5 class="card-title">{{ row[1] }}</h5>
                 <p class="card-text">
-                    <i class="bi bi-envelope me-2"></i>{{ row['email'] }}
+                    <i class="bi bi-envelope me-2"></i>{{ row[2] }}
                 </p>
                 <p class="card-text">
-                    <i class="bi bi-person-badge me-2"></i>{{ row['nombre_tipo_usuario'] }}
+                    <i class="bi bi-person-badge me-2"></i>{{ row[4] }}
                 </p>
             </div>
             <div class="card-footer bg-transparent border-top-0">
-                <a href="{{ url_for('usuarios.editar_usuario', id=row['Id_usuario']) }}"
+                <a href="{{ url_for('usuarios.editar_usuario', id=row[0]) }}"
                     class="btn btn-warning btn-sm w-100">
                     <i class="bi bi-pencil-square me-1"></i>Editar
                 </a>

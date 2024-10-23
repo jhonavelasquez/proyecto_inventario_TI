@@ -29,14 +29,14 @@
         </div>
         <div class="report-details-body">
             <div class="headReporte">
-                <h5>Asunto: {{reporte['asunto']}}</h5>
-                <p class="fecha">Fecha: {{reporte['fecha']}} <br>De: {{reporte['Nombre_user']}}</p>
+                <h5>Asunto: {{reporte[2]}} - {{reporte[1]}}</h5>
+                <p class="fecha">Fecha: {{reporte[3]}} <br>De: {{reporte[7]}}</p>
             </div>
-            <p class="fecha">Fecha de Solución: {{reporte['fecha_solucion']}}</p>
+            <p class="fecha">Fecha de Solución: {{reporte[4]}}</p>
             <hr>
-            {% if reporte['archivo'] %}
+            {% if reporte[6] %}
             <div class="archivoReporte">
-                <p><strong>Archivo:</strong> <a href="{{ url_for('reportes.uploaded_file', filename=reporte['archivo']) }}"
+                <p><strong>Archivo:</strong> <a href="{{ url_for('reportes.uploaded_file', filename=reporte[6]) }}"
                         target="_blank">Ver Documento </a></p>
                 <hr>
             </div>
@@ -46,7 +46,7 @@
             <div class="descripcionReporte">
                 
                 <p><strong>Descripción:</strong>  </p>
-                <div class="descripcion-text">{{ reporte['descripcion'] }}</div>
+                <div class="descripcion-text">{{ reporte[5] }}</div>
             </div>
         </div>
     </div>

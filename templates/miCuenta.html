@@ -87,7 +87,7 @@
                 <div class="card mb-4">
                     <div class="card-body">
                         <h3 class="h5 card-title mb-4">Actualiza tus datos</h3>
-                        <form action="{{ url_for('cuenta') }}" method="POST" id="updateForm">
+                        <form action="{{ url_for('usuarios.cuenta') }}" method="POST" id="updateForm">
                             {{ form.hidden_tag() }}
                             <div class="mb-3">
                                 <label for="email_user" class="form-label">Correo Electrónico</label>
