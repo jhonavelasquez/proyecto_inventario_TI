@@ -123,7 +123,7 @@ def enviar_recordatorios():
 stop_thread = False
 
 def iniciar_revisiones_periodicas():
-    schedule.every(1).minutes.do(enviar_recordatorios)
+    #schedule.every(1).minutes.do(enviar_recordatorios)
     schedule.every().day.at("08:00").do(enviar_recordatorios)
 
     while not stop_thread:
