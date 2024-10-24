@@ -9,12 +9,49 @@
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css">
-
+        <style>
+            .floating-alert-container {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 1050;
+                max-width: 400px;
+            }
+    
+            .floating-alert {
+                margin-bottom: 10px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+            }
+    
+            .floating-alert.fade-out {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            .alert-dismissible {
+                padding-left: 3rem;
+                padding-right: 4rem;
+            }
+        </style>
     <title>Iniciar Sesión DDI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_login.css') }}">
 </head>
 
 <body>
+    <div class="floating-alert-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if "Please log in to access this page." not in message %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show floating-alert" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
     <div class="area">
         <ul class="circles">
             <li></li>
@@ -64,20 +101,6 @@
                     {{ form.submit(class='botonlogin slide_right') }}
                 </div>
             </form>
-            {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-            <div class="mt-3">
-                {% for category, message in messages %}
-                {% if "Please log in to access this page." not in message %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                {% endif %}
-                {% endfor %}
-            </div>
-            {% endif %}
-            {% endwith %}
         </div>
     </div>
 
@@ -92,6 +115,34 @@
                 const type = passwordField.type === 'password' ? 'text' : 'password';
                 passwordField.type = type;
                 this.querySelector('i').className = type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const alertContainer = document.querySelector('.floating-alert-container');
+            
+            if (alertContainer) {
+                alertContainer.addEventListener('click', function(event) {
+                    if (event.target.classList.contains('btn-close')) {
+                        const alert = event.target.closest('.floating-alert');
+                        alert.classList.add('fade-out');
+                        
+                        setTimeout(() => {
+                            alert.remove();
+                        }, 300);
+                    }
+                });
+            }
+
+            const alerts = document.querySelectorAll('.floating-alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    alert.classList.add('fade-out');
+                    setTimeout(() => {
+                        alert.remove();
+                    }, 300);
+                }, 5000);
             });
         });
     </script>

@@ -65,20 +65,36 @@ def get_info_notifications(user_id):
 @notificaciones_bp.route('/marcar_notificaciones_leidas', methods=['POST'])
 @login_required
 def marcar_notificaciones_leidas():
-    print("Datos recibidos:", request.form)
     user_id = current_user.id
     conn = get_db_connection()
     cursor= conn.cursor()
 
-    cursor.execute('SELECT * FROM Notificaciones WHERE id_usuario = %s AND leido = false AND enviado = true', (user_id,))
+    cursor.execute('SELECT * FROM Notificaciones WHERE id_usuario = %s AND leido = false', (user_id,))
     notificaciones = cursor.fetchall()
 
     if notificaciones:
-        cursor.execute('UPDATE Notificaciones SET leido = true WHERE id_usuario = %s AND leido = false AND enviado = true', (user_id,))
+        cursor.execute('UPDATE Notificaciones SET leido = true WHERE id_usuario = %s AND leido = false', (user_id,))
         print("NOTIFICACIONES ACTULIZADAS")
     else:
         print("TODAS LAS NOTIFACIONES ESTÁN LEIDAS.")
     conn.commit()
     conn.close()
     return '', 204
+
+@notificaciones_bp.route('/marcar_notificacion_leida', methods=['POST'])
+@login_required
+def marcar_notificacion_leida():
+    user_id = current_user.id
+    id_reporte = request.form.get('id_reporte')
+
+    if id_reporte:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute('UPDATE Notificaciones SET leido = true WHERE id_usuario = %s AND id_reporte = %s', (user_id, id_reporte))
+
+        conn.commit()
+        conn.close()
+
+        return '', 204
 

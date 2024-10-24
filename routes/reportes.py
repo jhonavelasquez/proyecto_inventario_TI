@@ -223,7 +223,7 @@ def reporte_2():
                 (user.id, num_solicitud, nombre_sistema, descripcion, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), fecha_solucion, filename)
             )
 
-            fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+            fecha_actual_seg = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             descripcion_hist = f" ha realizado un nuevo reporte. ASUNTO: {nombre_sistema}."
             cursor.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 4)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
 

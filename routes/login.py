@@ -8,27 +8,41 @@ login_bp = Blueprint('login', __name__)
 
 @login_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    form = LoginForm()
-    if current_user.is_authenticated:
-        return redirect(url_for('sistema.index'))
+    try:
+        form = LoginForm()
+        if current_user.is_authenticated:
+            return redirect(url_for('sistema.index'))
 
-    if form.validate_on_submit():
-        nombre_usuario = form.nombre_usuario.data
-        password = form.contrasena.data
-        user = Usuario.get_by_nombre_usuario(nombre_usuario)
+        if form.validate_on_submit():
+            nombre_usuario = form.nombre_usuario.data
+            password = form.contrasena.data
+            print(f"Nombre de usuario: {nombre_usuario}")
+            
+            user = Usuario.get_by_nombre_usuario(nombre_usuario)
+            print(f"Usuario obtenido: {user}")
 
-        if user:
-            if check_password_hash(user.password, password):
-                login_user(user)
-                session['id_tipo_usuario'] = user.id_tipo_usuario
-                flash('Inicio de sesión exitoso.', 'success')
-                return redirect(url_for('sistema.index'))
+            if user:
+                if check_password_hash(user.password, password):
+                    print("Contraseña correcta")
+                    login_user(user)
+                    session['id_tipo_usuario'] = user.id_tipo_usuario
+                    flash('Inicio de sesión exitoso.', 'success')
+                    return redirect(url_for('sistema.index'))
+                else:
+                    print("Contraseña incorrecta")
+                    flash('Credenciales inválidas. Por favor, inténtalo de nuevo.', 'danger')
             else:
-                flash('Credenciales inválidas. Por favor, inténtalo de nuevo.', 'danger')
-        else:
-            flash('Usuario no encontrado.', 'danger')
+                print("Usuario no encontrado")
+                flash('Usuario no encontrado.', 'danger')
 
-    return render_template('login.html', form=form)
+        else:
+            print(f"Errores en el formulario: {form.errors}")
+
+        return render_template('login.html', form=form)
+    except Exception as e:
+        print(f"Error en la autenticación: {e}")
+        return "Error en el servidor", 500
+
 
 @login_bp.route('/logout')
 @login_required

@@ -70,8 +70,6 @@ def enviar_recordatorios():
             conn = get_db_connection()
             cursor = conn.cursor()
 
-            print("Revisión---")
-
             today = datetime.datetime.now()
             fecha_15_dias = today + datetime.timedelta(days=15)
 
@@ -80,46 +78,40 @@ def enviar_recordatorios():
             fecha_15_dias_str = fecha_15_dias.strftime('%Y-%m-%d')
 
             cursor.execute(
-                'SELECT * FROM Reportes WHERE fecha_solucion BETWEEN %s AND %s',
+                'SELECT * FROM Reportes WHERE (fecha_solucion BETWEEN %s AND %s) AND (enviado = false)',
                 (today_str, fecha_15_dias_str)
             )
             reportes = cursor.fetchall()
 
-            print(reportes)
-            print(f"Fecha de hoy: {today_str}")
-            print(f"Fecha de hoy sin segundos: {today_sin_seg}")
-            print(f"Fecha en 15 días: {fecha_15_dias_str}")
-
             for reporte in reportes:
+                id_reporte = reporte[0] 
                 usuario_id = reporte[1] 
                 nombre_sistema = reporte[3]
                 fecha_solucion = reporte[6]
-
-                cursor.execute(
-                    "SELECT * FROM Notificaciones WHERE id_reporte = %s AND DATE_FORMAT(fecha_notificacion, '%Y-%m-%d') = %s AND enviado = true",
-                    (reporte[0], today_sin_seg)
-                )
-                notificacion_enviada = cursor.fetchone()
+                enviado = reporte[8]
 
                 cursor.execute('SELECT Id_usuario, Nombre_user, Email FROM Usuario WHERE Id_usuario = %s', (usuario_id,))
                 usuario_reporte = cursor.fetchone()
-
-                print(usuario_reporte[2], " ----- ", nombre_sistema)
                 print("-------------------")
-                print(notificacion_enviada)
+                print("Enviando correo")
                 print("-------------------")
 
-                if not notificacion_enviada:
+                if enviado == False:
                     subject = f"Recordatorio: El reporte {nombre_sistema} está cercano a su fecha de solución"
                     body = f"Estimado {usuario_reporte[1]}, el reporte {nombre_sistema} tiene fecha de solución el {fecha_solucion}. Por favor tome las medidas necesarias."
                     enviar_correo(usuario_reporte[2], subject, body)
 
+                    cursor.execute('''
+                        UPDATE Reportes SET enviado = true WHERE id_reporte = %s
+                    ''', (id_reporte,))
+
                     cursor.execute(
-                        'INSERT INTO Notificaciones ( id_usuario, id_reporte, fecha_notificacion, mensaje, leido, enviado) VALUES (%s, %s, %s, %s, false, true)',
+                        'INSERT INTO Notificaciones ( id_usuario, id_reporte, fecha_notificacion, mensaje, leido) VALUES (%s, %s, %s, %s, false)',
                         (usuario_id, reporte[0], today_str, subject) 
                     )
                     conn.commit()
 
+            
     except Exception as e:
         print(f"Error al enviar recordatorios: {e}")
     finally:

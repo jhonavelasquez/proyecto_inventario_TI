@@ -3,6 +3,7 @@ from mysql.connector import Error
 
 def get_db_connection():
     try:
+        print("Intentando conectar...")
         conn = mysql.connector.connect(
             host='127.0.0.1',
             port='3306',
@@ -10,12 +11,14 @@ def get_db_connection():
             user='root',
             password=''
         )
-
         if conn.is_connected():
+            print("Conectado a la base de datos.")
             return conn
     except mysql.connector.Error as err:
         print(f"Error al conectar a MySQL: {err}")
-        return None
+    print("Conexión fallida.")
+    return None
+
 
 class Usuario:
     def __init__(self, id_usuario, nombre_user, email, psw, id_tipo_usuario):
@@ -75,10 +78,19 @@ class Usuario:
     @staticmethod
     def get_by_nombre_usuario(nombre_usuario):
         conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM Usuario WHERE Nombre_user = %s", (nombre_usuario,))
-        usuario = cursor.fetchone()
-        conn.close()
+        if conn is None:
+            print("No se pudo establecer conexión con la base de datos.")
+            return None
+
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM Usuario WHERE Nombre_user = %s", (nombre_usuario,))
+            usuario = cursor.fetchone()
+        except mysql.connector.Error as err:
+            print(f"Error al ejecutar la consulta: {err}")
+            return None
+        finally:
+            conn.close()  # Asegúrate de cerrar la conexión
 
         if usuario:
             return Usuario(
@@ -88,7 +100,6 @@ class Usuario:
                 usuario[3],
                 usuario[4]
             )
-        
         return None
 
     

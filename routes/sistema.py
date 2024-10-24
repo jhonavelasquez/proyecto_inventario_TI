@@ -54,7 +54,6 @@ def index():
     user=current_user
     num_notificaciones_totales = get_total_notifications(user.id)
     info_notificaciones = get_info_notifications(user.id)
-    print(info_notificaciones)
     
     return render_template('index.html', formCrear=formCrear, formEliminar=formEliminar, user_pc_data=user_pc_data, sistemas=sistemas, pcs=pcs,  user=current_user, num_notificaciones_totales=num_notificaciones_totales, info_notificaciones=info_notificaciones)
 
@@ -68,7 +67,6 @@ def crear_sistema():
         print("El formulario ha sido enviado.")
         if formCrear.validate_on_submit():
             nombre_sistema = formCrear.nombre_sistema.data
-            print(f"Nombre del sistema: {nombre_sistema}")
 
             cursor = conn.cursor()
             cursor.execute("SELECT Nombre_sistema FROM Sistema")
