@@ -23,28 +23,28 @@ def index():
     search_query = request.args.get('search', '')
 
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM Sistema")
+    cursor.execute("SELECT * FROM sistema")
     sistemas = cursor.fetchall()
     formEliminar.sistema.choices = [(sistema[0], sistema[1]) for sistema in sistemas]
 
-    cursor.execute("SELECT * FROM Pc")
+    cursor.execute("SELECT * FROM pc")
     pcs = cursor.fetchall()
 
     query = '''
-    SELECT Usuario.Id_usuario, Usuario.Nombre_user, Usuario.Email, Pc.Id_pc, 
-        Pc.Nombre_pc, Sistema.Id_sistema, Sistema.Nombre_sistema, Usuario_Sistema_PC.Activo
-    FROM Usuario
-    INNER JOIN Usuario_Sistema_PC ON Usuario_Sistema_PC.Id_usuario = Usuario.Id_usuario
-    INNER JOIN Pc ON Pc.Id_pc = Usuario_Sistema_PC.Id_pc
-    INNER JOIN Sistema ON Sistema.Id_sistema = Usuario_Sistema_PC.Id_sistema
+    SELECT usuario.id_usuario, usuario.nombre_user, usuario.email, pc.id_pc, 
+        pc.nombre_pc, sistema.id_sistema, sistema.nombre_sistema, usuario_sistema_pc.activo
+    FROM usuario
+    INNER JOIN usuario_sistema_pc ON usuario_sistema_pc.id_usuario = usuario.id_usuario
+    INNER JOIN pc ON pc.id_pc = usuario_sistema_pc.id_pc
+    INNER JOIN sistema ON sistema.id_sistema = usuario_sistema_pc.id_sistema
     WHERE 1=1
     '''
     params = []
     if sistema_id:
-        query += ' AND Sistema.Id_sistema = %s'
+        query += ' AND sistema.id_sistema = %s'
         params.append(sistema_id)
     if search_query:
-        query += ' AND (Usuario.Nombre_user LIKE %s OR Pc.Nombre_pc LIKE %s)'
+        query += ' AND (usuario.nombre_user LIKE %s OR pc.nombre_pc LIKE %s)'
         params.extend(['%' + search_query + '%', '%' + search_query + '%'])
 
     cursor.execute(query, params)
@@ -69,7 +69,7 @@ def crear_sistema():
             nombre_sistema = formCrear.nombre_sistema.data
 
             cursor = conn.cursor()
-            cursor.execute("SELECT Nombre_sistema FROM Sistema")
+            cursor.execute("SELECT nombre_sistema FROM sistema")
             sistemas = cursor.fetchall()
             for sistema in sistemas:
                 if nombre_sistema == sistema[0]:
@@ -77,11 +77,11 @@ def crear_sistema():
                     conn.close()
                     return redirect(url_for('sistema.index'))
 
-            cursor.execute('INSERT INTO Sistema (Nombre_sistema) VALUES (%s)', (nombre_sistema,))
+            cursor.execute('INSERT INTO sistema (nombre_sistema) VALUES (%s)', (nombre_sistema,))
             conn.commit()
 
             cursor.execute(
-                'SELECT Id_sistema FROM Sistema WHERE Nombre_sistema = %s', (nombre_sistema,)
+                'SELECT id_sistema FROM sistema WHERE nombre_sistema = %s', (nombre_sistema,)
             )
             result = cursor.fetchone()
             if result:
@@ -90,32 +90,35 @@ def crear_sistema():
                 flash("Error al obtener el ID del sistema.", "danger")
                 return redirect(url_for('sistema.index'))
 
-            cursor.execute("SELECT Id_usuario FROM Usuario")
+            cursor.execute("SELECT id_usuario FROM usuario")
             usuarios = cursor.fetchall()
             for usuario in usuarios:
-                cursor.execute('''
-                    SELECT Id_pc
-                    FROM Usuario_Sistema_PC
-                    WHERE Id_usuario = %s
-                    GROUP BY Id_pc
-                    ORDER BY COUNT(*) DESC
-                    LIMIT 1
+                cursor.execute('''SELECT id_pc
+                                  FROM usuario_sistema_pc
+                                  WHERE id_usuario = %s
+                                  GROUP BY id_pc
+                                  ORDER BY COUNT(*) DESC
+                                  LIMIT 1
                 ''', (usuario[0],))
                 id_pc_mas_utilizado = cursor.fetchone()
 
                 if id_pc_mas_utilizado:
                     cursor.execute(
-                        "INSERT INTO Usuario_Sistema_PC (Id_usuario, Id_sistema, Id_pc, Activo) VALUES (%s, %s, %s, FALSE)",
+                        "INSERT INTO usuario_sistema_pc (id_usuario, id_sistema, id_pc, activo) VALUES (%s, %s, %s, FALSE)",
                         (usuario[0], id_sistema, id_pc_mas_utilizado[0])
                     )
                 else:
                     flash(f"No se pudo encontrar un PC asignado para el usuario con ID {usuario[0]}.", "warning")
 
             user = current_user
-            fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-            fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
+
+            today = datetime.datetime.now()
+
+            today_str = today.strftime('%Y-%m-%d %H:%M:%S')
+
+            fecha_actual = datetime.datetime.now().strftime('%d-%m-%Y %H:%M')
             descripcion_hist = (f" agregó un nuevo sistema.  {nombre_sistema}.")
-            cursor.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s,%s,%s, 2)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
+            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s,%s,%s, 2)', (user.nombre_usuario, descripcion_hist, today_str))
 
             conn.commit()
             conn.close()
@@ -144,7 +147,7 @@ def eliminar_sistema():
     conn = get_db_connection()
 
     cursor= conn.cursor()
-    cursor.execute("SELECT Id_sistema, Nombre_sistema FROM Sistema")
+    cursor.execute("SELECT id_sistema, nombre_sistema FROM sistema")
     sistemas = cursor.fetchall()
     formEliminar.sistema.choices = [(sistema[0], sistema[1]) for sistema in sistemas]
 
@@ -152,20 +155,22 @@ def eliminar_sistema():
         sistema_id = formEliminar.sistema.data
 
         try:
-            cursor.execute('SELECT Nombre_sistema FROM Sistema WHERE Id_sistema = %s', (sistema_id,))
+            cursor.execute('SELECT nombre_sistema FROM sistema WHERE id_sistema = %s', (sistema_id,))
             sistema = cursor.fetchone()
             if sistema:
                 nombre_sistema = sistema[0]
 
 
-                cursor.execute('DELETE FROM Sistema WHERE Id_sistema = %s', (sistema_id,))
+                cursor.execute('DELETE FROM sistema WHERE id_sistema = %s', (sistema_id,))
 
                 user = current_user
-                fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-                fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
+                today = datetime.datetime.now()
+
+                today_str = today.strftime('%Y-%m-%d %H:%M:%S')
+                fecha_actual = datetime.datetime.now().strftime('%d-%m-%Y %H:%M')
                 descripcion_hist = (f" eliminó el sistema {nombre_sistema}.")
 
-                cursor.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 2)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
+                cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 2)', (user.nombre_usuario, descripcion_hist, today_str))
 
                 flash(f"{nombre_sistema} ha sido eliminado.", "warning")
                 conn.commit()
@@ -203,28 +208,28 @@ def editar_sistema(id_sistema, id_usuario, id_pc):
         abort(404)
     
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM Pc")
+    cursor.execute("SELECT * FROM pc")
     pcs = cursor.fetchall()
-    form.nuevo_Id_pc.choices = [(pc[0], pc[1]) for pc in pcs]
+    form.nuevo_id_pc.choices = [(pc[0], pc[1]) for pc in pcs]
     
     try:
         if request.method == 'POST' and form.validate_on_submit():
-            nuevo_id_pc = form.nuevo_Id_pc.data
+            nuevo_id_pc = form.nuevo_id_pc.data
             activo = form.activo.data
             user_pc = None
 
-            cursor.execute('''UPDATE Usuario_Sistema_PC 
-                            SET Activo = %s, Id_pc = %s
-                            WHERE Id_usuario = %s AND Id_sistema = %s AND Id_pc = %s''',
+            cursor.execute('''UPDATE usuario_sistema_pc 
+                            SET activo = %s, id_pc = %s
+                            WHERE id_usuario = %s AND id_sistema = %s AND id_pc = %s''',
                          (activo, nuevo_id_pc, id_usuario, id_sistema, id_pc))
 
             cursor.execute(
-                'SELECT Nombre_user FROM Usuario WHERE Id_usuario = %s', (id_usuario,))
+                'SELECT nombre_user FROM usuario WHERE id_usuario = %s', (id_usuario,))
             nombre_user = cursor.fetchone()
 
             
             cursor.execute(
-                'SELECT Nombre_sistema FROM Sistema WHERE Id_sistema = %s', (id_sistema,))
+                'SELECT nombre_sistema FROM sistema WHERE id_sistema = %s', (id_sistema,))
             nombre_sis = cursor.fetchone() 
 
             
@@ -232,31 +237,33 @@ def editar_sistema(id_sistema, id_usuario, id_pc):
             nombre_sistema = nombre_sis[0]
 
             user = current_user
-            fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-            fecha_actual = datetime.datetime.now().strftime('%d/%m/%Y %H:%M')
+            today = datetime.datetime.now()
+
+            today_str = today.strftime('%Y-%m-%d %H:%M:%S')
+            fecha_actual = datetime.datetime.now().strftime('%d-%m-%Y')
             descripcion_hist = (f"Actualizó {nombre_sistema} de {nombre_usuario}. ")
 
-            cursor.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s,%s,%s, 2)', 
-                         (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
+            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s,%s,%s, 2)', 
+                         (user.nombre_usuario, descripcion_hist, today_str))
 
             conn.commit()
 
             flash("¡El PC o el estado del sistema han sido actualizados!", "success")
             return redirect(url_for('sistema.index'))
 
-        cursor.execute('''SELECT Usuario.Id_usuario, Usuario.Nombre_user, Usuario_Sistema_PC.Id_pc, 
-                                  Pc.Nombre_pc, Sistema.Nombre_sistema, Usuario_Sistema_PC.Activo, 
-                                  Usuario_Sistema_PC.Id_sistema
-                                  FROM Usuario
-                                  INNER JOIN Usuario_Sistema_PC ON Usuario.Id_usuario = Usuario_Sistema_PC.Id_usuario
-                                  INNER JOIN Pc ON Pc.Id_pc = Usuario_Sistema_PC.Id_pc
-                                  INNER JOIN Sistema ON Usuario_Sistema_PC.Id_sistema = Sistema.Id_sistema
-                                  WHERE Usuario_Sistema_PC.Id_sistema = %s AND Usuario_Sistema_PC.Id_usuario = %s AND Usuario_Sistema_PC.Id_pc = %s''',
+        cursor.execute('''SELECT usuario.id_usuario, usuario.nombre_user, usuario_sistema_pc.id_pc, 
+                                  pc.nombre_pc, sistema.nombre_sistema, usuario_sistema_pc.activo, 
+                                  usuario_sistema_pc.id_sistema
+                                  FROM usuario
+                                  INNER JOIN usuario_sistema_pc ON usuario.id_usuario = usuario_sistema_pc.id_usuario
+                                  INNER JOIN pc ON pc.id_pc = usuario_sistema_pc.id_pc
+                                  INNER JOIN sistema ON usuario_sistema_pc.id_sistema = sistema.id_sistema
+                                  WHERE usuario_sistema_pc.id_sistema = %s AND usuario_sistema_pc.id_usuario = %s AND usuario_sistema_pc.id_pc = %s''',
                                  (id_sistema, id_usuario, id_pc))
         user_pc = cursor.fetchone()
 
         if user_pc:
-            form.nuevo_Id_pc.default = user_pc[2]
+            form.nuevo_id_pc.default = user_pc[2]
             form.activo.default = user_pc[5]
             form.process()
         else:

@@ -19,10 +19,10 @@ def usuarios():
     rol_query = request.args.get('rol', '')
 
     cursor= conn.cursor()
-    cursor.execute("SELECT Id_pc, Nombre_pc FROM Pc")
+    cursor.execute("SELECT id_pc, nombre_pc FROM pc")
     pcs = cursor.fetchall()
 
-    cursor.execute("SELECT id_tipo_usuario, nombre_tipo_usuario FROM Tipo_usuario")
+    cursor.execute("SELECT id_tipo_usuario, nombre_tipo_usuario FROM tipo_usuario")
     tipo_usuario = cursor.fetchall()
 
     form = CrearUsuarioForm()
@@ -30,18 +30,18 @@ def usuarios():
     form.computador.choices = [(pc[0], pc[1]) for pc in pcs]
     form.tipo_usuario.choices = [(tipo[0], tipo[1]) for tipo in tipo_usuario]
 
-    query = '''SELECT Usuario.Id_usuario, Usuario.Nombre_user, Usuario.Email, Usuario.id_tipo_usuario, Tipo_usuario.nombre_tipo_usuario
-                FROM Usuario
-                INNER JOIN Tipo_usuario ON Tipo_usuario.id_tipo_usuario = Usuario.id_tipo_usuario
+    query = '''SELECT usuario.id_usuario, usuario.nombre_user, usuario.email, usuario.id_tipo_usuario, tipo_usuario.nombre_tipo_usuario
+                FROM usuario
+                INNER JOIN tipo_usuario ON tipo_usuario.id_tipo_usuario = usuario.id_tipo_usuario
                 Where 1 = 1'''
     
     params = []
     if search_query:
-        query += ' AND (Usuario.Nombre_user LIKE %s  OR Usuario.Id_usuario LIKE %s)'
+        query += ' AND (usuario.nombre_user LIKE %s  OR usuario.id_usuario LIKE %s)'
         params.extend(['%' + search_query + '%', '%' + search_query + '%'])
     
     if rol_query:
-        query += ' AND Usuario.id_tipo_usuario LIKE %s'
+        query += ' AND usuario.id_tipo_usuario LIKE %s'
         params.extend(['%' + rol_query + '%'])
     
     cursor.execute(query, params)
@@ -63,10 +63,10 @@ def crear_usuario():
     conn = get_db_connection()
 
     cursor= conn.cursor()
-    cursor.execute("SELECT Id_pc, Nombre_pc FROM Pc")
+    cursor.execute("SELECT id_pc, nombre_pc FROM pc")
     pcs = cursor.fetchall()
     
-    cursor.execute("SELECT id_tipo_usuario, nombre_tipo_usuario FROM Tipo_usuario")
+    cursor.execute("SELECT id_tipo_usuario, nombre_tipo_usuario FROM tipo_usuario")
     tipo_usuario = cursor.fetchall()
 
     form = CrearUsuarioForm()
@@ -77,7 +77,7 @@ def crear_usuario():
     if form.validate_on_submit():
         nombre_user = form.nombre_user.data
 
-        cursor.execute("SELECT Nombre_user FROM Usuario")
+        cursor.execute("SELECT nombre_user FROM usuario")
         usuarios = cursor.fetchall()
 
         for usuario in usuarios:
@@ -94,29 +94,31 @@ def crear_usuario():
         hashed_password = generate_password_hash(psw)
         
         try:
-            cursor.execute('INSERT INTO Usuario (Nombre_user, Email, Psw, id_tipo_usuario) VALUES (%s, %s, %s, %s)', 
+            cursor.execute('INSERT INTO usuario (nombre_user, email, psw, id_tipo_usuario) VALUES (%s, %s, %s, %s)', 
                          (nombre_user, email_user, hashed_password, tipo_usuario))
 
             cursor.execute(
-                'SELECT Id_usuario FROM Usuario WHERE Nombre_user = %s AND Email = %s', 
+                'SELECT id_usuario FROM usuario WHERE nombre_user = %s AND email = %s', 
                 (nombre_user, email_user))
 
             id_usuario = cursor.fetchone()[0]
             
-            cursor.execute("SELECT Id_sistema FROM Sistema")
+            cursor.execute("SELECT id_sistema FROM sistema")
             sistemas =  cursor.fetchall()
 
             for sistema in sistemas:
                 cursor.execute(
-                    "INSERT INTO Usuario_Sistema_PC (Id_usuario, Id_sistema, Id_pc, Activo) VALUES (%s, %s, %s, FALSE)",
+                    "INSERT INTO usuario_sistema_pc (id_usuario, id_sistema, id_pc, Activo) VALUES (%s, %s, %s, FALSE)",
                     (id_usuario, sistema[0], id_pc)
                 )
 
             user = current_user
-            fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+            today = datetime.datetime.now()
+
+            today_str = today.strftime('%Y-%m-%d %H:%M:%S')
             descripcion_hist = f" agregó a un nuevo usuario {nombre_user}. "
-            cursor.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 1)', 
-                         (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
+            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 1)', 
+                         (user.nombre_usuario, descripcion_hist, today_str))
             
             conn.commit()
             flash("Usuario creado exitosamente.", "success")
@@ -142,13 +144,13 @@ def editar_usuario(id):
     conn = get_db_connection()
     
     cursor = conn.cursor()
-    cursor.execute("SELECT id_tipo_usuario, nombre_tipo_usuario FROM Tipo_usuario")
+    cursor.execute("SELECT id_tipo_usuario, nombre_tipo_usuario FROM tipo_usuario")
     tipo_usuario = cursor.fetchall()
     form = EditarUsuarioForm()
     
     form.tipo_usuario.choices = [(tipo[0], tipo[1]) for tipo in tipo_usuario]
 
-    cursor.execute('''SELECT * FROM Usuario WHERE Usuario.Id_usuario = %s''', (id,))
+    cursor.execute('''SELECT * FROM usuario WHERE usuario.id_usuario = %s''', (id,))
     user_edit = cursor.fetchone()
     if request.method == 'GET':
         form.nombre_user.data = user_edit[1]
@@ -182,17 +184,17 @@ def editar_usuario_form():
         if action == 'save':
             if psw:
                 cursor.execute(
-                    'UPDATE Usuario SET Nombre_user = %s, Email = %s, id_tipo_usuario = %s, Psw = %s WHERE Id_usuario = %s',
+                    'UPDATE usuario SET nombre_user = %s, email = %s, id_tipo_usuario = %s, psw = %s WHERE id_usuario = %s',
                     (nombre_usuario, email, tipo_usuario, hashed_password, id_usuario)
                 )
             else:
                 cursor.execute(
-                    'UPDATE Usuario SET Nombre_user = %s, Email = %s, id_tipo_usuario = %s WHERE Id_usuario = %s',
+                    'UPDATE usuario SET nombre_user = %s, email = %s, id_tipo_usuario = %s WHERE id_usuario = %s',
                     (nombre_usuario, email, tipo_usuario, id_usuario)
                 )
 
             if computador:
-                cursor.execute('SELECT Id_pc, Nombre_pc FROM Pc')
+                cursor.execute('SELECT Id_pc, nombre_pc FROM pc')
                 computadores = cursor.fetchall()
 
                 pc_existe = False
@@ -206,26 +208,28 @@ def editar_usuario_form():
                     return redirect(url_for('usuarios.editar_usuario'))
 
                 cursor.execute(
-                    'UPDATE Usuario_Sistema_PC SET Id_pc = %s WHERE Id_usuario = %s',
+                    'UPDATE usuario_sistema_pc SET Id_pc = %s WHERE id_usuario = %s',
                     (computador, id_usuario)
                 )
                 conn.commit()
 
             user = current_user
-            fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+            today = datetime.datetime.now()
+
+            today_str = today.strftime('%Y-%m-%d %H:%M:%S')
             descripcion_hist = f"actualizó la información de un usuario {nombre_usuario}."
-            cursor.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 1)', 
-                         (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
+            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 1)', 
+                         (user.nombre_usuario, descripcion_hist, today_str))
 
             flash("Información del usuario actualizada con éxito.", "success")
 
         elif action == 'delete':
-            cursor.execute('DELETE FROM Usuario WHERE Id_usuario = %s', (id_usuario,))
+            cursor.execute('DELETE FROM usuario WHERE id_usuario = %s', (id_usuario,))
             
             user = current_user
-            fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+            fecha_actual_seg = datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')
             descripcion_hist = f"eliminó a un usuario {nombre_usuario}."
-            cursor.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 1)', 
+            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 1)', 
                          (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
             
             flash("Usuario eliminado con éxito.", "warning")
@@ -245,67 +249,79 @@ def editar_usuario_form():
 @requiere_tipo_usuario(1, 2, 3)
 @login_required
 def cuenta():
-    user = current_user
-    num_notificaciones_totales = get_total_notifications(user.id)
-    info_notificaciones = get_info_notifications(user.id)
-    form = EditarMiCuenta()
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    if form.validate_on_submit():
-        nuevo_email = form.email_user.data
-        nueva_password = form.psw.data
-
-        cursor.execute(
-                'UPDATE Usuario SET email = %s WHERE id_usuario = %s',
-                (nuevo_email, user.id)
-            )
-        user.email = nuevo_email
-        if nueva_password:
-            hashed_password = generate_password_hash(nueva_password)
-            cursor.execute(
-                'UPDATE Usuario SET psw = %s WHERE id_usuario = %s',
-                (hashed_password, user.id)
-            )
-            user.password = nuevo_email
-        conn.commit()
-        flash('Tus datos se han actualizado correctamente', 'success')
-        return redirect(url_for('usuarios.cuenta'))
-
-    cursor.execute(
-        'SELECT nombre_tipo_usuario FROM Tipo_usuario WHERE id_tipo_usuario = %s', 
-        (user.id_tipo_usuario,)
-    )
-    tipo_usuario = cursor.fetchone()
-
-    tipo_usuario = tipo_usuario[0] if tipo_usuario else 'Desconocido'
     try:
-        cursor.execute(''' 
-                        SELECT Id_pc 
-                        FROM Usuario_Sistema_PC 
-                        WHERE Id_usuario = %s 
-                        GROUP BY Id_pc 
-                        ORDER BY COUNT(*) DESC 
-                        LIMIT 1 
-                    ''', (user.id,))
-        id_pc_mas_utilizado = cursor.fetchone()
+        user = current_user
 
-        if id_pc_mas_utilizado:
-            id_pc_mas_utilizado = id_pc_mas_utilizado[0]
-            
-            cursor.execute('SELECT Nombre_pc FROM Pc WHERE Id_pc = %s', (id_pc_mas_utilizado,))
-            nombre = cursor.fetchone()
+        num_notificaciones_totales = get_total_notifications(user.id)
+        info_notificaciones = get_info_notifications(user.id)
+        form = EditarMiCuenta()
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
-            if nombre:
-                nombre = nombre[0]
-            else:
-                nombre = 'Computador no encontrado'
+        if form.validate_on_submit():
+            nuevo_email = form.email_user.data.strip()  # Aplica trim aquí
+            nueva_password = form.psw.data.strip()  # Aplica trim aquí
+
+            if not nuevo_email:
+                flash('El correo electrónico no puede estar vacío.', 'danger')
+                return redirect(url_for('usuarios.cuenta'))
+
+            cursor.execute(
+                    'UPDATE usuario SET email = %s WHERE id_usuario = %s',
+                    (nuevo_email, user.id)
+                )
+            user.email = nuevo_email
+            if nueva_password:
+                hashed_password = generate_password_hash(nueva_password)
+                cursor.execute(
+                    'UPDATE usuario SET psw = %s WHERE id_usuario = %s',
+                    (hashed_password, user.id)
+                )
+                user.password = hashed_password
+
+            conn.commit()
+            flash('Tus datos se han actualizado correctamente', 'success')
+            return redirect(url_for('usuarios.cuenta'))
         else:
-            nombre = 'Computador no asignado'
-    except Exception as e:
-        nombre = 'Computador no asignado'
-        print(f"Error al obtener el nombre del PC: {e}")
+            print(f"error:{form.errors}") 
+        cursor.execute(
+            'SELECT nombre_tipo_usuario FROM tipo_usuario WHERE id_tipo_usuario = %s', 
+            (user.id_tipo_usuario,)
+        )
+        tipo_usuario = cursor.fetchone()
+        print(tipo_usuario)
+        tipo_usuario = tipo_usuario[0] if tipo_usuario else 'Desconocido'
+        try:
+            cursor.execute(''' 
+                            SELECT Id_pc 
+                            FROM usuario_sistema_pc 
+                            WHERE id_usuario = %s 
+                            GROUP BY Id_pc 
+                            ORDER BY COUNT(*) DESC 
+                            LIMIT 1 
+                        ''', (user.id,))
+            id_pc_mas_utilizado = cursor.fetchone()
 
-    conn.close()
-    data = {'user': user, 'tipo_usuario': tipo_usuario, 'nombre': nombre}
-    return render_template('miCuenta.html', user=user,data=data, form=form, num_notificaciones_totales=num_notificaciones_totales,info_notificaciones=info_notificaciones)
+            if id_pc_mas_utilizado:
+                id_pc_mas_utilizado = id_pc_mas_utilizado[0]
+                
+                cursor.execute('SELECT nombre_pc FROM pc WHERE id_pc = %s', (id_pc_mas_utilizado,))
+                nombre = cursor.fetchone()
+
+                if nombre:
+                    nombre = nombre[0]
+                else:
+                    nombre = 'Computador no encontrado'
+            else:
+                nombre = 'Computador no asignado'
+        except Exception as e:
+            nombre = 'Computador no asignado'
+            print(f"Error al obtener el nombre del Computador: {e}")
+
+        conn.close()
+        data = {'user': user, 'tipo_usuario': tipo_usuario, 'nombre': nombre}
+        return render_template('miCuenta.html', user=user,data=data, form=form, num_notificaciones_totales=num_notificaciones_totales,info_notificaciones=info_notificaciones)
+    
+    except Exception as e:
+        flash(f"Error al actualizar: {str(e)}", "danger")
+        return redirect(url_for('usuarios.cuenta'))  # Redirigir en caso de error

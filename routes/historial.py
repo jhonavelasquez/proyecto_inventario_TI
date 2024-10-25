@@ -19,7 +19,7 @@ def historial():
 
     try:
         categoria_id = request.args.get('categoria')
-        cursor.execute("SELECT * FROM Categoria_historial")
+        cursor.execute("SELECT * FROM categoria_historial")
         categorias = cursor.fetchall()
 
         historial_data = []
@@ -29,12 +29,12 @@ def historial():
             params = []
 
             query = '''
-            SELECT Historial.*, Categoria_historial.nombre_categoria 
-            FROM Historial 
-            INNER JOIN Categoria_historial ON Categoria_historial.id_categoria = Historial.id_categoria
+            SELECT historial.*, categoria_historial.nombre_categoria 
+            FROM historial 
+            INNER JOIN categoria_historial ON categoria_historial.id_categoria = historial.id_categoria
             WHERE 1=1
             '''
-            query += ' AND Historial.id_categoria = %s ORDER BY fecha DESC'
+            query += ' AND historial.id_categoria = %s ORDER BY fecha DESC'
             params.append(categoria_id)
             
             cursor.execute(query, params)
@@ -46,18 +46,17 @@ def historial():
             query += " LIMIT %s OFFSET %s"
             params += [per_page, offset]
 
-            
             cursor.execute(query, params)
             historial_data = cursor.fetchall()
 
-            cursor.execute('SELECT nombre_categoria FROM Categoria_historial WHERE id_categoria = %s', (categoria_id,))
+            cursor.execute('SELECT nombre_categoria FROM categoria_historial WHERE id_categoria = %s', (categoria_id,))
             categoria_nombre = cursor.fetchone()
 
         else:
-            cursor.execute("SELECT * FROM Historial ORDER BY fecha DESC LIMIT %s OFFSET %s", (per_page, (page - 1) * per_page))
+            cursor.execute("SELECT * FROM historial ORDER BY fecha DESC LIMIT %s OFFSET %s", (per_page, (page - 1) * per_page))
             historial_data = cursor.fetchall()
 
-            cursor.execute("SELECT COUNT(*) FROM Historial")
+            cursor.execute("SELECT COUNT(*) FROM historial")
             total_records = cursor.fetchone()[0]
 
         total_pages = (total_records // per_page) + (1 if total_records % per_page > 0 else 0)

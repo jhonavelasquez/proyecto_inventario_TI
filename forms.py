@@ -14,7 +14,7 @@ class CrearSistemaForm(FlaskForm):
     nombre_sistema = StringField('Nombre del Sistema', validators=[DataRequired()])
 
 class EditarSistemaForm(FlaskForm):
-    nuevo_Id_pc = SelectField('Seleccionar Computador', coerce=int, validators=[DataRequired()])
+    nuevo_id_pc = SelectField('Seleccionar Computador', coerce=int, validators=[DataRequired()])
     activo = BooleanField('Activar Sistema')
     submit = SubmitField('Guardar cambios')
 
@@ -79,6 +79,7 @@ class ReporteForm(FlaskForm):
     submit = SubmitField('Generar PDF')
 
 class EditarMiCuenta(FlaskForm):
-    email_user = StringField('Correo electrónico', validators=[DataRequired(), Email()])
-    psw = StringField('Contraseña')
+    email_user = StringField('Email', validators=[DataRequired(), Email()])
+    psw = PasswordField('Contraseña')
     psw_confirmar = PasswordField('Confirmar contraseña', validators=[EqualTo('psw', message='Las contraseñas deben coincidir')])
+    submit = SubmitField('Actualizar')

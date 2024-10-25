@@ -78,7 +78,7 @@ def enviar_recordatorios():
             fecha_15_dias_str = fecha_15_dias.strftime('%Y-%m-%d')
 
             cursor.execute(
-                'SELECT * FROM Reportes WHERE (fecha_solucion BETWEEN %s AND %s) AND (enviado = false)',
+                'SELECT * FROM reportes WHERE (fecha_solucion BETWEEN %s AND %s) AND (enviado = false)',
                 (today_str, fecha_15_dias_str)
             )
             reportes = cursor.fetchall()
@@ -90,7 +90,7 @@ def enviar_recordatorios():
                 fecha_solucion = reporte[6]
                 enviado = reporte[8]
 
-                cursor.execute('SELECT Id_usuario, Nombre_user, Email FROM Usuario WHERE Id_usuario = %s', (usuario_id,))
+                cursor.execute('SELECT id_usuario, nombre_user, email FROM usuario WHERE id_usuario = %s', (usuario_id,))
                 usuario_reporte = cursor.fetchone()
                 print("-------------------")
                 print("Enviando correo")
@@ -102,11 +102,11 @@ def enviar_recordatorios():
                     enviar_correo(usuario_reporte[2], subject, body)
 
                     cursor.execute('''
-                        UPDATE Reportes SET enviado = true WHERE id_reporte = %s
+                        UPDATE reportes SET enviado = true WHERE id_reporte = %s
                     ''', (id_reporte,))
 
                     cursor.execute(
-                        'INSERT INTO Notificaciones ( id_usuario, id_reporte, fecha_notificacion, mensaje, leido) VALUES (%s, %s, %s, %s, false)',
+                        'INSERT INTO notificaciones ( id_usuario, id_reporte, fecha_notificacion, mensaje, leido) VALUES (%s, %s, %s, %s, false)',
                         (usuario_id, reporte[0], today_str, subject) 
                     )
                     conn.commit()
@@ -123,7 +123,7 @@ def enviar_recordatorios():
 stop_thread = False
 
 def iniciar_revisiones_periodicas():
-    #schedule.every(1).minutes.do(enviar_recordatorios)
+    schedule.every(1).minutes.do(enviar_recordatorios)
     schedule.every().day.at("08:00").do(enviar_recordatorios)
 
     while not stop_thread:

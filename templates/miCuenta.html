@@ -89,6 +89,7 @@
             <div class="collapse" id="editarInfo">
                 <div class="card mb-4">
                     <div class="card-body">
+                        <div id="modalErrorContainer" class="alert alert-danger d-none" role="alert"></div>
                         <h3 class="h5 card-title mb-4">Actualiza tus datos</h3>
                         <form action="{{ url_for('usuarios.cuenta') }}" method="POST" id="updateForm">
                             {{ form.hidden_tag() }}
@@ -131,7 +132,7 @@
         </div>
     </div>
 </div>
-
+<script src="{{ url_for('static', filename='js/validacion-cuenta.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const togglePassword = document.getElementById('togglePassword');

@@ -1,4 +1,3 @@
-# routes/computadores.py
 from flask import Blueprint, render_template, request, redirect, url_for, flash, abort
 from flask_login import login_required, current_user
 from forms import CrearComputadorForm, EditarComputadorForm
@@ -16,10 +15,10 @@ def computadores():
     form = CrearComputadorForm()
     search_query = request.args.get('search', '')
 
-    query = "SELECT * FROM Pc Where 1 = 1"
+    query = "SELECT * FROM pc WHERE 1 = 1"
     params = []
     if search_query:
-        query += ' AND Pc.Nombre_pc LIKE %s'
+        query += ' AND pc.nombre_pc LIKE %s'
         params.extend(['%' + search_query + '%'])
 
     cursor.execute(query, params)
@@ -44,7 +43,7 @@ def crear_computador():
     if form.validate_on_submit():
         nombre_computador = form.nombre_computador.data
 
-        cursor.execute("SELECT Nombre_pc FROM Pc")
+        cursor.execute("SELECT nombre_pc FROM pc")
         pcs = cursor.fetchall()
 
         for pc in pcs:
@@ -60,15 +59,17 @@ def crear_computador():
         fuente = form.fuente.data
 
         try:
-            cursor.execute('''
-                INSERT INTO Pc (Nombre_pc, procesador, Placa, Almacenamiento, Ram, Fuente)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            ''', (nombre_computador, procesador, nombre_placa, almacenamiento, ram, fuente))
+            cursor.execute('''INSERT INTO pc (nombre_pc, procesador, placa, almacenamiento, ram, fuente)
+                              VALUES (%s, %s, %s, %s, %s, %s)''',
+                           (nombre_computador, procesador, nombre_placa, almacenamiento, ram, fuente))
 
             user = current_user
-            fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+            today = datetime.datetime.now()
+
+            today_str = today.strftime('%Y-%m-%d %H:%M:%S')
             descripcion_hist = f"agregó un nuevo computador. {nombre_computador}."
-            cursor.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 3)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
+            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 3)', 
+                           (user.nombre_usuario, descripcion_hist, today_str))
             
             conn.commit()
             conn.close()
@@ -92,11 +93,7 @@ def editar_computador(id_pc):
     conn = get_db_connection()
     cursor = conn.cursor()
     form = EditarComputadorForm()
-    cursor.execute('''
-        SELECT *
-        FROM Pc
-        WHERE Pc.Id_pc = %s
-    ''', (id_pc,))
+    cursor.execute('''SELECT * FROM pc WHERE pc.id_pc = %s''', (id_pc,))
     pc = cursor.fetchone()
 
     if pc is None:
@@ -141,26 +138,32 @@ def editar_computador_form():
 
         if action == 'save':
             cursor.execute(
-                'UPDATE Pc SET Nombre_pc = %s, Procesador = %s, Placa = %s, Almacenamiento = %s, Ram = %s, Fuente = %s WHERE Id_pc = %s',
+                'UPDATE pc SET nombre_pc = %s, procesador = %s, placa = %s, almacenamiento = %s, ram = %s, fuente = %s WHERE id_pc = %s',
                 (nombre_pc, procesador, placa_pc, almacenamiento, ram, nombre_fuente, id_pc)
             )
 
             user = current_user
-            fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+            today = datetime.datetime.now()
+
+            today_str = today.strftime('%Y-%m-%d %H:%M:%S')
             descripcion_hist = f"actualizó la información de un computador. {nombre_pc}."
-            cursor.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 3)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
+            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 3)', 
+                           (user.nombre_usuario, descripcion_hist, today_str))
 
             flash("Información del computador actualizada con éxito.", "success")
         elif action == 'delete':
             cursor.execute(
-                'DELETE FROM Pc WHERE Id_pc = %s',
+                'DELETE FROM pc WHERE id_pc = %s',
                 (id_pc,)
             )
 
             user = current_user
-            fecha_actual_seg = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+            today = datetime.datetime.now()
+
+            today_str = today.strftime('%Y-%m-%d %H:%M:%S')
             descripcion_hist = f"eliminó un computador. {nombre_pc}."
-            cursor.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 3)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
+            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 3)', 
+                           (user.nombre_usuario, descripcion_hist, today_str))
             flash("Computador eliminado con éxito.", "danger")
 
         conn.commit()

@@ -28,39 +28,39 @@ def reportes():
         total_records_params = []
 
         base_query = '''
-            SELECT Reportes.id_reporte, Reportes.num_solicitud, Reportes.asunto, Reportes.fecha, Reportes.fecha_solucion, 
-                   Reportes.descripcion, Usuario.Nombre_user 
-            FROM Reportes 
-            INNER JOIN Usuario ON Usuario.id_usuario = Reportes.usuario_id
+            SELECT reportes.id_reporte, reportes.num_solicitud, reportes.asunto, reportes.fecha, reportes.fecha_solucion, 
+                   reportes.descripcion, usuario.nombre_user 
+            FROM reportes 
+            INNER JOIN usuario ON usuario.id_usuario = reportes.usuario_id
             WHERE 1=1
         '''
         total_records_query = '''
             SELECT COUNT(*) 
-            FROM Reportes 
-            INNER JOIN Usuario ON Usuario.id_usuario = Reportes.usuario_id
+            FROM reportes 
+            INNER JOIN usuario ON usuario.id_usuario = reportes.usuario_id
             WHERE 1=1
         '''
 
         if search:
             base_query += '''
-                AND (asunto LIKE %s OR Usuario.Nombre_user LIKE %s OR Reportes.num_solicitud LIKE %s)
+                AND (asunto LIKE %s OR usuario.nombre_user LIKE %s OR reportes.num_solicitud LIKE %s)
             '''
             total_records_query += '''
-                AND (asunto LIKE %s OR Usuario.Nombre_user LIKE %s OR Reportes.num_solicitud LIKE %s)
+                AND (asunto LIKE %s OR usuario.nombre_user LIKE %s OR reportes.num_solicitud LIKE %s)
             '''
             search_term = '%' + search + '%'
             query_params.extend([search_term, search_term, search_term])
             total_records_params.extend([search_term, search_term, search_term])
 
         if date_from:
-            base_query += " AND Reportes.fecha >= %s"
-            total_records_query += " AND Reportes.fecha >= %s"
+            base_query += " AND reportes.fecha >= %s"
+            total_records_query += " AND reportes.fecha >= %s"
             query_params.append(date_from)
             total_records_params.append(date_from)
 
         if date_to:
-            base_query += " AND Reportes.fecha <= %s"
-            total_records_query += " AND Reportes.fecha <= %s"
+            base_query += " AND reportes.fecha <= %s"
+            total_records_query += " AND reportes.fecha <= %s"
             query_params.append(date_to)
             total_records_params.append(date_to)
 
@@ -108,11 +108,11 @@ def ver_reporte(id_reporte):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(''' 
-                           SELECT Reportes.id_reporte, Reportes.num_solicitud, Reportes.asunto, Reportes.fecha, Reportes.fecha_solucion, Reportes.descripcion, Reportes.archivo, Usuario.Nombre_user 
-                           FROM Reportes 
-                           INNER JOIN Usuario ON Usuario.id_usuario = Reportes.usuario_id
+                           SELECT reportes.id_reporte, reportes.num_solicitud, reportes.asunto, reportes.fecha, reportes.fecha_solucion, reportes.descripcion, reportes.archivo, usuario.nombre_user 
+                           FROM reportes 
+                           INNER JOIN usuario ON usuario.id_usuario = reportes.usuario_id
                            WHERE id_reporte = %s 
-                           ORDER BY Reportes.fecha DESC 
+                           ORDER BY reportes.fecha DESC 
                            ''', (id_reporte,))
     reporte = cursor.fetchone()
     print(reporte)
@@ -156,7 +156,7 @@ def reporte_2():
         fecha = datetime.datetime.now().strftime('%d-%m-%Y')
 
         cursor.execute(
-            'SELECT COUNT(*) FROM Reportes WHERE num_solicitud = %s',
+            'SELECT COUNT(*) FROM reportes WHERE num_solicitud = %s',
             (num_solicitud,)
         )
         existing_report = cursor.fetchone()[0]
@@ -219,13 +219,15 @@ def reporte_2():
                 f.write(output_pdf.read())
 
             cursor.execute(
-                'INSERT INTO Reportes (usuario_id, num_solicitud, asunto, descripcion, fecha, fecha_solucion, archivo) VALUES (%s, %s, %s, %s, %s, %s, %s)',
+                'INSERT INTO reportes (usuario_id, num_solicitud, asunto, descripcion, fecha, fecha_solucion, archivo) VALUES (%s, %s, %s, %s, %s, %s, %s)',
                 (user.id, num_solicitud, nombre_sistema, descripcion, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), fecha_solucion, filename)
             )
 
-            fecha_actual_seg = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            today = datetime.datetime.now()
+
+            today_str = today.strftime('%Y-%m-%d %H:%M:%S')
             descripcion_hist = f" ha realizado un nuevo reporte. ASUNTO: {nombre_sistema}."
-            cursor.execute('INSERT INTO Historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 4)', (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
+            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 4)', (user.nombre_usuario, descripcion_hist, today_str))
 
             conn.commit()
             conn.close()
@@ -250,4 +252,3 @@ def uploaded_file(filename):
         abort(404)
 
     return send_from_directory(directory, filename)
-
