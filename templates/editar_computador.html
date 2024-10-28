@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style_editar_computador.css')}}">
 {% endblock %}
 
-{% block title %}Editar Computador {{ pc['Nombre_pc'] }}{% endblock %}
+{% block title %}Editar Computador {{ pc['1'] }}{% endblock %}
 
 {% block content %}
 <h1 class="block-effect" style="--td:0.3s">
@@ -27,7 +27,7 @@
             </a>
         </div>
 
-        <h2 class="card-title mb-4">Editar Computador: {{ pc['Nombre_pc'] }} (#{{ pc['Id_pc'] }})</h2>
+        <h2 class="card-title mb-4">Editar Computador: {{ pc['1'] }} (#{{ pc['0'] }})</h2>
 
         <form id="editForm" method="post" action="{{ url_for('computadores.editar_computador_form') }}">
             {{ form.hidden_tag() }}

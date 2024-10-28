@@ -7,11 +7,6 @@
 -- Versión del servidor: 10.4.27-MariaDB
 -- Versión de PHP: 7.4.33
 
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
-
-
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
@@ -74,36 +69,6 @@ CREATE TABLE `historial` (
 
 INSERT INTO `historial` (`Id_historial`, `usuario_historial`, `descripcion`, `fecha`, `id_categoria`) VALUES
 (1, 'ADMIN', ' agregó un nuevo sistema.  SISTEMA PRUEBA 3.', '23/10/2024 10:01:13', 2),
-(2, 'ADMIN', ' eliminó el sistema SISTEMA PRUEBA 3.', '23/10/2024 10:21:20', 2),
-(3, 'ADMIN', ' eliminó el sistema SISTEMA PRUEBA 2.', '23/10/2024 10:21:29', 2),
-(4, 'ADMIN', ' eliminó el sistema SISTEMA PRUEBA.', '23/10/2024 10:21:35', 2),
-(5, 'ADMIN', ' agregó un nuevo sistema.  SISTEMA PRUEBA.', '23/10/2024 10:21:45', 2),
-(6, 'ADMIN', ' agregó un nuevo sistema.  SISTEMA PRUEBA 2.', '23/10/2024 10:21:47', 2),
-(7, 'ADMIN', 'Actualizó SISTEMA DE GESTIÓN DOCUMENTAL (SGD) de ADMIN. ', '23/10/2024 10:40:35', 2),
-(8, 'ADMIN', 'Actualizó SISTEMA DE GESTIÓN DOCUMENTAL (SGD) de ADMIN. ', '23/10/2024 10:40:41', 2),
-(9, 'ADMIN', 'Actualizó SISTEMA PRUEBA 2 de ADMIN. ', '23/10/2024 10:40:57', 2),
-(10, 'ADMIN', ' agregó a un nuevo usuario JONVELASQUEZ. ', '23/10/2024 10:56:36', 1),
-(11, 'ADMIN', ' agregó a un nuevo usuario PEPE. ', '23/10/2024 10:57:01', 1),
-(12, 'ADMIN', 'actualizó la información de un usuario JONVELASQUEZ.', '23/10/2024 11:12:32', 1),
-(13, 'ADMIN', 'actualizó la información de un usuario JONVELASQUEZ.', '23/10/2024 11:12:38', 1),
-(14, 'ADMIN', 'actualizó la información de un usuario JONVELASQUEZ.', '23/10/2024 11:12:46', 1),
-(15, 'ADMIN', 'actualizó la información de un usuario JONVELASQUEZ.', '23/10/2024 11:13:16', 1),
-(16, 'ADMIN', 'actualizó la información de un usuario JONVELASQUEZ.', '23/10/2024 11:13:30', 1),
-(17, 'ADMIN', 'actualizó la información de un usuario JONVELASQUEZ.', '23/10/2024 11:13:44', 1),
-(18, 'ADMIN', 'eliminó a un usuario PEPE.', '23/10/2024 11:14:29', 1),
-(19, 'ADMIN', 'actualizó la información de un usuario JONVELASQUEZ.', '23/10/2024 11:14:38', 1),
-(20, 'ADMIN', 'agregó un nuevo computador. SA25101052.', '23/10/2024 11:22:07', 3),
-(21, 'ADMIN', 'actualizó la información de un computador. SA2000000.', '23/10/2024 11:35:31', 3),
-(22, 'ADMIN', 'actualizó la información de un computador. SA2032050.', '23/10/2024 11:35:56', 3),
-(23, 'ADMIN', 'eliminó un computador. SA25101052.', '23/10/2024 11:36:15', 3),
-(24, 'ADMIN', 'eliminó un computador. SA0999999.', '23/10/2024 11:36:36', 3),
-(25, 'ADMIN', 'actualizó la información de un usuario JONVELASQUEZ.', '23/10/2024 11:36:47', 1),
-(26, 'ADMIN', ' ha realizado un nuevo reporte. ASUNTO: Sistema de Vecino Digital.', '23/10/2024 12:16:22', 4),
-(27, 'ADMIN', ' ha realizado un nuevo reporte. ASUNTO: Honorarios.', '23/10/2024 12:27:27', 4),
-(28, 'ADMIN', 'eliminó a un usuario JONVELASQUEZ.', '23/10/2024 12:57:12', 1),
-(29, 'ADMIN', ' agregó a un nuevo usuario JONVELASQUEZ. ', '23/10/2024 12:57:24', 1),
-(30, 'ADMIN', 'actualizó la información de un usuario JONVELASQUEZ.', '23/10/2024 12:59:12', 1),
-(31, 'ADMIN', 'actualizó la información de un usuario JONVELASQUEZ.', '23/10/2024 13:14:03', 1);
 
 -- --------------------------------------------------------
 
@@ -348,59 +313,6 @@ CREATE TABLE `usuario_sistema_pc` (
 
 INSERT INTO `usuario_sistema_pc` (`Id_usuario`, `Id_sistema`, `Id_pc`, `Activo`) VALUES
 (1, 1, 1, 1),
-(1, 52, 1, 0),
-(1, 53, 1, 1),
-(7, 1, 2, 0),
-(7, 2, 2, 0),
-(7, 3, 2, 0),
-(7, 4, 2, 0),
-(7, 5, 2, 0),
-(7, 6, 2, 0),
-(7, 7, 2, 0),
-(7, 8, 2, 0),
-(7, 9, 2, 0),
-(7, 10, 2, 0),
-(7, 11, 2, 0),
-(7, 12, 2, 0),
-(7, 13, 2, 0),
-(7, 14, 2, 0),
-(7, 15, 2, 0),
-(7, 16, 2, 0),
-(7, 17, 2, 0),
-(7, 18, 2, 0),
-(7, 19, 2, 0),
-(7, 20, 2, 0),
-(7, 21, 2, 0),
-(7, 22, 2, 0),
-(7, 23, 2, 0),
-(7, 24, 2, 0),
-(7, 25, 2, 0),
-(7, 26, 2, 0),
-(7, 27, 2, 0),
-(7, 28, 2, 0),
-(7, 29, 2, 0),
-(7, 30, 2, 0),
-(7, 31, 2, 0),
-(7, 32, 2, 0),
-(7, 33, 2, 0),
-(7, 34, 2, 0),
-(7, 35, 2, 0),
-(7, 36, 2, 0),
-(7, 37, 2, 0),
-(7, 38, 2, 0),
-(7, 39, 2, 0),
-(7, 40, 2, 0),
-(7, 41, 2, 0),
-(7, 42, 2, 0),
-(7, 43, 2, 0),
-(7, 44, 2, 0),
-(7, 45, 2, 0),
-(7, 46, 2, 0),
-(7, 47, 2, 0),
-(7, 48, 2, 0),
-(7, 52, 2, 0),
-(7, 53, 2, 0);
-
 --
 -- Índices para tablas volcadas
 --
@@ -555,7 +467,3 @@ ALTER TABLE `usuario_sistema_pc`
   ADD CONSTRAINT `usuario_sistema_pc_ibfk_2` FOREIGN KEY (`Id_sistema`) REFERENCES `sistema` (`Id_sistema`) ON DELETE CASCADE,
   ADD CONSTRAINT `usuario_sistema_pc_ibfk_3` FOREIGN KEY (`Id_pc`) REFERENCES `pc` (`Id_pc`) ON DELETE CASCADE;
 COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

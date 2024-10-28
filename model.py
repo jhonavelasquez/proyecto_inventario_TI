@@ -1,20 +1,14 @@
-import mysql.connector
-from mysql.connector import Error
+
+import sqlite3
+
 
 def get_db_connection():
     try:
         print("Intentando conectar...")
-        conn = mysql.connector.connect(
-            host='sql10.freemysqlhosting.net',
-            port='3306',
-            database='sql10740516',
-            user='sql10740516',
-            password='uNzjGFPxQb'
-        )
-        if conn.is_connected():
-            print("Conectado a la base de datos.")
-            return conn
-    except mysql.connector.Error as err:
+        conn = sqlite3.connect('database.db')
+        print("conectado")
+        return conn
+    except sqlite3.Error as err:
         print(f"Error al conectar a MySQL: {err}")
     print("Conexión fallida.")
     return None
@@ -45,7 +39,7 @@ class Usuario:
         conn = get_db_connection()
 
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM usuario WHERE Id_usuario = %s', (id_usuario,))
+        cursor.execute('SELECT * FROM usuario WHERE Id_usuario = ?', (id_usuario,))
         user = cursor.fetchone()
         conn.close()
         if user:
@@ -62,7 +56,7 @@ class Usuario:
     def get_by_email(email):
         conn = get_db_connection()
         user_data = conn.cursor(dictionary=True)
-        user_data.execute('SELECT * FROM usuario WHERE email = %s', (email,))
+        user_data.execute('SELECT * FROM usuario WHERE email = ?', (email,))
         user = user_data.fetchone()
         conn.close()
         if user:
@@ -84,9 +78,9 @@ class Usuario:
 
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM usuario WHERE nombre_user = %s", (nombre_usuario,))
+            cursor.execute("SELECT * FROM usuario WHERE nombre_user = ?", (nombre_usuario,))
             usuario = cursor.fetchone()
-        except mysql.connector.Error as err:
+        except sqlite3.Error as err:
             print(f"Error al ejecutar la consulta: {err}")
             return None
         finally:
@@ -111,7 +105,7 @@ class Usuario:
         SELECT u.*, t.nombre_tipo_usuario 
         FROM usuario u 
         JOIN tipo_usuario t ON u.id_tipo_usuario = t.id_tipo_usuario 
-        WHERE u.id_usuario = %s
+        WHERE u.id_usuario = ?
         '''
         cursor.execute(query, (id_usuario,))
         user_data = cursor.fetchone()

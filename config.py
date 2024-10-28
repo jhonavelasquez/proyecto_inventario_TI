@@ -9,9 +9,9 @@ class Config:
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
-    MAIL_USERNAME = 'jonathan.vr484@gmail.com'
-    MAIL_PASSWORD = 'ycfs vvod evqw emwy'
-    MAIL_DEFAULT_SENDER = 'jonathan.vr484@gmail.com'
+    MAIL_USERNAME = 'informaticaimsa2@gmail.com'
+    MAIL_PASSWORD = 'ebrw jlxt rdlf jbuz'
+    MAIL_DEFAULT_SENDER = 'informaticaimsa2@gmail.com'
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'

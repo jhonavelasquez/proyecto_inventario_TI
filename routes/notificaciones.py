@@ -17,21 +17,21 @@ def obtener_notificaciones():
     num_notificaciones_enviadas = 0
     num_notificaciones_totales = 0
 
-    cursor.execute('SELECT * FROM notificaciones WHERE id_usuario = %s AND leido = false', (user_id,))
+    cursor.execute('SELECT * FROM notificaciones WHERE id_usuario = ? AND leido = false', (user_id,))
     notificaciones = cursor.fetchall()
 
     if notificaciones:
         cursor.execute(
-            'SELECT COUNT(*) FROM notificaciones WHERE id_usuario = %s AND leido = false',
+            'SELECT COUNT(*) FROM notificaciones WHERE id_usuario = ? AND leido = false',
             (user_id,)
         )
         num_notificaciones_enviadas = cursor.fetchone()[0]
 
-        cursor.execute('UPDATE notificaciones SET leido = true WHERE id_usuario = %s AND leido = false', (user_id,))
+        cursor.execute('UPDATE notificaciones SET leido = true WHERE id_usuario = ? AND leido = false', (user_id,))
         conn.commit()  
 
     cursor.execute(
-        'SELECT COUNT(*) FROM notificaciones WHERE id_usuario = %s',
+        'SELECT COUNT(*) FROM notificaciones WHERE id_usuario = ?',
         (user_id,)
     )
     num_notificaciones_totales = cursor.fetchone()[0]
@@ -42,7 +42,7 @@ def get_total_notifications(user_id):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
-        'SELECT COUNT(*) FROM notificaciones WHERE id_usuario = %s AND leido = false',
+        'SELECT COUNT(*) FROM notificaciones WHERE id_usuario = ? AND leido = false',
         (user_id,)
     )
     total_notifications = cursor.fetchone()[0]
@@ -54,7 +54,7 @@ def get_info_notifications(user_id):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
-        'SELECT * FROM notificaciones WHERE id_usuario = %s ORDER BY id_notificacion DESC LIMIT 8',
+        'SELECT * FROM notificaciones WHERE id_usuario = ? ORDER BY id_notificacion DESC LIMIT 8',
         (user_id,)
     )
     info_notifiaciones = cursor.fetchall()
@@ -69,11 +69,11 @@ def marcar_notificaciones_leidas():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute('SELECT * FROM notificaciones WHERE id_usuario = %s AND leido = false', (user_id,))
+    cursor.execute('SELECT * FROM notificaciones WHERE id_usuario = ? AND leido = false', (user_id,))
     notificaciones = cursor.fetchall()
 
     if notificaciones:
-        cursor.execute('UPDATE notificaciones SET leido = true WHERE id_usuario = %s AND leido = false', (user_id,))
+        cursor.execute('UPDATE notificaciones SET leido = true WHERE id_usuario = ? AND leido = false', (user_id,))
         print("NOTIFICACIONES ACTUALIZADAS")
     else:
         print("TODAS LAS NOTIFICACIONES ESTÁN LEIDAS.")
@@ -91,7 +91,7 @@ def marcar_notificacion_leida():
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        cursor.execute('UPDATE notificaciones SET leido = true WHERE id_usuario = %s AND id_reporte = %s', (user_id, id_reporte))
+        cursor.execute('UPDATE notificaciones SET leido = true WHERE id_usuario = ? AND id_reporte = ?', (user_id, id_reporte))
 
         conn.commit()
         conn.close()

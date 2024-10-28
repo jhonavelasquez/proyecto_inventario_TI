@@ -18,7 +18,7 @@ def computadores():
     query = "SELECT * FROM pc WHERE 1 = 1"
     params = []
     if search_query:
-        query += ' AND pc.nombre_pc LIKE %s'
+        query += ' AND pc.nombre_pc LIKE ?'
         params.extend(['%' + search_query + '%'])
 
     cursor.execute(query, params)
@@ -60,7 +60,7 @@ def crear_computador():
 
         try:
             cursor.execute('''INSERT INTO pc (nombre_pc, procesador, placa, almacenamiento, ram, fuente)
-                              VALUES (%s, %s, %s, %s, %s, %s)''',
+                              VALUES (?, ?, ?, ?, ?, ?)''',
                            (nombre_computador, procesador, nombre_placa, almacenamiento, ram, fuente))
 
             user = current_user
@@ -68,7 +68,7 @@ def crear_computador():
 
             today_str = today.strftime('%Y-%m-%d %H:%M:%S')
             descripcion_hist = f"agregó un nuevo computador. {nombre_computador}."
-            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 3)', 
+            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 3)', 
                            (user.nombre_usuario, descripcion_hist, today_str))
             
             conn.commit()
@@ -93,7 +93,7 @@ def editar_computador(id_pc):
     conn = get_db_connection()
     cursor = conn.cursor()
     form = EditarComputadorForm()
-    cursor.execute('''SELECT * FROM pc WHERE pc.id_pc = %s''', (id_pc,))
+    cursor.execute('''SELECT * FROM pc WHERE pc.id_pc = ?''', (id_pc,))
     pc = cursor.fetchone()
 
     if pc is None:
@@ -138,7 +138,7 @@ def editar_computador_form():
 
         if action == 'save':
             cursor.execute(
-                'UPDATE pc SET nombre_pc = %s, procesador = %s, placa = %s, almacenamiento = %s, ram = %s, fuente = %s WHERE id_pc = %s',
+                'UPDATE pc SET nombre_pc = ?, procesador = ?, placa = ?, almacenamiento = ?, ram = ?, fuente = ? WHERE id_pc = ?',
                 (nombre_pc, procesador, placa_pc, almacenamiento, ram, nombre_fuente, id_pc)
             )
 
@@ -147,13 +147,13 @@ def editar_computador_form():
 
             today_str = today.strftime('%Y-%m-%d %H:%M:%S')
             descripcion_hist = f"actualizó la información de un computador. {nombre_pc}."
-            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 3)', 
+            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 3)', 
                            (user.nombre_usuario, descripcion_hist, today_str))
 
             flash("Información del computador actualizada con éxito.", "success")
         elif action == 'delete':
             cursor.execute(
-                'DELETE FROM pc WHERE id_pc = %s',
+                'DELETE FROM pc WHERE id_pc = ?',
                 (id_pc,)
             )
 
@@ -162,7 +162,7 @@ def editar_computador_form():
 
             today_str = today.strftime('%Y-%m-%d %H:%M:%S')
             descripcion_hist = f"eliminó un computador. {nombre_pc}."
-            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 3)', 
+            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 3)', 
                            (user.nombre_usuario, descripcion_hist, today_str))
             flash("Computador eliminado con éxito.", "danger")
 

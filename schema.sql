@@ -1,45 +1,45 @@
-DROP TABLE IF EXISTS Usuario;
-DROP TABLE IF EXISTS Pc;
-DROP TABLE IF EXISTS Sistema;
-DROP TABLE IF EXISTS Usuario_Sistema_PC;
-DROP TABLE IF EXISTS Reportes;
-DROP TABLE IF EXISTS Historial;
-DROP TABLE IF EXISTS Categoria_historial;
-DROP TABLE IF EXISTS Notificaciones;
-DROP TABLE IF EXISTS Tipo_usuario;
+DROP TABLE IF EXISTS usuario;
+DROP TABLE IF EXISTS pc;
+DROP TABLE IF EXISTS sistema;
+DROP TABLE IF EXISTS usuario_sistema_pc;
+DROP TABLE IF EXISTS reportes;
+DROP TABLE IF EXISTS historial;
+DROP TABLE IF EXISTS categoria_historial;
+DROP TABLE IF EXISTS notificaciones;
+DROP TABLE IF EXISTS tipo_usuario;
 
-CREATE TABLE Usuario (
-    Id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
-    Nombre_user VARCHAR(100),
-    Email VARCHAR(100),
-    Psw VARCHAR(100),
+CREATE TABLE usuario (
+    id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre_user VARCHAR(100),
+    email VARCHAR(100),
+    psw VARCHAR(100),
     id_tipo_usuario INTEGER,
-    FOREIGN KEY (id_tipo_usuario) REFERENCES Tipo_usuario(id_tipo_usuario)
+    FOREIGN KEY (id_tipo_usuario) REFERENCES tipo_usuario(id_tipo_usuario)
 );
 
 
-CREATE TABLE Tipo_usuario (
+CREATE TABLE tipo_usuario (
     id_tipo_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
     nombre_tipo_usuario VARCHAR(100)
 );
 
 
-CREATE TABLE Pc (
-    Id_pc INTEGER PRIMARY KEY AUTOINCREMENT,
-    Nombre_pc VARCHAR(30),
-    Procesador VARCHAR(50),
-    Placa VARCHAR(50),
-    Almacenamiento INTEGER,  -- en GB
-    Ram INTEGER,    -- en GB
-    Fuente VARCHAR(100)
+CREATE TABLE pc (
+    id_pc INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre_pc VARCHAR(30),
+    procesador VARCHAR(50),
+    placa VARCHAR(50),
+    almacenamiento INTEGER,  -- en GB
+    ram INTEGER,    -- en GB
+    fuente VARCHAR(100)
 );
 
-CREATE TABLE Sistema (
-    Id_sistema INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE sistema (
+    id_sistema INTEGER PRIMARY KEY AUTOINCREMENT,
     Nombre_sistema VARCHAR(100)
 );
 
-CREATE TABLE Reportes (
+CREATE TABLE reportes (
     id_reporte INTEGER PRIMARY KEY AUTOINCREMENT,
     usuario_id INTEGER,
     num_solicitud VARCHAR(100) NOT NULL,
@@ -48,42 +48,42 @@ CREATE TABLE Reportes (
     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     fecha_solucion TIMESTAMP,
     archivo VARCHAR,
-    FOREIGN KEY (usuario_id) REFERENCES Usuario(Id_usuario)
+    enviado BOOLEAN,
+    FOREIGN KEY (usuario_id) REFERENCES usuario(id_usuario)
 );
 
-CREATE TABLE Usuario_Sistema_PC (
-    Id_usuario INTEGER,
-    Id_sistema INTEGER,
-    Id_pc INTEGER,
-    Activo BOOLEAN,
-    PRIMARY KEY (Id_usuario, Id_sistema, Id_pc),
-    FOREIGN KEY (Id_usuario) REFERENCES Usuario(Id_usuario),
-    FOREIGN KEY (Id_sistema) REFERENCES Sistema(Id_sistema),
-    FOREIGN KEY (Id_pc) REFERENCES Pc(Id_pc)
+CREATE TABLE usuario_sistema_pc (
+    id_usuario INTEGER,
+    id_sistema INTEGER,
+    id_pc INTEGER,
+    activo BOOLEAN,
+    PRIMARY KEY (id_usuario, id_sistema, id_pc),
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
+    FOREIGN KEY (id_sistema) REFERENCES sistema(id_sistema),
+    FOREIGN KEY (id_pc) REFERENCES pc(id_pc)
 );
 
-CREATE TABLE Historial (
-    Id_historial INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE historial (
+    id_historial INTEGER PRIMARY KEY AUTOINCREMENT,
     usuario_historial VARCHAR(100),
     descripcion VARCHAR(100),
     fecha VARCHAR(100),
     id_categoria INTEGER,
-    FOREIGN KEY (id_categoria) REFERENCES Categoria_Historial(id_categoria)
+    FOREIGN KEY (id_categoria) REFERENCES categoria_historial(id_categoria)
 );
 
-CREATE TABLE Categoria_historial (
+CREATE TABLE categoria_historial (
     id_categoria INTEGER PRIMARY KEY AUTOINCREMENT,
     nombre_categoria VARCHAR(100)
 );
 
-CREATE TABLE Notificaciones (
+CREATE TABLE notificaciones (
     id_notificacion INTEGER PRIMARY KEY AUTOINCREMENT,
     id_usuario INTEGER, 
     id_reporte INTEGER, 
     fecha_notificacion TIMESTAMP, 
     mensaje VARCHAR(200),
     leido BOOLEAN,
-    enviado BOOLEAN,
-    FOREIGN KEY (id_usuario) REFERENCES Usuario(Id_usuario),
-    FOREIGN KEY (id_reporte) REFERENCES Reportes(id_reporte)
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
+    FOREIGN KEY (id_reporte) REFERENCES reportes(id_reporte)
 );

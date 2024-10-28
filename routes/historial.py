@@ -34,7 +34,7 @@ def historial():
             INNER JOIN categoria_historial ON categoria_historial.id_categoria = historial.id_categoria
             WHERE 1=1
             '''
-            query += ' AND historial.id_categoria = %s ORDER BY fecha DESC'
+            query += ' AND historial.id_categoria = ? ORDER BY fecha DESC'
             params.append(categoria_id)
             
             cursor.execute(query, params)
@@ -43,17 +43,17 @@ def historial():
             total_records = len(total_records)
 
             offset = (page - 1) * per_page
-            query += " LIMIT %s OFFSET %s"
+            query += " LIMIT ? OFFSET ?"
             params += [per_page, offset]
 
             cursor.execute(query, params)
             historial_data = cursor.fetchall()
 
-            cursor.execute('SELECT nombre_categoria FROM categoria_historial WHERE id_categoria = %s', (categoria_id,))
+            cursor.execute('SELECT nombre_categoria FROM categoria_historial WHERE id_categoria = ?', (categoria_id,))
             categoria_nombre = cursor.fetchone()
 
         else:
-            cursor.execute("SELECT * FROM historial ORDER BY fecha DESC LIMIT %s OFFSET %s", (per_page, (page - 1) * per_page))
+            cursor.execute("SELECT * FROM historial ORDER BY fecha DESC LIMIT ? OFFSET ?", (per_page, (page - 1) * per_page))
             historial_data = cursor.fetchall()
 
             cursor.execute("SELECT COUNT(*) FROM historial")

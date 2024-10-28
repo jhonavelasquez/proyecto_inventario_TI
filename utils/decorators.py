@@ -29,7 +29,7 @@ def get_total_notifications(user_id):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
-        'SELECT COUNT(*) FROM notificaciones WHERE id_usuario = %s AND leido = false',
+        'SELECT COUNT(*) FROM notificaciones WHERE id_usuario = ? AND leido = false',
         (user_id,))
     total_notifications = cursor.fetchone()[0]
     conn.close()
@@ -40,7 +40,7 @@ def get_info_notifications(user_id):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
-        'SELECT * FROM notificaciones WHERE id_usuario = %s ORDER BY id_notificacion DESC LIMIT 8',
+        'SELECT * FROM notificaciones WHERE id_usuario = ? ORDER BY id_notificacion DESC LIMIT 8',
         (user_id,)
     )
     info_notificaciones = cursor.fetchall()

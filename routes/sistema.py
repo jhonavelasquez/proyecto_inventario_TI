@@ -41,10 +41,10 @@ def index():
     '''
     params = []
     if sistema_id:
-        query += ' AND sistema.id_sistema = %s'
+        query += ' AND sistema.id_sistema = ?'
         params.append(sistema_id)
     if search_query:
-        query += ' AND (usuario.nombre_user LIKE %s OR pc.nombre_pc LIKE %s)'
+        query += ' AND (usuario.nombre_user LIKE ? OR pc.nombre_pc LIKE ?)'
         params.extend(['%' + search_query + '%', '%' + search_query + '%'])
 
     cursor.execute(query, params)
@@ -77,11 +77,11 @@ def crear_sistema():
                     conn.close()
                     return redirect(url_for('sistema.index'))
 
-            cursor.execute('INSERT INTO sistema (nombre_sistema) VALUES (%s)', (nombre_sistema,))
+            cursor.execute('INSERT INTO sistema (nombre_sistema) VALUES (?)', (nombre_sistema,))
             conn.commit()
 
             cursor.execute(
-                'SELECT id_sistema FROM sistema WHERE nombre_sistema = %s', (nombre_sistema,)
+                'SELECT id_sistema FROM sistema WHERE nombre_sistema = ?', (nombre_sistema,)
             )
             result = cursor.fetchone()
             if result:
@@ -95,7 +95,7 @@ def crear_sistema():
             for usuario in usuarios:
                 cursor.execute('''SELECT id_pc
                                   FROM usuario_sistema_pc
-                                  WHERE id_usuario = %s
+                                  WHERE id_usuario = ?
                                   GROUP BY id_pc
                                   ORDER BY COUNT(*) DESC
                                   LIMIT 1
@@ -104,7 +104,7 @@ def crear_sistema():
 
                 if id_pc_mas_utilizado:
                     cursor.execute(
-                        "INSERT INTO usuario_sistema_pc (id_usuario, id_sistema, id_pc, activo) VALUES (%s, %s, %s, FALSE)",
+                        "INSERT INTO usuario_sistema_pc (id_usuario, id_sistema, id_pc, activo) VALUES (?, ?, ?, FALSE)",
                         (usuario[0], id_sistema, id_pc_mas_utilizado[0])
                     )
                 else:
@@ -118,7 +118,7 @@ def crear_sistema():
 
             fecha_actual = datetime.datetime.now().strftime('%d-%m-%Y %H:%M')
             descripcion_hist = (f" agregó un nuevo sistema.  {nombre_sistema}.")
-            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s,%s,%s, 2)', (user.nombre_usuario, descripcion_hist, today_str))
+            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 2)', (user.nombre_usuario, descripcion_hist, today_str))
 
             conn.commit()
             conn.close()
@@ -155,13 +155,13 @@ def eliminar_sistema():
         sistema_id = formEliminar.sistema.data
 
         try:
-            cursor.execute('SELECT nombre_sistema FROM sistema WHERE id_sistema = %s', (sistema_id,))
+            cursor.execute('SELECT nombre_sistema FROM sistema WHERE id_sistema = ?', (sistema_id,))
             sistema = cursor.fetchone()
             if sistema:
                 nombre_sistema = sistema[0]
 
 
-                cursor.execute('DELETE FROM sistema WHERE id_sistema = %s', (sistema_id,))
+                cursor.execute('DELETE FROM sistema WHERE id_sistema = ?', (sistema_id,))
 
                 user = current_user
                 today = datetime.datetime.now()
@@ -170,7 +170,7 @@ def eliminar_sistema():
                 fecha_actual = datetime.datetime.now().strftime('%d-%m-%Y %H:%M')
                 descripcion_hist = (f" eliminó el sistema {nombre_sistema}.")
 
-                cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 2)', (user.nombre_usuario, descripcion_hist, today_str))
+                cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 2)', (user.nombre_usuario, descripcion_hist, today_str))
 
                 flash(f"{nombre_sistema} ha sido eliminado.", "warning")
                 conn.commit()
@@ -219,17 +219,17 @@ def editar_sistema(id_sistema, id_usuario, id_pc):
             user_pc = None
 
             cursor.execute('''UPDATE usuario_sistema_pc 
-                            SET activo = %s, id_pc = %s
-                            WHERE id_usuario = %s AND id_sistema = %s AND id_pc = %s''',
+                            SET activo = ?, id_pc = ?
+                            WHERE id_usuario = ? AND id_sistema = ? AND id_pc = ?''',
                          (activo, nuevo_id_pc, id_usuario, id_sistema, id_pc))
 
             cursor.execute(
-                'SELECT nombre_user FROM usuario WHERE id_usuario = %s', (id_usuario,))
+                'SELECT nombre_user FROM usuario WHERE id_usuario = ?', (id_usuario,))
             nombre_user = cursor.fetchone()
 
             
             cursor.execute(
-                'SELECT nombre_sistema FROM sistema WHERE id_sistema = %s', (id_sistema,))
+                'SELECT nombre_sistema FROM sistema WHERE id_sistema = ?', (id_sistema,))
             nombre_sis = cursor.fetchone() 
 
             
@@ -243,7 +243,7 @@ def editar_sistema(id_sistema, id_usuario, id_pc):
             fecha_actual = datetime.datetime.now().strftime('%d-%m-%Y')
             descripcion_hist = (f"Actualizó {nombre_sistema} de {nombre_usuario}. ")
 
-            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s,%s,%s, 2)', 
+            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?,?,?, 2)', 
                          (user.nombre_usuario, descripcion_hist, today_str))
 
             conn.commit()
@@ -258,7 +258,7 @@ def editar_sistema(id_sistema, id_usuario, id_pc):
                                   INNER JOIN usuario_sistema_pc ON usuario.id_usuario = usuario_sistema_pc.id_usuario
                                   INNER JOIN pc ON pc.id_pc = usuario_sistema_pc.id_pc
                                   INNER JOIN sistema ON usuario_sistema_pc.id_sistema = sistema.id_sistema
-                                  WHERE usuario_sistema_pc.id_sistema = %s AND usuario_sistema_pc.id_usuario = %s AND usuario_sistema_pc.id_pc = %s''',
+                                  WHERE usuario_sistema_pc.id_sistema = ? AND usuario_sistema_pc.id_usuario = ? AND usuario_sistema_pc.id_pc = ?''',
                                  (id_sistema, id_usuario, id_pc))
         user_pc = cursor.fetchone()
 

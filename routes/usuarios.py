@@ -37,11 +37,11 @@ def usuarios():
     
     params = []
     if search_query:
-        query += ' AND (usuario.nombre_user LIKE %s  OR usuario.id_usuario LIKE %s)'
+        query += ' AND (usuario.nombre_user LIKE ?  OR usuario.id_usuario LIKE ?)'
         params.extend(['%' + search_query + '%', '%' + search_query + '%'])
     
     if rol_query:
-        query += ' AND usuario.id_tipo_usuario LIKE %s'
+        query += ' AND usuario.id_tipo_usuario LIKE ?'
         params.extend(['%' + rol_query + '%'])
     
     cursor.execute(query, params)
@@ -94,11 +94,11 @@ def crear_usuario():
         hashed_password = generate_password_hash(psw)
         
         try:
-            cursor.execute('INSERT INTO usuario (nombre_user, email, psw, id_tipo_usuario) VALUES (%s, %s, %s, %s)', 
+            cursor.execute('INSERT INTO usuario (nombre_user, email, psw, id_tipo_usuario) VALUES (?, ?, ?, ?)', 
                          (nombre_user, email_user, hashed_password, tipo_usuario))
 
             cursor.execute(
-                'SELECT id_usuario FROM usuario WHERE nombre_user = %s AND email = %s', 
+                'SELECT id_usuario FROM usuario WHERE nombre_user = ? AND email = ?', 
                 (nombre_user, email_user))
 
             id_usuario = cursor.fetchone()[0]
@@ -108,7 +108,7 @@ def crear_usuario():
 
             for sistema in sistemas:
                 cursor.execute(
-                    "INSERT INTO usuario_sistema_pc (id_usuario, id_sistema, id_pc, Activo) VALUES (%s, %s, %s, FALSE)",
+                    "INSERT INTO usuario_sistema_pc (id_usuario, id_sistema, id_pc, Activo) VALUES (?, ?, ?, FALSE)",
                     (id_usuario, sistema[0], id_pc)
                 )
 
@@ -117,7 +117,7 @@ def crear_usuario():
 
             today_str = today.strftime('%Y-%m-%d %H:%M:%S')
             descripcion_hist = f" agregó a un nuevo usuario {nombre_user}. "
-            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 1)', 
+            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 1)', 
                          (user.nombre_usuario, descripcion_hist, today_str))
             
             conn.commit()
@@ -150,7 +150,7 @@ def editar_usuario(id):
     
     form.tipo_usuario.choices = [(tipo[0], tipo[1]) for tipo in tipo_usuario]
 
-    cursor.execute('''SELECT * FROM usuario WHERE usuario.id_usuario = %s''', (id,))
+    cursor.execute('''SELECT * FROM usuario WHERE usuario.id_usuario = ?''', (id,))
     user_edit = cursor.fetchone()
     if request.method == 'GET':
         form.nombre_user.data = user_edit[1]
@@ -184,12 +184,12 @@ def editar_usuario_form():
         if action == 'save':
             if psw:
                 cursor.execute(
-                    'UPDATE usuario SET nombre_user = %s, email = %s, id_tipo_usuario = %s, psw = %s WHERE id_usuario = %s',
+                    'UPDATE usuario SET nombre_user = ?, email = ?, id_tipo_usuario = ?, psw = ? WHERE id_usuario = ?',
                     (nombre_usuario, email, tipo_usuario, hashed_password, id_usuario)
                 )
             else:
                 cursor.execute(
-                    'UPDATE usuario SET nombre_user = %s, email = %s, id_tipo_usuario = %s WHERE id_usuario = %s',
+                    'UPDATE usuario SET nombre_user = ?, email = ?, id_tipo_usuario = ? WHERE id_usuario = ?',
                     (nombre_usuario, email, tipo_usuario, id_usuario)
                 )
 
@@ -208,7 +208,7 @@ def editar_usuario_form():
                     return redirect(url_for('usuarios.editar_usuario'))
 
                 cursor.execute(
-                    'UPDATE usuario_sistema_pc SET Id_pc = %s WHERE id_usuario = %s',
+                    'UPDATE usuario_sistema_pc SET Id_pc = ? WHERE id_usuario = ?',
                     (computador, id_usuario)
                 )
                 conn.commit()
@@ -218,19 +218,21 @@ def editar_usuario_form():
 
             today_str = today.strftime('%Y-%m-%d %H:%M:%S')
             descripcion_hist = f"actualizó la información de un usuario {nombre_usuario}."
-            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 1)', 
+            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 1)', 
                          (user.nombre_usuario, descripcion_hist, today_str))
 
             flash("Información del usuario actualizada con éxito.", "success")
 
         elif action == 'delete':
-            cursor.execute('DELETE FROM usuario WHERE id_usuario = %s', (id_usuario,))
+            cursor.execute('DELETE FROM usuario WHERE id_usuario = ?', (id_usuario,))
             
             user = current_user
-            fecha_actual_seg = datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')
+            today = datetime.datetime.now()
+
+            today_str = today.strftime('%Y-%m-%d %H:%M:%S')
             descripcion_hist = f"eliminó a un usuario {nombre_usuario}."
-            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (%s, %s, %s, 1)', 
-                         (user.nombre_usuario, descripcion_hist, fecha_actual_seg))
+            cursor.execute('INSERT INTO historial (usuario_historial, descripcion, fecha, id_categoria) VALUES (?, ?, ?, 1)', 
+                         (user.nombre_usuario, descripcion_hist, today_str))
             
             flash("Usuario eliminado con éxito.", "warning")
 
@@ -267,14 +269,14 @@ def cuenta():
                 return redirect(url_for('usuarios.cuenta'))
 
             cursor.execute(
-                    'UPDATE usuario SET email = %s WHERE id_usuario = %s',
+                    'UPDATE usuario SET email = ? WHERE id_usuario = ?',
                     (nuevo_email, user.id)
                 )
             user.email = nuevo_email
             if nueva_password:
                 hashed_password = generate_password_hash(nueva_password)
                 cursor.execute(
-                    'UPDATE usuario SET psw = %s WHERE id_usuario = %s',
+                    'UPDATE usuario SET psw = ? WHERE id_usuario = ?',
                     (hashed_password, user.id)
                 )
                 user.password = hashed_password
@@ -285,7 +287,7 @@ def cuenta():
         else:
             print(f"error:{form.errors}") 
         cursor.execute(
-            'SELECT nombre_tipo_usuario FROM tipo_usuario WHERE id_tipo_usuario = %s', 
+            'SELECT nombre_tipo_usuario FROM tipo_usuario WHERE id_tipo_usuario = ?', 
             (user.id_tipo_usuario,)
         )
         tipo_usuario = cursor.fetchone()
@@ -295,7 +297,7 @@ def cuenta():
             cursor.execute(''' 
                             SELECT Id_pc 
                             FROM usuario_sistema_pc 
-                            WHERE id_usuario = %s 
+                            WHERE id_usuario = ? 
                             GROUP BY Id_pc 
                             ORDER BY COUNT(*) DESC 
                             LIMIT 1 
@@ -305,7 +307,7 @@ def cuenta():
             if id_pc_mas_utilizado:
                 id_pc_mas_utilizado = id_pc_mas_utilizado[0]
                 
-                cursor.execute('SELECT nombre_pc FROM pc WHERE id_pc = %s', (id_pc_mas_utilizado,))
+                cursor.execute('SELECT nombre_pc FROM pc WHERE id_pc = ?', (id_pc_mas_utilizado,))
                 nombre = cursor.fetchone()
 
                 if nombre:
